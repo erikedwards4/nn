@@ -1,4 +1,5 @@
 //This outputs X unchanged.
+//Could be useful for debugging or for place-holder in a chain.
 
 #include <stdio.h>
 
