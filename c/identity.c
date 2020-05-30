@@ -75,4 +75,3 @@ int identity_z (double *Y, const double *X, const int N)
 }
 }
 #endif
-

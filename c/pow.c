@@ -150,4 +150,3 @@ int pow_inplace_z (double *X, const int N, const double p)
 }
 }
 #endif
-

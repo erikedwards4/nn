@@ -154,4 +154,3 @@ int log2_inplace_z (double *X, const int N)
 }
 }
 #endif
-

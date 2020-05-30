@@ -38,7 +38,10 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
+    descr += "Activation function.\n";
     descr += "Gets ReLU (Rectified Linear Unit) of each element of X.\n";
+    descr += "For each element: y = 0,  if x<0.\n";
+    descr += "                  y = x,  if x>=0.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ relu X -o Y \n";

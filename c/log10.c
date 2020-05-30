@@ -154,4 +154,3 @@ int log10_inplace_z (double *X, const int N)
 }
 }
 #endif
-

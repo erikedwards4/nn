@@ -41,9 +41,14 @@ int main(int argc, char *argv[])
     string descr;
     descr += "Activation function.\n";
     descr += "Gets binary step function of each element of X.\n";
+    descr += "For each element: y = 0, if x<0\n";
+    descr += "                  y = 1, if x>=0\n";
+    descr += "\n";
+    descr += "This allows a generalized step function by the thresh parameter.\n";
+    descr += "For each element: y = 0, if x<thresh\n";
+    descr += "                  y = 1, if x>=thresh\n";
     descr += "\n";
     descr += "Use -t (--thresh) to specify a threshold [default=0].\n";
-    descr += "For each element: y = (x>thresh) ? 1 : 0.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ step X -t0.5 -o Y \n";

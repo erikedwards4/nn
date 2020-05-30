@@ -103,4 +103,3 @@ int logistic_inplace_d (double *X, const int N, const double alpha)
 }
 }
 #endif
-

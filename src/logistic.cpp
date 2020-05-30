@@ -40,13 +40,13 @@ int main(int argc, char *argv[])
     //Description
     string descr;
     descr += "Activation function.\n";
-    descr += "Gets logistic function of each element of X.\n";
+    descr += "Gets logistic function (basic sigmoid) of each element of X.\n";
     descr += "For each element: y = 1/(1+exp(-x)).\n";
     descr += "\n";
-    descr += "This allows a generalized logistic function by the alpha parameter.\n";
+    descr += "A generalized logistic function can also be given by the alpha parameter.\n";
+    descr += "For each element: y = 1/(1+exp(-x))^alpha.\n";
     descr += "\n";
     descr += "Use -a (--alpha) to specify alpha [default=1].\n";
-    descr += "For each element: y = 1/(1+exp(-x))^alpha.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ logistic X -o Y \n";

@@ -71,4 +71,3 @@ int step_inplace_d (double *X, const int N, const double thresh)
 }
 }
 #endif
-

@@ -70,4 +70,3 @@ int relu_inplace_d (double *X, const int N)
 }
 }
 #endif
-
