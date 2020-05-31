@@ -4,6 +4,13 @@
 #openN is my own library of functions for computational neurons in C and C++.
 #This is the makefile for the CMLI wrappers to use openN at the command-line.
 
+#Project is organized as:
+#Math  : some useful math functions
+#Input : input side of neurons
+#INPUT : input side for layers of neurons
+#Output: output side of neurons
+#OUTPUT: output side for layers of neurons
+
 SHELL=/bin/bash
 
 ss=bin/srci2src
@@ -23,12 +30,15 @@ CFLAGS=$(WFLAG) -O3 $(STD) -march=native -Ic
 #LIBS=-largtable2 -lopenblas -llapacke -llapack -lfftw3f -lfftw3 -lm
 
 
-all: srci2src Nonlin Acts
+all: srci2src Math Input INPUT Output OUTPUT
 	rm -f 7 obj/*.o
 
 srci2src: src/srci2src.cpp
 	$(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
+
+#Math: some useful math functions
+Math: Nonlin
 
 #Nonlin: various static nonlinearities
 Nonlin: abs square sqrt cbrt log log2 log10 pow exp
@@ -51,13 +61,30 @@ pow: srci/pow.cpp c/pow.c
 exp: srci/exp.cpp c/exp.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
-#Sigmods: logistic tanh atan erf generalised_logistic_function smoothstep algebraic(isru)
 
-#Acts: various activation functions
-Acts: identity step logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish
+#Input: input side of neurons
+#For now, only the usual weights and bias (wb) is implemented
+Input: wb
+wb: srci/wb.cpp c/wb.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+
+#INPUT: input side for Layers of neurons
+INPUT: WB
+WB: srci/WB.cpp c/WB.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+
+
+#Output: output side of neurons
+Output: Output_Acts
+
+#Output Activation functions
+#These are all element-wise static nonlinearities, so apply to neurons or layers
+Output_Acts: identity step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish
 identity: srci/identity.cpp c/identity.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 step: srci/step.cpp c/step.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+smoothstep: srci/smoothstep.cpp c/smoothstep.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 logistic: srci/logistic.cpp c/logistic.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
@@ -100,8 +127,18 @@ silu: srci/silu.cpp c/silu.c
 swish: srci/swish.cpp c/swish.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
-#Layer_Acts: activation functions applied layer-wise
+
+#OUTPUT: output side for Layers of neurons
+OUTPUT: Layer_Acts
+
+#Activation functions applied layer-wise
+#Recall that above Output_Acts can be applied without modification to layers, so are not repeated here
 Layer_Acts: maxout softmax
+maxout: srci/maxout.cpp c/maxout.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+softmax: srci/softmax.cpp c/softmax.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+
 
 clean:
 	find ./obj -type f -name *.o | xargs rm -f
