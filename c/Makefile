@@ -58,18 +58,14 @@ pow: pow.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 exp: exp.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
-#Input: input side of neurons
+#Input: input side of neurons/layers
 #For now, only the usual weights and bias (wb) is implemented
-Input: wb #wb_filt
-wb: wb.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-#INPUT: input side for Layers of neurons
-INPUT: WB #WB_Filt
+Input: WB #WV_filt
 WB: WB.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
-#Output: output side of neurons
-Output: Output_Acts
+#Output: output side of neurons/layers
+Output: Output_Acts Layer_Acts ML_Neurons CN_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
@@ -98,16 +94,28 @@ softplus: softplus.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softsign: softsign.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 plu: plu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
-
-
-#OUTPUT: output side for Layers of neurons
-OUTPUT: Layer_Acts
-
 #Activation functions applied layer-wise
 #Recall that above Output_Acts can be applied without modification to layers, so are not repeated here
 Layer_Acts: maxout softmax
 maxout: maxout.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softmax: softmax.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#ML_Neurons: output side of various neurons/layers from history of ML and pattern recognit
+#Note that the input must come from WB for the full neuron as usually described
+ML_Neurons: perceptron elman jordan gru_min gru_full lstm lstm_peephole
+perceptron: perceptron.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+elman: elman.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+jordan: jordan.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+gru_min: gru_min.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+gru_full: gru_full.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+lstm: lstm.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+lstm_peephole: lstm_peephole.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#CN_Neurons: output side of various neurons/layers from history of computational neuroscience
+CN_Neurons: lapicque hill hodgkin_huxley 
+
+#DEQ_Neurons: output side of various neurons/layers based on systems of differential equations
+DEQ_Neurons: vanderpol fitzhugh nagumo izhikevich wang
 
 
 clean:

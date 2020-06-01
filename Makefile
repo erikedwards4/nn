@@ -63,19 +63,14 @@ exp: srci/exp.cpp c/exp.c
 
 
 #Input: input side of neurons
-#For now, only the usual weights and bias (wb) is implemented
-Input: wb
-wb: srci/wb.cpp c/wb.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-
-#INPUT: input side for Layers of neurons
-INPUT: WB
+#For now, only the usual weights and bias (WB) is implemented
+Input: WB
 WB: srci/WB.cpp c/WB.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 
 #Output: output side of neurons
-Output: Output_Acts
+Output: Output_Acts Layer_Acts ML_Neurons #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
@@ -127,17 +122,37 @@ silu: srci/silu.cpp c/silu.c
 swish: srci/swish.cpp c/swish.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
-
-#OUTPUT: output side for Layers of neurons
-OUTPUT: Layer_Acts
-
 #Activation functions applied layer-wise
-#Recall that above Output_Acts can be applied without modification to layers, so are not repeated here
+#Recall that above Output_Acts can be applied without modification to layers
 Layer_Acts: maxout softmax
 maxout: srci/maxout.cpp c/maxout.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 softmax: srci/softmax.cpp c/softmax.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+
+#ML_Neurons: output side of various neurons/layers from history of ML and pattern recognit
+#Note that the input must come from WB for the full neuron as usually described
+ML_Neurons: perceptron #elman jordan gru_min gru_full lstm
+perceptron: srci/perceptron.cpp c/perceptron.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+elman: srci/elman.cpp c/elman.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+jordan: srci/jordan.cpp c/jordan.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+gru_min: srci/gru_min.cpp c/gru_min.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+gru_full: srci/gru_full.cpp c/gru_full.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+lstm: srci/lstm.cpp c/lstm.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+lstm_peephole: srci/lstm_peephole.cpp c/lstm_peephole.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+
+#CN_Neurons: output side of various neurons/layers from history of computational neuroscience
+CN_Neurons: lapicque hill hodgkin_huxley 
+
+#DEQ_Neurons: output side of various neurons/layers based on systems of differential equations
+DEQ_Neurons: vanderpol fitzhugh nagumo izhikevich wang
 
 
 clean:

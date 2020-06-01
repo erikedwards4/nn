@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
     double thresh;
+    char m;
 
 
     //Description
@@ -50,6 +51,9 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Use -t (--thresh) to specify a threshold [default=0].\n";
     descr += "\n";
+    descr += "Include -m (--minus1) to set y to -1 when x<thresh [default=False].\n";
+    descr += "This is used in the Hopfield network, but usually y=0 for x<thresh.\n";
+    descr += "\n";
     descr += "Examples:\n";
     descr += "$ step X -t0.5 -o Y \n";
     descr += "$ step X -t0.5 > Y \n";
@@ -60,10 +64,11 @@ int main(int argc, char *argv[])
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
     struct arg_dbl   *a_th = arg_dbln("t","thresh","<dbl>",0,1,"threshold [default=0.0]");
+    struct arg_lit    *a_m = arg_litn("m","minus1",0,1,"include to set y=-1 for x<thresh");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_th, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_th, a_m, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -106,6 +111,9 @@ int main(int argc, char *argv[])
     //Get thresh
     thresh = (a_th->count==0) ? 0.0 : a_th->dval[0];
 
+    //Get m
+    m = (a_m->count>0);
+
 
     //Checks
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
@@ -139,7 +147,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (openn::step_inplace_s(X,int(i1.N()),float(thresh)))
+        if (openn::step_inplace_s(X,int(i1.N()),float(thresh),m))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -155,7 +163,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (openn::step_inplace_d(X,int(i1.N()),double(thresh)))
+        if (openn::step_inplace_d(X,int(i1.N()),double(thresh),m))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

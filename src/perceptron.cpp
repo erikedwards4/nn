@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "/home/erik/codee/cmli/cmli.hpp"
-#include "softmax.c"
+#include "perceptron.c"
 
 #ifdef I
 #undef I
@@ -34,33 +34,38 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
-    int dim;
+    double thresh;
 
 
     //Description
     string descr;
-    descr += "Layer activation function.\n";
-    descr += "Gets softmax function for each row or col of X.\n";
-    descr += "The output Y has the same size as X, with:\n";
-    descr += "Y[r,c] = exp(X[r,c]) / sum(exp(X[:,c])),  for dim=0.\n";
-    descr += "Y[r,c] = exp(X[r,c]) / sum(exp(X[r,:])),  for dim=1.\n";
+    descr += "ML Neuron Output Side.\n";
+    descr += "Does output side of perceptron for driving input X,\n";
+    descr += "where X has size NxT or TxN; N is the number of neurons;\n";
+    descr += "and T is the number of time points or test cases.\n";
+    descr += "For each element: y = 0, if x<0\n";
+    descr += "                  y = 1, if x>=0\n";
     descr += "\n";
-    descr += "Use -d (--dim) to specify the dimension (axis) [default=0].\n";
+    descr += "Use the thresh parameter to get a generalized perceptron function:\n";
+    descr += "For each element: y = 0, if x<thresh\n";
+    descr += "                  y = 1, if x>=thresh\n";
+    descr += "\n";
+    descr += "Use -t (--thresh) to specify a threshold [default=0].\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ softmax X -o Y \n";
-    descr += "$ softmax X > Y \n";
-    descr += "$ cat X | softmax > Y \n";
+    descr += "$ perceptron X -t0.5 -o Y \n";
+    descr += "$ perceptron X -t0.5 > Y \n";
+    descr += "$ cat X | perceptron -t0.5 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension (0 or 1) [default=0]");
+    struct arg_dbl   *a_th = arg_dbln("t","thresh","<dbl>",0,1,"threshold [default=0.0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_d, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_th, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -100,16 +105,12 @@ int main(int argc, char *argv[])
 
     //Get options
 
-    //Get dim
-    if (a_d->count==0) { dim = 0; }
-    else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    //Get thresh
+    thresh = (a_th->count==0) ? 0.0 : a_th->dval[0];
 
 
     //Checks
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
-    if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must be a matrix" << endl; return 1; }
 
 
     //Set output header info
@@ -137,10 +138,10 @@ int main(int argc, char *argv[])
     {
         float *X;
         try { X = new float[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (openn::softmax_inplace_s(X,i1.iscolmajor(),int(i1.R),int(i1.C),dim))
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        if (openn::perceptron_inplace_s(X,int(i1.N()),float(thresh)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -153,10 +154,10 @@ int main(int argc, char *argv[])
     {
         double *X;
         try { X = new double[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (openn::softmax_inplace_d(X,i1.iscolmajor(),int(i1.R),int(i1.C),dim))
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        if (openn::perceptron_inplace_d(X,int(i1.N()),double(thresh)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

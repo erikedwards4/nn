@@ -113,7 +113,7 @@ else if (i1.T==101)
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
     }
-    delete[] X;
+    delete[] X; delete[] W; delete[] B; delete[] Y;
 }
 
 //Finish

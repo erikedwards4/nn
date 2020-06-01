@@ -1,46 +1,40 @@
 //Includes
-#include "step.c"
+#include "perceptron.c"
 
 //Declarations
 const valarray<uint8_t> oktypes = {1,2};
 const size_t I = 1, O = 1;
 double thresh;
-char m;
 
 //Description
 string descr;
-descr += "Activation function.\n";
-descr += "Gets binary step function of each element of X.\n";
+descr += "ML Neuron Output Side.\n";
+descr += "Does output side of perceptron for driving input X,\n";
+descr += "where X has size NxT or TxN; N is the number of neurons;\n";
+descr += "and T is the number of observations (e.g. time points).\n";
 descr += "For each element: y = 0, if x<0\n";
 descr += "                  y = 1, if x>=0\n";
 descr += "\n";
-descr += "This allows a generalized step function by the thresh parameter.\n";
+descr += "Use the thresh parameter to get a generalized perceptron function:\n";
 descr += "For each element: y = 0, if x<thresh\n";
 descr += "                  y = 1, if x>=thresh\n";
 descr += "\n";
 descr += "Use -t (--thresh) to specify a threshold [default=0].\n";
 descr += "\n";
-descr += "Include -m (--minus1) to set y to -1 when x<thresh [default=False].\n";
-descr += "This is used in the Hopfield network, but usually y=0 for x<thresh.\n";
-descr += "\n";
 descr += "Examples:\n";
-descr += "$ step X -t0.5 -o Y \n";
-descr += "$ step X -t0.5 > Y \n";
-descr += "$ cat X | step -t0.5 > Y \n";
+descr += "$ perceptron X -t0.5 -o Y \n";
+descr += "$ perceptron X -t0.5 > Y \n";
+descr += "$ cat X | perceptron -t0.5 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
 struct arg_dbl   *a_th = arg_dbln("t","thresh","<dbl>",0,1,"threshold [default=0.0]");
-struct arg_lit    *a_m = arg_litn("m","minus1",0,1,"include to set y=-1 for x<thresh");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
 
 //Get thresh
 thresh = (a_th->count==0) ? 0.0 : a_th->dval[0];
-
-//Get m
-m = (a_m->count>0);
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
@@ -59,7 +53,7 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    if (openn::step_inplace_s(X,int(i1.N()),float(thresh),m))
+    if (openn::perceptron_inplace_s(X,int(i1.N()),float(thresh)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
