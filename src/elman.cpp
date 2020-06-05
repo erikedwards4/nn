@@ -197,8 +197,8 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    T = (dim==0) ? int(i1.C) : int(i1.R);
-    N = (dim==0) ? int(i1.R) : int(i1.C);
+    N = (dim==0) ? int(o1.R) : int(o1.C);
+    T = (dim==0) ? int(o1.C) : int(o1.R);
     
 
     //Process
@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (W)" << endl; return 1; }
         try { ifs5.read(reinterpret_cast<char*>(B),i5.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (B)" << endl; return 1; }
-        if (openn::elman_s(Y,X,U,H,W,B,T,N,dim,i1.iscolmajor()))
+        if (openn::elman_s(Y,X,U,H,W,B,N,T,dim,i1.iscolmajor()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (W)" << endl; return 1; }
         try { ifs5.read(reinterpret_cast<char*>(B),i5.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (B)" << endl; return 1; }
-        if (openn::elman_d(Y,X,U,H,W,B,T,N,dim,i1.iscolmajor()))
+        if (openn::elman_d(Y,X,U,H,W,B,N,T,dim,i1.iscolmajor()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

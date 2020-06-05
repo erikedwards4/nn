@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "/home/erik/codee/cmli/cmli.hpp"
-#include "step.c"
+#include "deadzone.c"
 
 #ifdef I
 #undef I
@@ -34,36 +34,33 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
-    double thresh;
+    double delta;
 
 
     //Description
     string descr;
-    descr += "Activation function.\n";
-    descr += "Gets binary step function of each element of X.\n";
-    descr += "For each element: y = 0, if x<0\n";
-    descr += "                  y = 1, if x>=0\n";
+    descr += "Does hard limiter with deadzone for each element of X.\n";
+    descr += "For each element: y = -1, if x<-d\n";
+    descr += "                  y =  0, if -d<=x<=d\n";
+    descr += "                  y =  1, if x>d\n";
     descr += "\n";
-    descr += "With the thresh parameter, thi is a generalized step function:\n";
-    descr += "For each element: y = 0, if x<thresh\n";
-    descr += "                  y = 1, if x>=thresh\n";
-    descr += "\n";
-    descr += "Use -t (--thresh) to specify a threshold [default=0].\n";
+    descr += "Use -d (--delta) to specify the deadzone threshold [default=0].\n";
+    descr += "For d=0, this is the signum (sign) function.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ step X -t0.5 -o Y \n";
-    descr += "$ step X -t0.5 > Y \n";
-    descr += "$ cat X | step -t0.5 > Y \n";
+    descr += "$ deadzone X -d0.5 -o Y \n";
+    descr += "$ deadzone X -d0.5 > Y \n";
+    descr += "$ cat X | deadzone -d0.5 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-    struct arg_dbl   *a_th = arg_dbln("t","thresh","<dbl>",0,1,"threshold [default=0.0]");
+    struct arg_dbl    *a_d = arg_dbln("d","delta","<dbl>",0,1,"deadzone delta [default=0.0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_th, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_d, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -103,8 +100,8 @@ int main(int argc, char *argv[])
 
     //Get options
 
-    //Get thresh
-    thresh = (a_th->count==0) ? 0.0 : a_th->dval[0];
+    //Get delta
+    delta = (a_d->count==0) ? 0.0 : a_d->dval[0];
 
 
     //Checks
@@ -139,7 +136,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (openn::step_inplace_s(X,int(i1.N()),float(thresh)))
+        if (openn::deadzone_inplace_s(X,int(i1.N()),float(delta)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -155,7 +152,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (openn::step_inplace_d(X,int(i1.N()),double(thresh)))
+        if (openn::deadzone_inplace_d(X,int(i1.N()),double(delta)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

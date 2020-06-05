@@ -20,11 +20,11 @@ namespace openn {
 extern "C" {
 #endif
 
-int jordan_s (float *Y, const float *X, const float *U, float *Y1, const float *W, const float *B, const int T, const int N, const int dim, const char iscolmajor);
-int jordan_d (double *Y, const double *X, const double *U, double *Y1, const double *W, const double *B, const int T, const int N, const int dim, const char iscolmajor);
+int jordan_s (float *Y, const float *X, const float *U, float *Y1, const float *W, const float *B, const int N, const int T, const int dim, const char iscolmajor);
+int jordan_d (double *Y, const double *X, const double *U, double *Y1, const double *W, const double *B, const int N, const int T, const int dim, const char iscolmajor);
 
 
-int jordan_s (float *Y, const float *X, const float *U, float *Y1, const float *W, const float *B, const int T, const int N, const int dim, const char iscolmajor)
+int jordan_s (float *Y, const float *X, const float *U, float *Y1, const float *W, const float *B, const int N, const int T, const int dim, const char iscolmajor)
 {
     const float o = 1.0f;
     int n, t;
@@ -32,8 +32,8 @@ int jordan_s (float *Y, const float *X, const float *U, float *Y1, const float *
     //struct timespec tic, toc;
 
     //Checks
+    if (N<1) { fprintf(stderr,"error in jordan_s: N (num neurons) must be positive\n"); return 1; }
     if (T<1) { fprintf(stderr,"error in jordan_s: T (num time points) must be positive\n"); return 1; }
-    if (N<1) { fprintf(stderr,"error in jordan_s: N (length input vectors) must be positive\n"); return 1; }
 
     //Allocate
     if (!(H=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in jordan_s: problem with malloc. "); perror("malloc"); return 1; }
@@ -137,15 +137,15 @@ int jordan_s (float *Y, const float *X, const float *U, float *Y1, const float *
 }
 
 
-int jordan_d (double *Y, const double *X, const double *U, double *Y1, const double *W, const double *B, const int T, const int N, const int dim, const char iscolmajor)
+int jordan_d (double *Y, const double *X, const double *U, double *Y1, const double *W, const double *B, const int N, const int T, const int dim, const char iscolmajor)
 {
     const double o = 1.0;
     int n, t;
     double *H;
 
     //Checks
+    if (N<1) { fprintf(stderr,"error in jordan_d: N (num neurons) must be positive\n"); return 1; }
     if (T<1) { fprintf(stderr,"error in jordan_d: T (num time points) must be positive\n"); return 1; }
-    if (N<1) { fprintf(stderr,"error in jordan_d: N (length input vectors) must be positive\n"); return 1; }
 
     //Allocate
     if (!(H=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in jordan_d: problem with malloc. "); perror("malloc"); return 1; }

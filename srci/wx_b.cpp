@@ -1,5 +1,5 @@
 //Includes
-#include "WB.c"
+#include "wx_b.c"
 
 //Declarations
 const valarray<uint8_t> oktypes = {1,2,101,102};
@@ -24,9 +24,9 @@ descr += "\n";
 descr += "Use -d (--dim) to specify the dimension (axis) [default=0].\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ WB X W B -o Y \n";
-descr += "$ WB X W B > Y \n";
-descr += "$ cat X | WB - W B > Y \n";
+descr += "$ wx_b X W B -o Y \n";
+descr += "$ wx_b X W B > Y \n";
+descr += "$ cat X | wx_b - W B > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,W,B)");
@@ -80,7 +80,7 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
     try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-    if (openn::WB_s(Y,X,i1.iscolmajor(),int(i1.R),int(i1.C),W,B,int(i3.N()),dim))
+    if (openn::wx_b_s(Y,X,i1.iscolmajor(),int(i1.R),int(i1.C),W,B,int(i3.N()),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -106,7 +106,7 @@ else if (i1.T==101)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
     try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-    if (openn::WB_c(Y,X,i1.iscolmajor(),int(i1.R),int(i1.C),W,B,int(i3.N()),dim))
+    if (openn::wx_b_c(Y,X,i1.iscolmajor(),int(i1.R),int(i1.C),W,B,int(i3.N()),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

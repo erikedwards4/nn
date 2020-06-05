@@ -38,7 +38,7 @@ libopenn.a: all
 	ar crs ../lib/libopenn.a obj/*.o
 
 
-all: Math Input INPUT Output OUTPUT
+all: Math IN CELL OUT
 
 
 #Math: some useful math functions
@@ -46,7 +46,7 @@ Math: Nonlin
 
 #Nonlin: various static nonlinearities used in NNs and computational neuroscience
 #Each of these is applied element-wise to the input X.
-Nonlin: abs square sqrt cbrt log log2 log10 pow exp
+Nonlin: abs square sqrt cbrt log log2 log10 pow exp deadzone
 abs: abs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 square: square.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sqrt: sqrt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -56,21 +56,33 @@ log2: log2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 log10: log10.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 pow: pow.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 exp: exp.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+deadzone: deadzone.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
-#Input: input side of neurons/layers
-#For now, only the usual weights and bias (wb) is implemented
-Input: WB #WV_filt
-WB: WB.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+#IN: input side of neurons/layers
+#For now, only the simple/usual possibilities are implemented: apply weights and bias
+IN: wx wx_b #WV_filt
+wx: wx.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+wx_b: wx_b.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
-#Output: output side of neurons/layers
-Output: Output_Acts Layer_Acts ML_Neurons CN_Neurons
+#CELL: middle part (~soma) of neurons/layers
+CELL: identity integrate fir fukushima hopfield grossberg
+identity: identity.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+integrate: integrate.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fir: fir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fukushima: fukushima.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+hopfield: hopfield.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+grossberg: grossberg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+
+#OUT: output side of neurons/layers
+OUT: Output_Acts Layer_Acts ML_Neurons CN_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
-Output_Acts: identity step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu silu swish softclip softplus softsign plu
-identity: identity.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+Output_Acts: signum step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu silu swish softclip softplus softsign plu
+signum: signum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 step: step.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 smoothstep: smoothstep.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 logistic: logistic.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

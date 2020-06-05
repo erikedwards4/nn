@@ -13,18 +13,18 @@
 #include <stdio.h>
 #include <math.h>
 #include <cblas.h>
-#include <time.h>
+//#include <time.h>
 
 #ifdef __cplusplus
 namespace openn {
 extern "C" {
 #endif
 
-int elman_s (float *Y, const float *X, const float *U, float *H, const float *W, const float *B, const int T, const int N, const int dim, const char iscolmajor);
-int elman_d (double *Y, const double *X, const double *U, double *H, const double *W, const double *B, const int T, const int N, const int dim, const char iscolmajor);
+int elman_s (float *Y, const float *X, const float *U, float *H, const float *W, const float *B, const int N, const int T, const int dim, const char iscolmajor);
+int elman_d (double *Y, const double *X, const double *U, double *H, const double *W, const double *B, const int N, const int T, const int dim, const char iscolmajor);
 
 
-int elman_s (float *Y, const float *X, const float *U, float *H, const float *W, const float *B, const int T, const int N, const int dim, const char iscolmajor)
+int elman_s (float *Y, const float *X, const float *U, float *H, const float *W, const float *B, const int N, const int T, const int dim, const char iscolmajor)
 {
     const float o = 1.0f;
     int n, t;
@@ -32,8 +32,8 @@ int elman_s (float *Y, const float *X, const float *U, float *H, const float *W,
     //struct timespec tic, toc;
 
     //Checks
+    if (N<1) { fprintf(stderr,"error in elman_s: N (num neurons) must be positive\n"); return 1; }
     if (T<1) { fprintf(stderr,"error in elman_s: T (num time points) must be positive\n"); return 1; }
-    if (N<1) { fprintf(stderr,"error in elman_s: N (length input vectors) must be positive\n"); return 1; }
 
     //clock_gettime(CLOCK_REALTIME,&tic);
     if (N==1)
@@ -118,15 +118,15 @@ int elman_s (float *Y, const float *X, const float *U, float *H, const float *W,
 }
 
 
-int elman_d (double *Y, const double *X, const double *U, double *H, const double *W, const double *B, const int T, const int N, const int dim, const char iscolmajor)
+int elman_d (double *Y, const double *X, const double *U, double *H, const double *W, const double *B, const int N, const int T, const int dim, const char iscolmajor)
 {
     const double o = 1.0;
     int n, t;
     double *tmp;
 
     //Checks
+    if (N<1) { fprintf(stderr,"error in elman_d: N (num neurons) must be positive\n"); return 1; }
     if (T<1) { fprintf(stderr,"error in elman_d: T (num time points) must be positive\n"); return 1; }
-    if (N<1) { fprintf(stderr,"error in elman_d: N (length input vectors) must be positive\n"); return 1; }
 
     if (N==1)
     {

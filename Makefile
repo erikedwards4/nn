@@ -30,7 +30,7 @@ CFLAGS=$(WFLAG) -O3 $(STD) -march=native -Ic
 #LIBS=-largtable2 -lopenblas -llapacke -llapack -lfftw3f -lfftw3 -lm
 
 
-all: srci2src Math Input INPUT Output OUTPUT
+all: srci2src Math IN CELL OUT
 	rm -f 7 obj/*.o
 
 srci2src: src/srci2src.cpp
@@ -41,7 +41,7 @@ srci2src: src/srci2src.cpp
 Math: Nonlin
 
 #Nonlin: various static nonlinearities
-Nonlin: abs square sqrt cbrt log log2 log10 pow exp
+Nonlin: abs square sqrt cbrt log log2 log10 pow exp deadzone
 abs: srci/abs.cpp c/abs.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 square: srci/square.cpp c/square.c
@@ -60,24 +60,42 @@ pow: srci/pow.cpp c/pow.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 exp: srci/exp.cpp c/exp.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+deadzone: srci/deadzone.cpp c/deadzone.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 
-#Input: input side of neurons
-#For now, only the usual weights and bias (WB) is implemented
-Input: WB
-WB: srci/WB.cpp c/WB.c
+#IN: input side of neurons (~dendrites)
+#For now, I only implement the usual wieghts and weights+biases (great majority of neuron models use this).
+IN: wx wx_b
+wx: srci/wx.cpp c/wx.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+wx_b: srci/wx_b.cpp c/wx_b.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
+#Cell: middle part of neurons (~soma)
+CELL: integrate fir fukushima hopfield grossberg
+identity: srci/identity.cpp c/identity.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+integrate: srci/integrate.cpp c/integrate.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+fir: srci/fir.cpp c/fir.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
+fukushima: srci/fukushima.cpp c/fukushima.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
+hopfield: srci/hopfield.cpp c/hopfield.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+grossberg: srci/grossberg.cpp c/grossberg.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
-#Output: output side of neurons
-Output: Output_Acts Layer_Acts ML_Neurons #CN_Neurons DEQ_Neurons
+#OUT: output side of neurons (~axon)
+OUT: Output_Acts Layer_Acts ML_Neurons #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
-Output_Acts: identity step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish
-identity: srci/identity.cpp c/identity.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+Output_Acts: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish
 step: srci/step.cpp c/step.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+signum: srci/signum.cpp c/signum.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 smoothstep: srci/smoothstep.cpp c/smoothstep.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2

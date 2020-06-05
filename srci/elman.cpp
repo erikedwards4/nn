@@ -4,14 +4,15 @@
 //Declarations
 const valarray<uint8_t> oktypes = {1,2};
 const size_t I = 5, O = 1;
-int dim, T, N;
+int dim, N, T;
 
 //Description
 string descr;
 descr += "ML Neuron Output Side.\n";
 descr += "Recurrent NN (RNN) type.\n";
-descr += "Does output side of Elman RNN for driving input X,\n";
-descr += "where X has size NxT or TxN; N is the number of neurons;\n";
+descr += "Does output side of Elman RNN for driving input X.\n";
+descr += "\n";
+descr += "X has size NxT or TxN, where N is the number of neurons\n";
 descr += "and T is the number of observations (e.g. time points).\n";
 descr += "\n";
 descr += "Use -d (--dim) to specify the dimension (axis) of length N [default=0].\n";
@@ -97,8 +98,8 @@ o1.F = i1.F; o1.T = i1.T;
 o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
-T = (dim==0) ? int(i1.C) : int(i1.R);
-N = (dim==0) ? int(i1.R) : int(i1.C);
+N = (dim==0) ? int(o1.R) : int(o1.C);
+T = (dim==0) ? int(o1.C) : int(o1.R);
 
 //Process
 if (i1.T==1)
@@ -126,7 +127,7 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (W)" << endl; return 1; }
     try { ifs5.read(reinterpret_cast<char*>(B),i5.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (B)" << endl; return 1; }
-    if (openn::elman_s(Y,X,U,H,W,B,T,N,dim,i1.iscolmajor()))
+    if (openn::elman_s(Y,X,U,H,W,B,N,T,dim,i1.iscolmajor()))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
