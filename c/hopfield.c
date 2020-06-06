@@ -5,9 +5,14 @@
 //For dim=0: Y[n,t] = a[n]*Y[n,t-1] + b[n]*(X[n,t]-alpha[n]*Y[n,t-1]);
 //For dim=1: Y[t,n] = a[n]*Y[t-1,n] + b[n]*(X[t,n]-alpha[n]*Y[t-1,n]);
 //where a[n] = exp(-1/(fs*tau[n])) and b[n] = 1 - a[n].
-//Note that alpha is a vector of length N, so that each neuron has its own alpha.
 
-//For complex inputs, real and imag parts are filtered separately, so alpha is still real.
+//Thus, setting a[n] to a[n]-b[n]*alpha[n], this gives:
+//For dim=0: Y[n,t] = a[n]*Y[n,t-1] + b[n]*X[n,t];
+//For dim=1: Y[t,n] = a[n]*Y[t-1,n] + b[n]*X[t,n];
+
+//tau and alpha are vectors of length N, so that each neuron has its own parameters.
+
+//For complex inputs, real and imag parts are filtered separately, so params are real.
 
 
 #include <stdio.h>
@@ -115,7 +120,7 @@ int hopfield_d (double *Y, const double *X, const double *tau, const double *alp
 
     if (N==1)
     {
-        a = exp(-1.0/(fs*tau[0])); b = 1.0 - a;
+        a = exp(-1.0/(fs*tau[0])); b = 1.0 - a; a -= b*alpha[0];
         Y[0] = b*X[0];
         for (t=1; t<T; t++) { Y[t] = a*Y[t-1] + b*X[t]; }
     }
@@ -279,12 +284,12 @@ int hopfield_z (double *Y, const double *X, const double *tau, const double *alp
 
     if (N==1)
     {
-        a = exp(-1.0/(fs*tau[0])); b = 1.0 - a;
+        a = exp(-1.0/(fs*tau[0])); b = 1.0 - a; a -= b*alpha[0];
         Y[0] = b*X[0]; Y[1] = b*X[1];
         for (t=1; t<T; t++)
         {
-            Y[2*t] = a*Y[2*t-2] + b*(X[2*t]-alpha[0]*Y[2*(t-1)]);
-            Y[2*t+1] = a*Y[2*t-1] + b*(X[2*t+1]-alpha[0]*Y[2*(t-1)+1]);
+            Y[2*t] = a*Y[2*(t-1)] + b*X[2*t];
+            Y[2*t+1] = a*Y[2*(t-1)+1] + b*X[2*t+1];
         }
     }
     else if (dim==0)
@@ -601,10 +606,8 @@ int hopfield_inplace_z (double *X, const double *tau, const double *alpha, const
         X[0] *= b; X[1] *= b;
         for (t=1; t<T; t++)
         {
-            X[2*t] = a*X[2*t-2] + b*X[2*t];
-            X[2*t+1] = a*X[2*t-1] + b*X[2*t+1];
-            //X[2*t] = a*X[2*t-2] + b*(X[2*t]-alpha[0]*X[2*(t-1)]);
-            //X[2*t+1] = a*X[2*t-1] + b*(X[2*t+1]-alpha[0]*Y[2*(t-1)+1]);
+            X[2*t] = a*X[2*(t-1)] + b*X[2*t];
+            X[2*t+1] = a*X[2*(t-1)+1] + b*X[2*t+1];
         }
     }
     else if (dim==0)
