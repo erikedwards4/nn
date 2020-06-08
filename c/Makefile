@@ -61,19 +61,37 @@ deadzone: deadzone.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #IN: input side of neurons/layers
 #For now, only the simple/usual possibilities are implemented: apply weights and bias
-IN: wx wx_b #WV_filt
-wx: wx.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-wx_b: wx_b.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+IN: linear0 linear #WV_filt
+linear0: linear0.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+linear: linear.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #CELL: middle part (~soma) of neurons/layers
-CELL: identity integrate fir fukushima hopfield grossberg
+CELL: Basic Model RNN
+
+Basic: identity integrate fir 
 identity: identity.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 integrate: integrate.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 fir: fir.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+Model: fukushima fukushima2 hopfield grossberg grossberg2
 fukushima: fukushima.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+fukushima2: fukushima2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 hopfield: hopfield.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 grossberg: grossberg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+grossberg2: grossberg2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+RNN: elman jordan gru_min gru_min2 gru gru3 lstm lstm4 #lstm_peephole lstm_peephole4
+elman: elman.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+jordan: jordan.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+gru_min: gru_min.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+gru_min2: gru_min2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+gru: gru.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+gru3: gru3.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+lstm: lstm.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+lstm4: lstm4.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+lstm_peephole: lstm_peephole.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+lstm_peephole4: lstm_peephole4.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #OUT: output side of neurons/layers
@@ -114,20 +132,19 @@ softmax: softmax.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #ML_Neurons: output side of various neurons/layers from history of ML and pattern recognit
 #Note that the input must come from WB for the full neuron as usually described
-ML_Neurons: perceptron elman jordan gru_min gru_full lstm lstm_peephole
-perceptron: perceptron.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-elman: elman.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-jordan: jordan.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-gru_min: gru_min.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-gru_full: gru_full.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-lstm: lstm.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-lstm_peephole: lstm_peephole.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# ML_Neurons: elman jordan gru_min gru_full lstm lstm_peephole
+# elman: elman.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# jordan: jordan.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# gru_min: gru_min.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# gru_full: gru_full.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# lstm: lstm.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+# lstm_peephole: lstm_peephole.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #CN_Neurons: output side of various neurons/layers from history of computational neuroscience
-CN_Neurons: lapicque hill hodgkin_huxley 
+# CN_Neurons: lapicque hill hodgkin_huxley 
 
 #DEQ_Neurons: output side of various neurons/layers based on systems of differential equations
-DEQ_Neurons: vanderpol fitzhugh nagumo izhikevich wang
+# DEQ_Neurons: vanderpol fitzhugh nagumo izhikevich wang
 
 
 clean:

@@ -1,32 +1,38 @@
 //Includes
-#include "wx_b.c"
+#include "linear.c"
 
 //Declarations
 const valarray<uint8_t> oktypes = {1,2,101,102};
 const size_t I = 3, O = 1;
-int dim;
+int dim, Ni, No, T;
 
 //Description
 string descr;
-descr += "Input method.\n";
-descr += "Applies weights (W) plus bias (B) along rows or cols of X.\n";
-descr += "The weights are entered as a matrix W with size matched to X.\n";
-descr += "The bias is entered as a vector B with length matched to X.\n";
+descr += "Linear Input method.\n";
+descr += "Applies weights (W) plus bias (B) to matrix X by linear method.\n";
+descr += "The weights are entered as a matrix W.\n";
+descr += "The biases are entered as a vector B with length No.\n";
 descr += "\n";
-descr += "The output Y is a matrix with: \n";
-descr += "Y = W*X + B,  for dim=0.\n";
-descr += "Y = X*W + B,  for dim=1.\n";
+descr += "For dim=0: Y = W*X + B \n";
+descr += "with sizes X:  Ni x T  \n";
+descr += "           W:  No x Ni \n";
+descr += "           B:  No x 1  \n";
+descr += "           Y:  No x T  \n";
 descr += "\n";
-descr += "X has size RxC. \n";
-descr += "For dim=0, W has size R2xR, B has length R2, and Y has size R2xC.\n";
-descr += "For dim=1, W has size CxC2, B has length C2, and Y has size RxC2.\n";
+descr += "For dim=1: Y = X*W + B \n";
+descr += "with sizes X:  T x Ni  \n";
+descr += "           W: Ni x No  \n";
+descr += "           B:  1 x No  \n";
+descr += "           Y:  T x No  \n";
+descr += "\n";
+descr += "where Ni is num inputs, No is num outputs, and T is num time-points.\n";
 descr += "\n";
 descr += "Use -d (--dim) to specify the dimension (axis) [default=0].\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ wx_b X W B -o Y \n";
-descr += "$ wx_b X W B > Y \n";
-descr += "$ cat X | wx_b - W B > Y \n";
+descr += "$ linear X W B -o Y \n";
+descr += "$ linear X W B > Y \n";
+descr += "$ cat X | linear - W B > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,W,B)");
@@ -61,6 +67,9 @@ o1.C = (dim==1) ? i2.C : i1.C;
 o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
+Ni = (dim==0) ? int(i1.R) : int(i1.C);
+No = (dim==0) ? int(o1.R) : int(o1.C);
+T = (dim==0) ? int(i1.C) : int(i1.R);
 
 //Process
 if (i1.T==1)
@@ -80,7 +89,7 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
     try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-    if (openn::wx_b_s(Y,X,i1.iscolmajor(),int(i1.R),int(i1.C),W,B,int(i3.N()),dim))
+    if (openn::linear_s(Y,X,W,B,Ni,No,T,dim,i1.iscolmajor()))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -106,7 +115,7 @@ else if (i1.T==101)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
     try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-    if (openn::wx_b_c(Y,X,i1.iscolmajor(),int(i1.R),int(i1.C),W,B,int(i3.N()),dim))
+    if (openn::linear_c(Y,X,W,B,Ni,No,T,dim,i1.iscolmajor()))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

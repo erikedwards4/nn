@@ -1,31 +1,35 @@
 //Includes
-#include "W.c"
+#include "linear0.c"
 
 //Declarations
 const valarray<uint8_t> oktypes = {1,2,101,102};
 const size_t I = 2, O = 1;
-int dim;
+int dim, Ni, No, T;
 
 //Description
 string descr;
-descr += "Input method.\n";
-descr += "Applies weights (W) along rows or cols of X.\n";
-descr += "The weights are entered as a matrix W with size matched to X.\n";
+descr += "Linear Input method.\n";
+descr += "Applies weights (W) (but no bias) to matrix X by linear method.\n";
+descr += "The weights are entered as a matrix W.\n";
 descr += "\n";
-descr += "The output Y is a matrix with: \n";
-descr += "Y = W*X,  for dim=0.\n";
-descr += "Y = X*W,  for dim=1.\n";
+descr += "For dim=0: Y = W*X     \n";
+descr += "with sizes X:  Ni x T  \n";
+descr += "           W:  Ni x Ni \n";
+descr += "           Y:  No x T  \n";
 descr += "\n";
-descr += "X has size RxC. \n";
-descr += "For dim=0, W has size R2xR, and Y has size R2xC.\n";
-descr += "For dim=1, W has size CxC2, and Y has size RxC2.\n";
+descr += "For dim=1: Y = X*W     \n";
+descr += "with sizes X:  T x Ni  \n";
+descr += "           W: Ni x No  \n";
+descr += "           Y:  T x No  \n";
+descr += "\n";
+descr += "where Ni is num inputs, No is num outputs, and T is num time-points.\n";
 descr += "\n";
 descr += "Use -d (--dim) to specify the dimension (axis) [default=0].\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ WX X W -o Y \n";
-descr += "$ WX X W > Y \n";
-descr += "$ cat X | WX - W > Y \n";
+descr += "$ linear0 X W -o Y \n";
+descr += "$ linear0 X W > Y \n";
+descr += "$ cat X | linear0 - W > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,W)");
@@ -56,6 +60,9 @@ o1.C = (dim==1) ? i2.C : i1.C;
 o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
+Ni = (dim==0) ? int(i1.R) : int(i1.C);
+No = (dim==0) ? int(o1.R) : int(o1.C);
+T = (dim==0) ? int(i1.C) : int(i1.R);
 
 //Process
 if (i1.T==1)
@@ -71,7 +78,7 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-    if (openn::W_s(Y,X,i1.iscolmajor(),int(i1.R),int(i1.C),W,B,int(i3.N()),dim))
+    if (openn::linear0_s(Y,X,W,Ni,No,T,dim,i1.iscolmajor()))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -93,7 +100,7 @@ else if (i1.T==101)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-    if (openn::W_c(Y,X,i1.iscolmajor(),int(i1.R),int(i1.C),W,B,int(i3.N()),dim))
+    if (openn::linear0_c(Y,X,W,Ni,No,T,dim,i1.iscolmajor()))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

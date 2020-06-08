@@ -60,7 +60,7 @@ if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}
 
 //Checks
 if (i1.T!=i2.T || i1.T!=i3.T || i1.T!=i4.T || i1.T!=i5.T) { cerr << progstr+": " << __LINE__ << errstr << "all inputs must have the same data type" << endl; return 1; }
-if (i3.N()>1 && (i1.iscolmajor()!=i2.iscolmajor() || i1.iscolmajor()!=i4.iscolmajor()))
+if (!i1.isvec() && (i1.iscolmajor()!=i2.iscolmajor() || i1.iscolmajor()!=i4.iscolmajor()))
 { cerr << progstr+": " << __LINE__ << errstr << "inputs 1, 2, 4 (X,U,W) must have the same row/col major format" << endl; return 1; }
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
 if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (U) found to be empty" << endl; return 1; }

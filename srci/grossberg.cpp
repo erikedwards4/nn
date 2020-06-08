@@ -4,14 +4,15 @@
 //Declarations
 const valarray<uint8_t> oktypes = {1,2,101,102};
 const size_t I = 5, O = 1;
-int dim, N, T;
+int dim, n, N, T;
 double fs;
 
 //Description
 string descr;
 descr += "Neural soma stage.\n";
 descr += "Does middle stage of Grossberg model for each row or col of X.\n";
-descr += "This temporal integration (1st-order IIR filter), with time-constant tau,.\n";
+descr += "\n";
+descr += "The soma model is temporal integration (1st-order IIR filter, time-constant tau),\n";
 descr += "along with a subtractive feedback with gain alpha,\n";
 descr += "along with adaptive gain control with parameters beta and gamma.\n";
 descr += "\n";
@@ -71,6 +72,8 @@ if (fs<=0.0) { cerr << progstr+": " << __LINE__ << errstr << "fs (sample rate) m
 //Checks
 if (i1.T!=i2.T && i1.T-100!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
 if (i1.T!=i3.T && i1.T-100!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+if (i1.T!=i4.T && i1.T-100!=i4.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+if (i1.T!=i5.T && i1.T-100!=i5.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
 if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) must be a matrix" << endl; return 1; }
 if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (taus) found to be empty" << endl; return 1; }
@@ -135,10 +138,10 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (betas)" << endl; return 1; }
     try { ifs5.read(reinterpret_cast<char*>(gammas),i5.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (gammas)" << endl; return 1; }
-    if (i2.N()==1u) { for (int n=1; n<N; n++) { taus[n] = taus[0]; } }
-    if (i3.N()==1u) { for (int n=1; n<N; n++) { alphas[n] = alphas[0]; } }
-    if (i4.N()==1u) { for (int n=1; n<N; n++) { betas[n] = betas[0]; } }
-    if (i5.N()==1u) { for (int n=1; n<N; n++) { gammas[n] = gammas[0]; } }
+    if (i2.N()==1u) { for (n=1; n<N; n++) { taus[n] = taus[0]; } }
+    if (i3.N()==1u) { for (n=1; n<N; n++) { alphas[n] = alphas[0]; } }
+    if (i4.N()==1u) { for (n=1; n<N; n++) { betas[n] = betas[0]; } }
+    if (i5.N()==1u) { for (n=1; n<N; n++) { gammas[n] = gammas[0]; } }
     if (openn::grossberg_inplace_s(X,taus,alphas,betas,gammas,N,T,dim,i1.iscolmajor(),float(fs)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
@@ -171,10 +174,10 @@ else if (i1.T==101)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (betas)" << endl; return 1; }
     try { ifs5.read(reinterpret_cast<char*>(gammas),i5.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (gammas)" << endl; return 1; }
-    if (i2.N()==1u) { for (int n=1; n<N; n++) { taus[n] = taus[0]; } }
-    if (i3.N()==1u) { for (int n=1; n<N; n++) { alphas[n] = alphas[0]; } }
-    if (i4.N()==1u) { for (int n=1; n<N; n++) { betas[n] = betas[0]; } }
-    if (i5.N()==1u) { for (int n=1; n<N; n++) { gammas[n] = gammas[0]; } }
+    if (i2.N()==1u) { for (n=1; n<N; n++) { taus[n] = taus[0]; } }
+    if (i3.N()==1u) { for (n=1; n<N; n++) { alphas[n] = alphas[0]; } }
+    if (i4.N()==1u) { for (n=1; n<N; n++) { betas[n] = betas[0]; } }
+    if (i5.N()==1u) { for (n=1; n<N; n++) { gammas[n] = gammas[0]; } }
     if (openn::grossberg_inplace_c(X,taus,alphas,betas,gammas,N,T,dim,i1.iscolmajor(),float(fs)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)

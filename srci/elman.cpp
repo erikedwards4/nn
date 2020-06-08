@@ -60,7 +60,7 @@ if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}
 
 //Checks
 if (i1.T!=i2.T || i1.T!=i3.T || i1.T!=i4.T || i1.T!=i5.T) { cerr << progstr+": " << __LINE__ << errstr << "all inputs must have the same data type" << endl; return 1; }
-if (i3.N()>1 && (i1.iscolmajor()!=i2.iscolmajor() || i1.iscolmajor()!=i4.iscolmajor()))
+if (!i1.isvec() && (i1.iscolmajor()!=i2.iscolmajor() || i1.iscolmajor()!=i4.iscolmajor()))
 { cerr << progstr+": " << __LINE__ << errstr << "inputs 1, 2, 4 (X,U,W) must have the same row/col major format" << endl; return 1; }
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
 if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (U) found to be empty" << endl; return 1; }
@@ -88,10 +88,6 @@ if (dim==1)
     if (i4.R!=i3.N()) { cerr << progstr+": " << __LINE__ << errstr << "nrows W must equal length H for dim=1" << endl; return 1; }
     if (i5.N()!=i4.C) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal ncols W for dim=1" << endl; return 1; }
 }
-
-if (dim==1 && i1.C!=i2.R) { cerr << progstr+": " << __LINE__ << errstr << "nrows W must equal ncols X for dim=1" << endl; return 1; }
-if (dim==0 && i3.N()!=i2.R) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal nrows W for dim=0" << endl; return 1; }
-if (dim==1 && i3.N()!=i2.C) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal ncols W for dim=1" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;

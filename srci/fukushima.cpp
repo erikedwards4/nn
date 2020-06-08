@@ -59,8 +59,8 @@ if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
 if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must be a matrix" << endl; return 1; }
-if (dim==0 && i1.R%2) { cerr << progstr+": " << __LINE__ << errstr << "num rows X must be even for dim=0" << endl; return 1; }
-if (dim==1 && i1.C%2) { cerr << progstr+": " << __LINE__ << errstr << "num cols X must be even for dim=1" << endl; return 1; }
+if (dim==0 && i1.R%2u) { cerr << progstr+": " << __LINE__ << errstr << "num rows X must be even for dim=0" << endl; return 1; }
+if (dim==1 && i1.C%2u) { cerr << progstr+": " << __LINE__ << errstr << "num cols X must be even for dim=1" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;
