@@ -10,9 +10,9 @@ int dim, N, T;
 //Description
 string descr;
 descr += "Neural soma stage.\n";
-descr += "Does LSTM (long short-term memory) model for driving inputs Xc, Xi, Xf, Xo.\n";
-descr += "where Xc is the input to the cell, and\n";
-descr += "Xi, Xf, Xo are the inputs for the input, forget, output gates.\n";
+descr += "Does LSTM (long short-term memory) model for driving\n";
+descr += "inputs Xc, Xi, Xf, Xo, where Xc is the input to the cell,\n";
+descr += "and Xi, Xf, Xo are the inputs for the input, forget, output gates.\n";
 descr += "\n";
 descr += "All have size NxT or TxN, where N is the number of neurons,\n";
 descr += "and T is the number of observations (e.g. time points).\n";
