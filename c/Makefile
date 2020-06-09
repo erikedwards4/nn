@@ -42,7 +42,10 @@ all: Math IN CELL OUT
 
 
 #Math: some useful math functions
-Math: Nonlin
+Math: Split_Join Nonlin Stats
+
+#Split_Join: utilities to split matrix into several, or join several matrices into one.
+Split_Join: #split2 split3 split4 split5 join2 join3 join4 join5
 
 #Nonlin: various static nonlinearities used in NNs and computational neuroscience
 #Each of these is applied element-wise to the input X.
@@ -58,6 +61,20 @@ pow: pow.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 exp: exp.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 deadzone: deadzone.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
+#Stats: some basic statistics calculated row-wise or column-wise
+Stats: sum asum cnt min max range median mean std var norm1 norm2
+sum: sum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+asum: asum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+cnt: cnt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+min: min.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+max: max.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+range: range.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+median: median.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+mean: mean.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+std: std.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+var: var.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+norm1: norm1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+norm2: norm2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #IN: input side of neurons/layers
 #For now, only the simple/usual possibilities are implemented: apply weights and bias
