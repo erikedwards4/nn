@@ -1,44 +1,60 @@
 //This gets maxout layer-wise activation function for X.
 //This is just the max along rows or cols of X according to dim.
 
+//For complex input X, output Y is complex with elements having max absolute values.
+
+
 #include <stdio.h>
+#include <cblas.h>
 
 #ifdef __cplusplus
 namespace openn {
 extern "C" {
 #endif
 
-int maxout_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim);
-int maxout_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim);
+int maxout_s (float *Y, const float *X, const int N, const int T, const int M, const int dim, const char iscolmajor);
+int maxout_d (double *Y, const double *X, const int N, const int T, const int M, const int dim, const char iscolmajor);
+int maxout_c (float *Y, const float *X, const int N, const int T, const int M, const int dim, const char iscolmajor);
+int maxout_z (double *Y, const double *X, const int N, const int T, const int M, const int dim, const char iscolmajor);
 
 
-int maxout_s (float *Y, const float *X, const char iscolmajor, const int R, const int C, const int dim)
+int maxout_s (float *Y, const float *X, const int N, const int T, const int M, const int dim, const char iscolmajor)
 {
-    int r, c, n;
+    const int MN = M*N, TN = T*N;
+    int m, n, t, tN, tMN, nT;
     float mx;
 
     //Checks
-    if (R<1) { fprintf(stderr,"error in maxout_s: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in maxout_s: C (ncols X) must be positive\n"); return 1; }
+    if (M<1) { fprintf(stderr,"error in maxout_s: M (num inputs per neuron) must be positive\n"); return 1; }
+    if (N<1) { fprintf(stderr,"error in maxout_s: N (num neurons) must be positive\n"); return 1; }
+    if (T<1) { fprintf(stderr,"error in maxout_s: T (num time points) must be positive\n"); return 1; }
 
     if (dim==0)
     {
         if (iscolmajor)
         {
-            for (c=0; c<C; c++)
+            for (t=0; t<T; t++)
             {
-                n = c*R; mx = X[n];
-                while (++n<(c+1)*R) { if (X[n]>mx) { mx = X[n]; } }
-                Y[c] = mx;
+                tN = t*N; tMN = t*MN;
+                for (n=0; n<N; n++)
+                {
+                    mx = X[tMN+n];
+                    for (m=0; m<M; m++) { if (X[tMN+m*N+n]>mx) { mx = X[tMN+m*N+n]; } }
+                    Y[tN+n] = mx;
+                }
             }
         }
         else
         {
-            for (c=0; c<C; c++)
+            for (n=0; n<N; n++)
             {
-                n = c; mx = X[n]; n += C;
-                while (n<R*C) { if (X[n]>mx) { mx = X[n]; } n+=C; }
-                Y[c] = mx;
+                nT = n*T;
+                for (t=0; t<T; t++)
+                {
+                    mx = X[nT+t];
+                    for (m=0; m<M; m++) { if (X[m*TN+nT+t]>mx) { mx = X[m*TN+nT+t]; } }
+                    Y[nT+t] = mx;
+                }
             }
         }
     }
@@ -46,20 +62,28 @@ int maxout_s (float *Y, const float *X, const char iscolmajor, const int R, cons
     {
         if (iscolmajor)
         {
-            for (r=0; r<R; r++)
+            for (n=0; n<N; n++)
             {
-                n = r; mx = X[n]; n += R;
-                while (n<R*C) { if (X[n]>mx) { mx = X[n]; } n+=R; }
-                Y[r] = mx;
+                nT = n*T;
+                for (t=0; t<T; t++)
+                {
+                    mx = X[nT+t];
+                    for (m=0; m<M; m++) { if (X[m*TN+nT+t]>mx) { mx = X[m*TN+nT+t]; } }
+                    Y[nT+t] = mx;
+                }
             }
         }
         else
         {
-            for (r=0; r<R; r++)
+            for (t=0; t<T; t++)
             {
-                n = r*C; mx = X[n];
-                while (++n<(r+1)*C) { if (X[n]>mx) { mx = X[n]; } }
-                Y[r] = mx;
+                tN = t*N; tMN = t*MN;
+                for (n=0; n<N; n++)
+                {
+                    mx = X[tMN+n];
+                    for (m=0; m<M; m++) { if (X[tMN+m*N+n]>mx) { mx = X[tMN+m*N+n]; } }
+                    Y[tN+n] = mx;
+                }
             }
         }
     }
@@ -72,33 +96,43 @@ int maxout_s (float *Y, const float *X, const char iscolmajor, const int R, cons
 }
 
 
-int maxout_d (double *Y, const double *X, const char iscolmajor, const int R, const int C, const int dim)
+int maxout_d (double *Y, const double *X, const int N, const int T, const int M, const int dim, const char iscolmajor)
 {
-    int r, c, n;
+    const int MN = M*N, TN = T*N;
+    int m, n, t, tN, tMN, nT;
     double mx;
 
     //Checks
-    if (R<1) { fprintf(stderr,"error in maxout_d: R (nrows X) must be positive\n"); return 1; }
-    if (C<1) { fprintf(stderr,"error in maxout_d: C (ncols X) must be positive\n"); return 1; }
+    if (M<1) { fprintf(stderr,"error in maxout_d: M (num inputs per neuron) must be positive\n"); return 1; }
+    if (N<1) { fprintf(stderr,"error in maxout_d: N (num neurons) must be positive\n"); return 1; }
+    if (T<1) { fprintf(stderr,"error in maxout_d: T (num time points) must be positive\n"); return 1; }
 
     if (dim==0)
     {
         if (iscolmajor)
         {
-            for (c=0; c<C; c++)
+            for (t=0; t<T; t++)
             {
-                n = c*R; mx = X[n];
-                while (++n<(c+1)*R) { if (X[n]>mx) { mx = X[n]; } }
-                Y[c] = mx;
+                tN = t*N; tMN = t*MN;
+                for (n=0; n<N; n++)
+                {
+                    mx = X[tMN+n];
+                    for (m=0; m<M; m++) { if (X[tMN+m*N+n]>mx) { mx = X[tMN+m*N+n]; } }
+                    Y[tN+n] = mx;
+                }
             }
         }
         else
         {
-            for (c=0; c<C; c++)
+            for (n=0; n<N; n++)
             {
-                n = c; mx = X[n]; n += C;
-                while (n<R*C) { if (X[n]>mx) { mx = X[n]; } n+=C; }
-                Y[c] = mx;
+                nT = n*T;
+                for (t=0; t<T; t++)
+                {
+                    mx = X[nT+t];
+                    for (m=0; m<M; m++) { if (X[m*TN+nT+t]>mx) { mx = X[m*TN+nT+t]; } }
+                    Y[nT+t] = mx;
+                }
             }
         }
     }
@@ -106,20 +140,28 @@ int maxout_d (double *Y, const double *X, const char iscolmajor, const int R, co
     {
         if (iscolmajor)
         {
-            for (r=0; r<R; r++)
+            for (n=0; n<N; n++)
             {
-                n = r; mx = X[n]; n += R;
-                while (n<R*C) { if (X[n]>mx) { mx = X[n]; } n+=R; }
-                Y[r] = mx;
+                nT = n*T;
+                for (t=0; t<T; t++)
+                {
+                    mx = X[nT+t];
+                    for (m=0; m<M; m++) { if (X[m*TN+nT+t]>mx) { mx = X[m*TN+nT+t]; } }
+                    Y[nT+t] = mx;
+                }
             }
         }
         else
         {
-            for (r=0; r<R; r++)
+            for (t=0; t<T; t++)
             {
-                n = r*C; mx = X[n];
-                while (++n<(r+1)*C) { if (X[n]>mx) { mx = X[n]; } }
-                Y[r] = mx;
+                tN = t*N; tMN = t*MN;
+                for (n=0; n<N; n++)
+                {
+                    mx = X[tMN+n];
+                    for (m=0; m<M; m++) { if (X[tMN+m*N+n]>mx) { mx = X[tMN+m*N+n]; } }
+                    Y[tN+n] = mx;
+                }
             }
         }
     }
@@ -128,6 +170,153 @@ int maxout_d (double *Y, const double *X, const char iscolmajor, const int R, co
         fprintf(stderr,"error in maxout_d: dim must be 0 or 1.\n"); return 1;
     }
     
+    return 0;
+}
+
+
+int maxout_c (float *Y, const float *X, const int N, const int T, const int M, const int dim, const char iscolmajor)
+{
+    const int MN = M*N, TN = T*N;
+    int m, n, t, tN, tMN, nT;
+
+    //Checks
+    if (M<1) { fprintf(stderr,"error in maxout_c: M (num inputs per neuron) must be positive\n"); return 1; }
+    if (N<1) { fprintf(stderr,"error in maxout_c: N (num neurons) must be positive\n"); return 1; }
+    if (T<1) { fprintf(stderr,"error in maxout_c: T (num time points) must be positive\n"); return 1; }
+
+    if (dim==0)
+    {
+        if (iscolmajor)
+        {
+            for (t=0; t<T; t++)
+            {
+                tN = t*N; tMN = t*MN;
+                for (n=0; n<N; n++)
+                {
+                    m = (int)cblas_icamax(M,&X[2*(tMN+n)],N);
+                    Y[2*(tN+n)] = X[2*(tMN+m*N+n)]; Y[2*(tN+n)+1] = X[2*(tMN+m*N+n)+1];
+                    //Y[tN+n] = sqrtf(X[2*(tMN+m*N+n)]*X[2*(tMN+m*N+n)]+X[2*(tMN+m*N+n)+1]*X[2*(tMN+m*N+n)+1]);
+                }
+            }
+        }
+        else
+        {
+            for (n=0; n<N; n++)
+            {
+                nT = n*T;
+                for (t=0; t<T; t++)
+                {
+                    m = (int)cblas_icamax(M,&X[2*(nT+t)],TN);
+                    Y[2*(nT+t)] = X[2*(m*TN+nT+t)]; Y[2*(nT+t)+1] = X[2*(m*TN+nT+t)+1];
+                }
+            }
+        }
+    }
+    else if (dim==1)
+    {
+        if (iscolmajor)
+        {
+            for (n=0; n<N; n++)
+            {
+                nT = n*T;
+                for (t=0; t<T; t++)
+                {
+                    m = (int)cblas_icamax(M,&X[2*(nT+t)],TN);
+                    Y[2*(nT+t)] = X[2*(m*TN+nT+t)]; Y[2*(nT+t)+1] = X[2*(m*TN+nT+t)+1];
+                }
+            }
+        }
+        else
+        {
+            for (t=0; t<T; t++)
+            {
+                tN = t*N; tMN = t*MN;
+                for (n=0; n<N; n++)
+                {
+                    m = (int)cblas_icamax(M,&X[2*(tMN+n)],N);
+                    Y[2*(tN+n)] = X[2*(tMN+m*N+n)]; Y[2*(tN+n)+1] = X[2*(tMN+m*N+n)+1];
+                }
+            }
+        }
+    }
+    else
+    {
+        fprintf(stderr,"error in maxout_c: dim must be 0 or 1.\n"); return 1;
+    }
+
+    return 0;
+}
+
+
+int maxout_z (double *Y, const double *X, const int N, const int T, const int M, const int dim, const char iscolmajor)
+{
+    const int MN = M*N, TN = T*N;
+    int m, n, t, tN, tMN, nT;
+
+    //Checks
+    if (M<1) { fprintf(stderr,"error in maxout_z: M (num inputs per neuron) must be positive\n"); return 1; }
+    if (N<1) { fprintf(stderr,"error in maxout_z: N (num neurons) must be positive\n"); return 1; }
+    if (T<1) { fprintf(stderr,"error in maxout_z: T (num time points) must be positive\n"); return 1; }
+
+    if (dim==0)
+    {
+        if (iscolmajor)
+        {
+            for (t=0; t<T; t++)
+            {
+                tN = t*N; tMN = t*MN;
+                for (n=0; n<N; n++)
+                {
+                    m = (int)cblas_izamax(M,&X[2*(tMN+n)],N);
+                    Y[2*(tN+n)] = X[2*(tMN+m*N+n)]; Y[2*(tN+n)+1] = X[2*(tMN+m*N+n)+1];
+                }
+            }
+        }
+        else
+        {
+            for (n=0; n<N; n++)
+            {
+                nT = n*T;
+                for (t=0; t<T; t++)
+                {
+                    m = (int)cblas_izamax(M,&X[2*(nT+t)],TN);
+                    Y[2*(nT+t)] = X[2*(m*TN+nT+t)]; Y[2*(nT+t)+1] = X[2*(m*TN+nT+t)+1];
+                }
+            }
+        }
+    }
+    else if (dim==1)
+    {
+        if (iscolmajor)
+        {
+            for (n=0; n<N; n++)
+            {
+                nT = n*T;
+                for (t=0; t<T; t++)
+                {
+                    m = (int)cblas_izamax(M,&X[2*(nT+t)],TN);
+                    Y[2*(nT+t)] = X[2*(m*TN+nT+t)]; Y[2*(nT+t)+1] = X[2*(m*TN+nT+t)+1];
+                }
+            }
+        }
+        else
+        {
+            for (t=0; t<T; t++)
+            {
+                tN = t*N; tMN = t*MN;
+                for (n=0; n<N; n++)
+                {
+                    m = (int)cblas_izamax(M,&X[2*(tMN+n)],N);
+                    Y[2*(tN+n)] = X[2*(tMN+m*N+n)]; Y[2*(tN+n)+1] = X[2*(tMN+m*N+n)+1];
+                }
+            }
+        }
+    }
+    else
+    {
+        fprintf(stderr,"error in maxout_z: dim must be 0 or 1.\n"); return 1;
+    }
+
     return 0;
 }
 

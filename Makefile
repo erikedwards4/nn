@@ -30,18 +30,27 @@ CFLAGS=$(WFLAG) -O3 $(STD) -march=native -Ic
 #LIBS=-largtable2 -lopenblas -llapacke -llapack -lfftw3f -lfftw3 -lm
 
 
-all: srci2src Math IN CELL OUT
+all: srci2src MATH IN CELL OUT
 	rm -f 7 obj/*.o
 
 srci2src: src/srci2src.cpp
 	$(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 
-#Math: some useful math functions
-Math: Split_Join Nonlin Stats
+
+#MATH: some useful math functions
+MATH: Split_Join Nonlin Stats
 
 #Split_Join: utilities to split matrix into several, or join several matrices into one.
-Split_Join: split2 split3 split4 split5 join2 join3 join4 join5
+Split_Join: split2 split3 join2 join3
+split2: srci/split2.cpp c/split2.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
+split3: srci/split3.cpp c/split3.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
+join2: srci/join2.cpp c/join2.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
+join3: srci/join3.cpp c/join3.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
 
 #Nonlin: various static nonlinearities
 Nonlin: abs square sqrt cbrt log log2 log10 pow exp deadzone
@@ -93,6 +102,8 @@ norm1: srci/norm1.cpp c/norm1.c
 norm2: srci/norm2.cpp c/norm2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
+
+
 #IN: input side of neurons (~dendrites)
 #For now, I only implement the usual wieghts and weights+biases (great majority of neuron models use this).
 IN: linear0 linear
@@ -101,7 +112,9 @@ linear0: srci/linear0.cpp c/linear0.c
 linear: srci/linear.cpp c/linear.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
-#Cell: middle part of neurons (~soma)
+
+
+#CELL: middle part of neurons (~soma)
 CELL: Basic Model RNN
 
 Basic: identity integrate fir
@@ -147,12 +160,13 @@ lstm_peephole4: srci/lstm_peephole4.cpp c/lstm_peephole4.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 
+
 #OUT: output side of neurons (~axon hillock and axon)
-OUT: Output_Acts Layer_Acts #CN_Neurons DEQ_Neurons
+OUT: Activations_Static Activations_Other #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
-#These are all element-wise static nonlinearities, so apply to neurons or layers
-Output_Acts: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish
+#These are all element-wise static nonlinearities, so apply without modification to single neurons or to layers of neurons.
+Activations_Static: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish
 step: srci/step.cpp c/step.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 signum: srci/signum.cpp c/signum.c
@@ -200,13 +214,15 @@ silu: srci/silu.cpp c/silu.c
 swish: srci/swish.cpp c/swish.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
-#Activation functions applied layer-wise
-#Recall that above Output_Acts can be applied without modification to layers
-Layer_Acts: maxout softmax
+#Other OUT Activation functions 
+#Maxout can be applied without modification to layers or single neurons, but it is not a static nonlinearity.
+#Softmax is inherently layer-wise (output of any single neuron depends on layer).
+Activations_Other: maxout softmax
 maxout: srci/maxout.cpp c/maxout.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 softmax: srci/softmax.cpp c/softmax.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+
 
 
 #CN_Neurons: output side of various neurons/layers from history of computational neuroscience

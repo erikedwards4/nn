@@ -45,7 +45,15 @@ all: Math IN CELL OUT
 Math: Split_Join Nonlin Stats
 
 #Split_Join: utilities to split matrix into several, or join several matrices into one.
-Split_Join: #split2 split3 split4 split5 join2 join3 join4 join5
+Split_Join: split2 split3 split4 split5 join2 join3 join4 join5
+split2: split2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+split3: split3.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+split4: split4.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+split5: split5.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+join2: join2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+join3: join3.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+join4: join4.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+join5: join5.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Nonlin: various static nonlinearities used in NNs and computational neuroscience
 #Each of these is applied element-wise to the input X.

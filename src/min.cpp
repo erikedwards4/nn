@@ -139,75 +139,79 @@ int main(int argc, char *argv[])
     //Process
     if (i1.T==1)
     {
-        float *X, *Y;
+        float *X; //*Y;
         try { X = new float[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        try { Y = new float[o1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        //try { Y = new float[o1.N()]; }
+        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (openn::min_s(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        //if (openn::min_s(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        if (openn::min_inplace_s(X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] Y;
+        delete[] X; //delete[] Y;
     }
     else if (i1.T==2)
     {
-        double *X, *Y;
+        double *X; //*Y;
         try { X = new double[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        try { Y = new double[o1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        //try { Y = new double[o1.N()]; }
+        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (openn::min_d(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        //if (openn::min_d(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        if (openn::min_inplace_d(X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] Y;
+        delete[] X; //delete[] Y;
     }
     else if (i1.T==101)
     {
-        float *X, *Y;
+        float *X; //*Y;
         try { X = new float[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        try { Y = new float[o1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        //try { Y = new float[o1.N()]; }
+        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (openn::min_c(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        //if (openn::min_c(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        if (openn::min_inplace_c(X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] Y;
+        delete[] X; //delete[] Y;
     }
     else if (i1.T==102)
     {
-        double *X, *Y;
+        double *X; //*Y;
         try { X = new double[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        try { Y = new double[o1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        //try { Y = new double[o1.N()]; }
+        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (openn::min_z(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        //if (openn::min_z(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        if (openn::min_inplace_z(X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
-            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] Y;
+        delete[] X; //delete[] Y;
     }
     else
     {
