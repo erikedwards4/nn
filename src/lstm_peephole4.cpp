@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,10 +9,9 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
+#include "../util/cmli.hpp"
 //#include <chrono>
 #include "lstm_peephole4.c"
 
@@ -30,12 +30,12 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2};
-    const size_t I = 7, O = 1;
+    const valarray<size_t> oktypes = {1u,2u};
+    const size_t I = 7u, O = 1u;
     ifstream ifs1, ifs2, ifs3, ifs4, ifs5, ifs6, ifs7; ofstream ofs1;
     int8_t stdi1, stdi2, stdi3, stdi4, stdi5, stdi6, stdi7, stdo1, wo1;
     ioinfo i1, i2, i3, i4, i5, i6, i7, o1;
-    int dim, N, T;
+    size_t dim, N, T;
 
 
     //Description
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0 || (i3.T==oktypes).sum()==0 || (i4.T==oktypes).sum()==0 || (i5.T==oktypes).sum()==0 || (i6.T==oktypes).sum()==0 || (i7.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -150,10 +150,10 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = 0; }
+    if (a_d->count==0) { dim = 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 
     //Checks
@@ -181,8 +181,8 @@ int main(int argc, char *argv[])
     if (i5.R!=i6.R || i5.C!=i6.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-7 (Ui, Uf, Uo) must have the same size" << endl; return 1; }
     if (i5.R!=i7.R || i5.C!=i7.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-7 (Ui, Uf, Uo) must have the same size" << endl; return 1; }
     if (i5.R!=i5.C || i6.R!=i6.C || i7.R!=i7.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-7 (Ui, Uf, Uo) must be square" << endl; return 1; }
-    if (dim==0 && i1.R!=i5.R) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-7 (Ui, Uf, Uo) must have size NxN" << endl; return 1; }
-    if (dim==1 && i1.C!=i5.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-7 (Ui, Uf, Uo) must have size NxN" << endl; return 1; }
+    if (dim==0u && i1.R!=i5.R) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-7 (Ui, Uf, Uo) must have size NxN" << endl; return 1; }
+    if (dim==1u && i1.C!=i5.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-7 (Ui, Uf, Uo) must have size NxN" << endl; return 1; }
 
 
     //Set output header info
@@ -203,12 +203,12 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    N = (dim==0) ? int(o1.R) : int(o1.C);
-    T = (dim==0) ? int(o1.C) : int(o1.R);
+    N = (dim==0u) ? o1.R : o1.C;
+    T = (dim==0u) ? o1.C : o1.R;
     
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *Xc, *Xi, *Xf, *Xo, *Ui, *Uf, *Uo;// *Y;
         try { Xc = new float[i1.N()]; }
@@ -242,8 +242,8 @@ int main(int argc, char *argv[])
         try { ifs7.read(reinterpret_cast<char*>(Uo),i7.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 7 (Uo)" << endl; return 1; }
         //auto tic = chrono::high_resolution_clock::now();
-        //if (openn::lstm_peephole4_s(Y,Xc,Xi,Xf,Xo,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
-        if (openn::lstm_peephole4_inplace_s(Xc,Xi,Xf,Xo,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
+        //if (codee::lstm_peephole4_s(Y,Xc,Xi,Xf,Xo,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
+        if (codee::lstm_peephole4_inplace_s(Xc,Xi,Xf,Xo,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -289,8 +289,8 @@ int main(int argc, char *argv[])
         try { ifs7.read(reinterpret_cast<char*>(Uo),i7.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 7 (Uo)" << endl; return 1; }
         //auto tic = chrono::high_resolution_clock::now();
-        //if (openn::lstm_peephole4_d(Y,Xc,Xi,Xf,Xo,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
-        if (openn::lstm_peephole4_inplace_d(Xc,Xi,Xf,Xo,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
+        //if (codee::lstm_peephole4_d(Y,Xc,Xi,Xf,Xo,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
+        if (codee::lstm_peephole4_inplace_d(Xc,Xi,Xf,Xo,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {

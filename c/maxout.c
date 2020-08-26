@@ -1,320 +1,147 @@
 //This gets maxout layer-wise activation function for X.
-//This is just the max along rows or cols of X according to dim.
+//This is used on the output of M separate affine transforms,
+//each of which has output vector length of No (num output neurons).
+//These are stacked into a single long vector of length M*No.
+//For each of the No positions, the max over the M elements is taken.
+//Thus, M is the number of inputs per output neuron,
+//and each output neuron just takes a max.
 
-//For complex input X, output Y is complex with elements having max absolute values.
-
+//This is programmed as a vec2vec operation, with the vecs along dim.
+//The output vecs have length Ly = No, and the input vecs have length Lx = M*Ly.
 
 #include <stdio.h>
-#include <cblas.h>
 
 #ifdef __cplusplus
-namespace openn {
+namespace codee {
 extern "C" {
 #endif
 
-int maxout_s (float *Y, const float *X, const int N, const int T, const int M, const int dim, const char iscolmajor);
-int maxout_d (double *Y, const double *X, const int N, const int T, const int M, const int dim, const char iscolmajor);
-int maxout_c (float *Y, const float *X, const int N, const int T, const int M, const int dim, const char iscolmajor);
-int maxout_z (double *Y, const double *X, const int N, const int T, const int M, const int dim, const char iscolmajor);
+int maxout_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t M);
+int maxout_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t M);
 
 
-int maxout_s (float *Y, const float *X, const int N, const int T, const int M, const int dim, const char iscolmajor)
+int maxout_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t M)
 {
-    const int MN = M*N, TN = T*N;
-    int m, n, t, tN, tMN, nT;
+    if (dim>3) { fprintf(stderr,"error in maxout_s: dim must be in [0 3]\n"); return 1; }
+
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    if (Lx%M) { fprintf(stderr,"error in maxout_s: each vector in X must have length that is multiple of M\n"); return 1; }
+    const size_t Ly = Lx / M;
     float mx;
 
-    //Checks
-    if (M<1) { fprintf(stderr,"error in maxout_s: M (num inputs per neuron) must be positive\n"); return 1; }
-    if (N<1) { fprintf(stderr,"error in maxout_s: N (num neurons) must be positive\n"); return 1; }
-    if (T<1) { fprintf(stderr,"error in maxout_s: T (num time points) must be positive\n"); return 1; }
-
-    if (dim==0)
+    if (N==0) {}
+    else if (Lx==1)
     {
-        if (iscolmajor)
-        {
-            for (t=0; t<T; t++)
-            {
-                tN = t*N; tMN = t*MN;
-                for (n=0; n<N; n++)
-                {
-                    mx = X[tMN+n];
-                    for (m=0; m<M; m++) { if (X[tMN+m*N+n]>mx) { mx = X[tMN+m*N+n]; } }
-                    Y[tN+n] = mx;
-                }
-            }
-        }
-        else
-        {
-            for (n=0; n<N; n++)
-            {
-                nT = n*T;
-                for (t=0; t<T; t++)
-                {
-                    mx = X[nT+t];
-                    for (m=0; m<M; m++) { if (X[m*TN+nT+t]>mx) { mx = X[m*TN+nT+t]; } }
-                    Y[nT+t] = mx;
-                }
-            }
-        }
+        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = *X; }
     }
-    else if (dim==1)
+    else if (Lx==N)
     {
-        if (iscolmajor)
+        for (size_t l=0; l<Ly; ++l, X-=Lx-1, ++Y)
         {
-            for (n=0; n<N; n++)
-            {
-                nT = n*T;
-                for (t=0; t<T; t++)
-                {
-                    mx = X[nT+t];
-                    for (m=0; m<M; m++) { if (X[m*TN+nT+t]>mx) { mx = X[m*TN+nT+t]; } }
-                    Y[nT+t] = mx;
-                }
-            }
-        }
-        else
-        {
-            for (t=0; t<T; t++)
-            {
-                tN = t*N; tMN = t*MN;
-                for (n=0; n<N; n++)
-                {
-                    mx = X[tMN+n];
-                    for (m=0; m<M; m++) { if (X[tMN+m*N+n]>mx) { mx = X[tMN+m*N+n]; } }
-                    Y[tN+n] = mx;
-                }
-            }
+            mx = *X; X += Ly;
+            for (size_t m=1; m<M; ++m, X+=Ly) { if (*X>mx) { mx = *X; } }
+            *Y = mx;
         }
     }
     else
     {
-        fprintf(stderr,"error in maxout_s: dim must be 0 or 1.\n"); return 1;
+        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
+        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
+
+        if (K==1 && (G==1 || B==1))
+        {
+            for (size_t v=0; v<V; ++v, X-=Ly-1)
+            {
+                for (size_t l=0; l<Ly; ++l, ++Y)
+                {
+                    mx = *X; X += Ly;
+                    for (size_t m=1; m<M; ++m, X+=Ly) { if (*X>mx) { mx = *X; } }
+                    *Y = mx;
+                    if (l<Ly-1) { X -= Lx - 1; }
+                }
+            }
+        }
+        else
+        {
+            for (size_t g=0; g<G; ++g, X+=B*(Lx-1), Y+=B*(Ly-1))
+            {
+                for (size_t b=0; b<B; ++b, X-=K*Ly-1, Y-=K*Ly-1)
+                {
+                    for (size_t l=0; l<Ly; ++l, X-=K*(Lx-1), Y+=K)
+                    {
+                        mx = *X; X += K*Ly;
+                        for (size_t m=1; m<M; ++m, X+=K*Ly) { if (*X>mx) { mx = *X; } }
+                        *Y = mx;
+                    }
+                }
+            }
+        }
     }
 
     return 0;
 }
 
 
-int maxout_d (double *Y, const double *X, const int N, const int T, const int M, const int dim, const char iscolmajor)
+int maxout_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const size_t M)
 {
-    const int MN = M*N, TN = T*N;
-    int m, n, t, tN, tMN, nT;
+    if (dim>3) { fprintf(stderr,"error in maxout_d: dim must be in [0 3]\n"); return 1; }
+
+    const size_t N = R*C*S*H;
+    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    if (Lx%M) { fprintf(stderr,"error in maxout_d: each vector in X must have length that is multiple of M\n"); return 1; }
+    const size_t Ly = Lx / M;
     double mx;
 
-    //Checks
-    if (M<1) { fprintf(stderr,"error in maxout_d: M (num inputs per neuron) must be positive\n"); return 1; }
-    if (N<1) { fprintf(stderr,"error in maxout_d: N (num neurons) must be positive\n"); return 1; }
-    if (T<1) { fprintf(stderr,"error in maxout_d: T (num time points) must be positive\n"); return 1; }
-
-    if (dim==0)
+    if (N==0) {}
+    else if (Lx==1)
     {
-        if (iscolmajor)
-        {
-            for (t=0; t<T; t++)
-            {
-                tN = t*N; tMN = t*MN;
-                for (n=0; n<N; n++)
-                {
-                    mx = X[tMN+n];
-                    for (m=0; m<M; m++) { if (X[tMN+m*N+n]>mx) { mx = X[tMN+m*N+n]; } }
-                    Y[tN+n] = mx;
-                }
-            }
-        }
-        else
-        {
-            for (n=0; n<N; n++)
-            {
-                nT = n*T;
-                for (t=0; t<T; t++)
-                {
-                    mx = X[nT+t];
-                    for (m=0; m<M; m++) { if (X[m*TN+nT+t]>mx) { mx = X[m*TN+nT+t]; } }
-                    Y[nT+t] = mx;
-                }
-            }
-        }
+        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = *X; }
     }
-    else if (dim==1)
+    else if (Lx==N)
     {
-        if (iscolmajor)
+        for (size_t l=0; l<Ly; ++l, X-=Lx-1, ++Y)
         {
-            for (n=0; n<N; n++)
-            {
-                nT = n*T;
-                for (t=0; t<T; t++)
-                {
-                    mx = X[nT+t];
-                    for (m=0; m<M; m++) { if (X[m*TN+nT+t]>mx) { mx = X[m*TN+nT+t]; } }
-                    Y[nT+t] = mx;
-                }
-            }
-        }
-        else
-        {
-            for (t=0; t<T; t++)
-            {
-                tN = t*N; tMN = t*MN;
-                for (n=0; n<N; n++)
-                {
-                    mx = X[tMN+n];
-                    for (m=0; m<M; m++) { if (X[tMN+m*N+n]>mx) { mx = X[tMN+m*N+n]; } }
-                    Y[tN+n] = mx;
-                }
-            }
+            mx = *X; X += Ly;
+            for (size_t m=1; m<M; ++m, X+=Ly) { if (*X>mx) { mx = *X; } }
+            *Y = mx;
         }
     }
     else
     {
-        fprintf(stderr,"error in maxout_d: dim must be 0 or 1.\n"); return 1;
-    }
-    
-    return 0;
-}
+        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
+        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t V = N/Lx, G = V/B;
 
-
-int maxout_c (float *Y, const float *X, const int N, const int T, const int M, const int dim, const char iscolmajor)
-{
-    const int MN = M*N, TN = T*N;
-    int m, n, t, tN, tMN, nT;
-
-    //Checks
-    if (M<1) { fprintf(stderr,"error in maxout_c: M (num inputs per neuron) must be positive\n"); return 1; }
-    if (N<1) { fprintf(stderr,"error in maxout_c: N (num neurons) must be positive\n"); return 1; }
-    if (T<1) { fprintf(stderr,"error in maxout_c: T (num time points) must be positive\n"); return 1; }
-
-    if (dim==0)
-    {
-        if (iscolmajor)
+        if (K==1 && (G==1 || B==1))
         {
-            for (t=0; t<T; t++)
+            for (size_t v=0; v<V; ++v, X-=Ly-1)
             {
-                tN = t*N; tMN = t*MN;
-                for (n=0; n<N; n++)
+                for (size_t l=0; l<Ly; ++l, ++Y)
                 {
-                    m = (int)cblas_icamax(M,&X[2*(tMN+n)],N);
-                    Y[2*(tN+n)] = X[2*(tMN+m*N+n)]; Y[2*(tN+n)+1] = X[2*(tMN+m*N+n)+1];
-                    //Y[tN+n] = sqrtf(X[2*(tMN+m*N+n)]*X[2*(tMN+m*N+n)]+X[2*(tMN+m*N+n)+1]*X[2*(tMN+m*N+n)+1]);
+                    mx = *X; X += Ly;
+                    for (size_t m=1; m<M; ++m, X+=Ly) { if (*X>mx) { mx = *X; } }
+                    *Y = mx;
+                    if (l<Ly-1) { X -= Lx - 1; }
                 }
             }
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t g=0; g<G; ++g, X+=B*(Lx-1), Y+=B*(Ly-1))
             {
-                nT = n*T;
-                for (t=0; t<T; t++)
+                for (size_t b=0; b<B; ++b, X-=K*Ly-1, Y-=K*Ly-1)
                 {
-                    m = (int)cblas_icamax(M,&X[2*(nT+t)],TN);
-                    Y[2*(nT+t)] = X[2*(m*TN+nT+t)]; Y[2*(nT+t)+1] = X[2*(m*TN+nT+t)+1];
+                    for (size_t l=0; l<Ly; ++l, X-=K*(Lx-1), Y+=K)
+                    {
+                        mx = *X; X += K*Ly;
+                        for (size_t m=1; m<M; ++m, X+=K*Ly) { if (*X>mx) { mx = *X; } }
+                        *Y = mx;
+                    }
                 }
             }
         }
-    }
-    else if (dim==1)
-    {
-        if (iscolmajor)
-        {
-            for (n=0; n<N; n++)
-            {
-                nT = n*T;
-                for (t=0; t<T; t++)
-                {
-                    m = (int)cblas_icamax(M,&X[2*(nT+t)],TN);
-                    Y[2*(nT+t)] = X[2*(m*TN+nT+t)]; Y[2*(nT+t)+1] = X[2*(m*TN+nT+t)+1];
-                }
-            }
-        }
-        else
-        {
-            for (t=0; t<T; t++)
-            {
-                tN = t*N; tMN = t*MN;
-                for (n=0; n<N; n++)
-                {
-                    m = (int)cblas_icamax(M,&X[2*(tMN+n)],N);
-                    Y[2*(tN+n)] = X[2*(tMN+m*N+n)]; Y[2*(tN+n)+1] = X[2*(tMN+m*N+n)+1];
-                }
-            }
-        }
-    }
-    else
-    {
-        fprintf(stderr,"error in maxout_c: dim must be 0 or 1.\n"); return 1;
-    }
-
-    return 0;
-}
-
-
-int maxout_z (double *Y, const double *X, const int N, const int T, const int M, const int dim, const char iscolmajor)
-{
-    const int MN = M*N, TN = T*N;
-    int m, n, t, tN, tMN, nT;
-
-    //Checks
-    if (M<1) { fprintf(stderr,"error in maxout_z: M (num inputs per neuron) must be positive\n"); return 1; }
-    if (N<1) { fprintf(stderr,"error in maxout_z: N (num neurons) must be positive\n"); return 1; }
-    if (T<1) { fprintf(stderr,"error in maxout_z: T (num time points) must be positive\n"); return 1; }
-
-    if (dim==0)
-    {
-        if (iscolmajor)
-        {
-            for (t=0; t<T; t++)
-            {
-                tN = t*N; tMN = t*MN;
-                for (n=0; n<N; n++)
-                {
-                    m = (int)cblas_izamax(M,&X[2*(tMN+n)],N);
-                    Y[2*(tN+n)] = X[2*(tMN+m*N+n)]; Y[2*(tN+n)+1] = X[2*(tMN+m*N+n)+1];
-                }
-            }
-        }
-        else
-        {
-            for (n=0; n<N; n++)
-            {
-                nT = n*T;
-                for (t=0; t<T; t++)
-                {
-                    m = (int)cblas_izamax(M,&X[2*(nT+t)],TN);
-                    Y[2*(nT+t)] = X[2*(m*TN+nT+t)]; Y[2*(nT+t)+1] = X[2*(m*TN+nT+t)+1];
-                }
-            }
-        }
-    }
-    else if (dim==1)
-    {
-        if (iscolmajor)
-        {
-            for (n=0; n<N; n++)
-            {
-                nT = n*T;
-                for (t=0; t<T; t++)
-                {
-                    m = (int)cblas_izamax(M,&X[2*(nT+t)],TN);
-                    Y[2*(nT+t)] = X[2*(m*TN+nT+t)]; Y[2*(nT+t)+1] = X[2*(m*TN+nT+t)+1];
-                }
-            }
-        }
-        else
-        {
-            for (t=0; t<T; t++)
-            {
-                tN = t*N; tMN = t*MN;
-                for (n=0; n<N; n++)
-                {
-                    m = (int)cblas_izamax(M,&X[2*(tMN+n)],N);
-                    Y[2*(tN+n)] = X[2*(tMN+m*N+n)]; Y[2*(tN+n)+1] = X[2*(tMN+m*N+n)+1];
-                }
-            }
-        }
-    }
-    else
-    {
-        fprintf(stderr,"error in maxout_z: dim must be 0 or 1.\n"); return 1;
     }
 
     return 0;

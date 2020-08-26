@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,10 +9,9 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
+#include "../util/cmli.hpp"
 #include "hopfield.c"
 
 #ifdef I
@@ -29,12 +29,12 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2,101,102};
-    const size_t I = 3, O = 1;
+    const valarray<size_t> oktypes = {1u,2u,101u,102u};
+    const size_t I = 3u, O = 1u;
     ifstream ifs1, ifs2, ifs3; ofstream ofs1;
     int8_t stdi1, stdi2, stdi3, stdo1, wo1;
     ioinfo i1, i2, i3, o1;
-    int dim, N, T;
+    size_t dim, N, T;
     double fs;
 
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
     //Argtable
     int nerrs;
-    struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,taus)");
+    struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,taus,alphas)");
     struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension (0 or 1) [default=0]");
     struct arg_dbl   *a_fs = arg_dbln("s","fs","<dbl>",0,1,"sample rate of X [default=10000]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0 || (i3.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -134,8 +134,8 @@ int main(int argc, char *argv[])
     //Get dim
     if (a_d->count==0) { dim = (i1.C==1u) ? 1 : 0; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
     //Get fs
     fs = (a_fs->count>0) ? a_fs->dval[0] : 10000.0;
@@ -143,8 +143,8 @@ int main(int argc, char *argv[])
 
 
     //Checks
-    if (i1.T!=i2.T && i1.T-100!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
-    if (i1.T!=i3.T && i1.T-100!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+    if (i1.T!=i2.T && i1.T-100u!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+    if (i1.T!=i3.T && i1.T-100u!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
     if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) must be a matrix" << endl; return 1; }
     if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (taus) found to be empty" << endl; return 1; }
@@ -153,12 +153,12 @@ int main(int argc, char *argv[])
     if (!i3.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (alphas) must be a vector or scalar" << endl; return 1; }
     if (i2.N()!=1u)
     {
-        if ((dim==0 && i2.N()!=i1.R) || (dim==1 && i2.N()!=i1.C))
+        if ((dim==0u && i2.N()!=i1.R) || (dim==1u && i2.N()!=i1.C))
         { cerr << progstr+": " << __LINE__ << errstr << "length taus must equal N (num neurons)" << endl; return 1; }
     }
     if (i3.N()!=1u)
     {
-        if ((dim==0 && i3.N()!=i1.R) || (dim==1 && i3.N()!=i1.C))
+        if ((dim==0u && i3.N()!=i1.R) || (dim==1u && i3.N()!=i1.C))
         { cerr << progstr+": " << __LINE__ << errstr << "length alphas must equal N (num neurons)" << endl; return 1; }
     }
 
@@ -181,13 +181,13 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    N = (dim==0) ? int(o1.R) : int(o1.C);
-    T = (dim==0) ? int(o1.C) : int(o1.R);
-    if (T<2) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
+    N = (dim==0u) ? o1.R : o1.C;
+    T = (dim==0u) ? o1.C : o1.R;
+    if (T<2u) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
     
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *X, *taus, *alphas; // *Y;
         try { X = new float[i1.N()]; }
@@ -204,10 +204,10 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (taus)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(alphas),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (alphas)" << endl; return 1; }
-        if (i2.N()==1u) { for (int n=1; n<N; n++) { taus[n] = taus[0]; } }
-        if (i3.N()==1u) { for (int n=1; n<N; n++) { alphas[n] = alphas[0]; } }
-        //if (openn::hopfield_s(Y,X,taus,N,T,dim,i1.iscolmajor(),float(fs)))
-        if (openn::hopfield_inplace_s(X,taus,alphas,N,T,dim,i1.iscolmajor(),float(fs)))
+        if (i2.N()==1u) { for (size_t n=1u; n<N; ++n) { taus[n] = taus[0]; } }
+        if (i3.N()==1u) { for (size_t n=1u; n<N; ++n) { alphas[n] = alphas[0]; } }
+        //if (codee::hopfield_s(Y,X,taus,N,T,i1.iscolmajor(),dim,float(fs)))
+        if (codee::hopfield_inplace_s(X,taus,alphas,N,T,i1.iscolmajor(),dim,float(fs)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -233,10 +233,10 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (taus)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(alphas),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (alphas)" << endl; return 1; }
-        if (i2.N()==1u) { for (int n=1; n<N; n++) { taus[n] = taus[0]; } }
-        if (i3.N()==1u) { for (int n=1; n<N; n++) { alphas[n] = alphas[0]; } }
-        //if (openn::hopfield_d(Y,X,taus,N,T,dim,i1.iscolmajor(),double(fs)))
-        if (openn::hopfield_inplace_d(X,taus,alphas,N,T,dim,i1.iscolmajor(),double(fs)))
+        if (i2.N()==1u) { for (size_t n=1u; n<N; ++n) { taus[n] = taus[0]; } }
+        if (i3.N()==1u) { for (size_t n=1u; n<N; ++n) { alphas[n] = alphas[0]; } }
+        //if (codee::hopfield_d(Y,X,taus,N,T,i1.iscolmajor(),dim,double(fs)))
+        if (codee::hopfield_inplace_d(X,taus,alphas,N,T,i1.iscolmajor(),dim,double(fs)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] taus; delete[] alphas; //delete[] Y;
     }
-    else if (i1.T==101)
+    else if (i1.T==101u)
     {
         float *X, *taus, *alphas;
         try { X = new float[2u*i1.N()]; }
@@ -260,9 +260,9 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (taus)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(alphas),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (alphas)" << endl; return 1; }
-        if (i2.N()==1u) { for (int n=1; n<N; n++) { taus[n] = taus[0]; } }
-        if (i3.N()==1u) { for (int n=1; n<N; n++) { alphas[n] = alphas[0]; } }
-        if (openn::hopfield_inplace_c(X,taus,alphas,N,T,dim,i1.iscolmajor(),float(fs)))
+        if (i2.N()==1u) { for (size_t n=1u; n<N; ++n) { taus[n] = taus[0]; } }
+        if (i3.N()==1u) { for (size_t n=1u; n<N; ++n) { alphas[n] = alphas[0]; } }
+        if (codee::hopfield_inplace_c(X,taus,alphas,N,T,i1.iscolmajor(),dim,float(fs)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] taus; delete[] alphas;
     }
-    else if (i1.T==102)
+    else if (i1.T==102u)
     {
         double *X, *taus, *alphas;
         try { X = new double[2u*i1.N()]; }
@@ -286,9 +286,9 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (taus)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(alphas),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (alphas)" << endl; return 1; }
-        if (i2.N()==1u) { for (int n=1; n<N; n++) { taus[n] = taus[0]; } }
-        if (i3.N()==1u) { for (int n=1; n<N; n++) { alphas[n] = alphas[0]; } }
-        if (openn::hopfield_inplace_z(X,taus,alphas,N,T,dim,i1.iscolmajor(),double(fs)))
+        if (i2.N()==1u) { for (size_t n=1u; n<N; ++n) { taus[n] = taus[0]; } }
+        if (i3.N()==1u) { for (size_t n=1u; n<N; ++n) { alphas[n] = alphas[0]; } }
+        if (codee::hopfield_inplace_z(X,taus,alphas,N,T,i1.iscolmajor(),dim,double(fs)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {

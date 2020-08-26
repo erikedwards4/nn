@@ -1,21 +1,19 @@
 #@author Erik Edwards
-#@date 2017-2020
+#@date 2017-present
+#@license BSD 3-clause
 
-#openN is my own library of C functions for computational neurons in C.
+#nn is my own library of C functions for computational neurons in C.
 
 #This is the Makefile used during development of the C functions.
 #Since these are not stand-alone programs (no main functions), the only outputs are object files to obj.
 
 #Project is organized as:
-#Math  : some useful math functions
-#Input : input side of neurons
-#INPUT : input side for layers of neurons
-#Output: output side of neurons
-#OUTPUT: output side for layers of neurons
+#IN  : input side of neurons and layers of neurons
+#CELL: middle part of neurons and layers of neurons
+#OUT : output side of neurons and layers of neurons
 
 SHELL=/bin/bash
-
-CC=clang++
+CC=clang
 
 ifeq ($(CC),$(filter $(CC),clang gcc))
 	STD=-std=c11
@@ -25,70 +23,34 @@ endif
 
 ifeq ($(CC),clang++)
 	STD=-std=c++11
-	WFLAG=-Weverything -Wno-c++98-compat -Wno-padded -Wno-old-style-cast -Wno-gnu-imaginary-constant -Wno-deprecated
+	WFLAG=-Weverything -Wno-c++98-compat -Wno-gnu-imaginary-constant -Wno-deprecated -Wno-old-style-cast
 else
 	WFLAG=-Wall -Wextra
 endif
 
-CFLAGS=$(WFLAG) -O3 $(STD) -march=native -fPIC
+CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
 
 
-#This works with clang++
-libopenn.a: all
-	ar crs ../lib/libopenn.a obj/*.o
+All: all
+all: IN CELL OUT Clean
 
-
-all: Math IN CELL OUT
-
-
-#Math: some useful math functions
-Math: Split_Join Nonlin Stats
-
-#Split_Join: utilities to split matrix into several, or join several matrices into one.
-Split_Join: split2 split3 split4 split5 join2 join3 join4 join5
-split2: split2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-split3: split3.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-split4: split4.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-split5: split5.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-join2: join2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-join3: join3.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-join4: join4.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-join5: join5.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-#Nonlin: various static nonlinearities used in NNs and computational neuroscience
-#Each of these is applied element-wise to the input X.
-Nonlin: abs square sqrt cbrt log log2 log10 pow exp deadzone
-abs: abs.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-square: square.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-sqrt: sqrt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-cbrt: cbrt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-log: log.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-log2: log2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-log10: log10.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-pow: pow.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-exp: exp.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-deadzone: deadzone.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-#Stats: some basic statistics calculated row-wise or column-wise
-Stats: sum asum cnt min max range median mean std var norm1 norm2
-sum: sum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-asum: asum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-cnt: cnt.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-min: min.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-max: max.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-range: range.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-median: median.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-mean: mean.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-std: std.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-var: var.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-norm1: norm1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-norm2: norm2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #IN: input side of neurons/layers
-#For now, only the simple/usual possibilities are implemented: apply weights and bias
-IN: linear0 linear #WV_filt
-linear0: linear0.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+IN: Linear Conv
+
+#linear applies weights only; affine applies weights and biases.
+Linear: linear affine
 linear: linear.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+affine: affine.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#Conv: convolution
+Conv: #conv1d conv2d conv1d_fft conv2d_fft maxpool avgpool
+conv1d: conv1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv2d: conv2d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv1d_fft: conv1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv2d_fft: conv2d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+maxpool: maxpool.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+avgpool: avgpool.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #CELL: middle part (~soma) of neurons/layers
@@ -106,7 +68,7 @@ hopfield: hopfield.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 grossberg: grossberg.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 grossberg2: grossberg2.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
-RNN: elman jordan gru_min gru_min2 gru gru3 lstm lstm4 #lstm_peephole lstm_peephole4
+RNN: elman jordan gru_min gru_min2 gru gru3 lstm lstm4 lstm_peephole lstm_peephole4
 elman: elman.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 jordan: jordan.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 gru_min: gru_min.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -119,12 +81,13 @@ lstm_peephole: lstm_peephole.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 lstm_peephole4: lstm_peephole4.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
+
 #OUT: output side of neurons/layers
-OUT: Output_Acts Layer_Acts ML_Neurons CN_Neurons
+OUT: Output_Act Other_Act
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
-Output_Acts: signum step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu silu swish softclip softplus softsign plu
+Output_Act: signum step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu silu swish softclip softplus softsign plu sin
 signum: signum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 step: step.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 smoothstep: smoothstep.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -148,30 +111,29 @@ softclip: softclip.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softplus: softplus.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softsign: softsign.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 plu: plu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+sin: sin.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Activation functions applied layer-wise
-#Recall that above Output_Acts can be applied without modification to layers, so are not repeated here
-Layer_Acts: maxout softmax
+#(Above Output_Acts can be applied without modification to layers, so are not repeated here)
+Other_Act: maxout softmax betamax
 maxout: maxout.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softmax: softmax.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+betamax: betamax.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
-#ML_Neurons: output side of various neurons/layers from history of ML and pattern recognit
-#Note that the input must come from WB for the full neuron as usually described
-# ML_Neurons: elman jordan gru_min gru_full lstm lstm_peephole
-# elman: elman.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# jordan: jordan.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# gru_min: gru_min.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# gru_full: gru_full.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# lstm: lstm.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-# lstm_peephole: lstm_peephole.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-
-#CN_Neurons: output side of various neurons/layers from history of computational neuroscience
+#CN_Neurons: output side of various neurons from history of computational neuroscience
 # CN_Neurons: lapicque hill hodgkin_huxley 
 
-#DEQ_Neurons: output side of various neurons/layers based on systems of differential equations
+#DEQ_Neurons: output side of various neurons based on systems of differential equations
 # DEQ_Neurons: vanderpol fitzhugh nagumo izhikevich wang
 
 
+
+#If want to make a library archive for C++ use, this works with clang++
+#ar crs ../lib/libnn.a obj/*.o
+
+
+#make clean
+Clean: clean
 clean:
 	find ./obj -type f -name *.o | xargs rm -f
-
+	rm -f *.s tmp.*

@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,10 +9,9 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
+#include "../util/cmli.hpp"
 #include "jordan.c"
 
 #ifdef I
@@ -29,20 +29,21 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2};
-    const size_t I = 5, O = 1;
+    const valarray<size_t> oktypes = {1u,2u};
+    const size_t I = 5u, O = 1u;
     ifstream ifs1, ifs2, ifs3, ifs4, ifs5; ofstream ofs1;
     int8_t stdi1, stdi2, stdi3, stdi4, stdi5, stdo1, wo1;
     ioinfo i1, i2, i3, i4, i5, o1;
-    int dim, T, N;
+    size_t dim, N, T;
 
 
     //Description
     string descr;
     descr += "ML Neuron Output Side.\n";
     descr += "Recurrent NN (RNN) type.\n";
-    descr += "Does output side of Jordan RNN for driving input X,\n";
-    descr += "where X has size NxT or TxN; N is the number of neurons;\n";
+    descr += "Does output side of Jordan RNN for driving input X.\n";
+    descr += "\n";
+    descr += "X has size NxT or TxN, where N is the number of neurons\n";
     descr += "and T is the number of observations (e.g. time points).\n";
     descr += "\n";
     descr += "Use -d (--dim) to specify the dimension (axis) of length N [default=0].\n";
@@ -133,7 +134,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0 || (i3.T==oktypes).sum()==0 || (i4.T==oktypes).sum()==0 || (i5.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -141,15 +142,15 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = 0; }
+    if (a_d->count==0) { dim = 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 
     //Checks
     if (i1.T!=i2.T || i1.T!=i3.T || i1.T!=i4.T || i1.T!=i5.T) { cerr << progstr+": " << __LINE__ << errstr << "all inputs must have the same data type" << endl; return 1; }
-    if (i3.N()>1 && (i1.iscolmajor()!=i2.iscolmajor() || i1.iscolmajor()!=i4.iscolmajor()))
+    if (!i1.isvec() && (i1.iscolmajor()!=i2.iscolmajor() || i1.iscolmajor()!=i4.iscolmajor()))
     { cerr << progstr+": " << __LINE__ << errstr << "inputs 1, 2, 4 (X,U,W) must have the same row/col major format" << endl; return 1; }
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
     if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (U) found to be empty" << endl; return 1; }
@@ -163,14 +164,14 @@ int main(int argc, char *argv[])
     if (!i5.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 5 (B) must be a vector" << endl; return 1; }
     if (!i2.issquare()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (U) must be square" << endl; return 1; }
     if (!i4.issquare()) { cerr << progstr+": " << __LINE__ << errstr << "input 4 (W) must be square" << endl; return 1; }
-    if (dim==0)
+    if (dim==0u)
     {
         if (i2.R!=i1.R) { cerr << progstr+": " << __LINE__ << errstr << "nrows U must equal nrows X for dim=0" << endl; return 1; }
         if (i3.N()!=i2.C) { cerr << progstr+": " << __LINE__ << errstr << "length Y1 must equal ncols U for dim=0" << endl; return 1; }
         if (i4.C!=i3.N()) { cerr << progstr+": " << __LINE__ << errstr << "ncols W must equal length Y1 for dim=0" << endl; return 1; }
         if (i5.N()!=i4.R) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal nrows W for dim=0" << endl; return 1; }
     }
-    if (dim==1)
+    if (dim==1u)
     {
         if (i2.C!=i1.C) { cerr << progstr+": " << __LINE__ << errstr << "ncols U must equal ncols X for dim=1" << endl; return 1; }
         if (i3.N()!=i2.R) { cerr << progstr+": " << __LINE__ << errstr << "length Y1 must equal nrows U for dim=1" << endl; return 1; }
@@ -197,12 +198,12 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    N = (dim==0) ? int(o1.R) : int(o1.C);
-    T = (dim==0) ? int(o1.C) : int(o1.R);
+    N = (dim==0u) ? o1.R : o1.C;
+    T = (dim==0u) ? o1.C : o1.R;
     
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *X, *U, *Y1, *W, *B, *Y;
         try { X = new float[i1.N()]; }
@@ -227,7 +228,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (W)" << endl; return 1; }
         try { ifs5.read(reinterpret_cast<char*>(B),i5.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (B)" << endl; return 1; }
-        if (openn::jordan_s(Y,X,U,Y1,W,B,N,T,dim,i1.iscolmajor()))
+        if (codee::jordan_s(Y,X,U,Y1,W,B,N,T,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -261,7 +262,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (W)" << endl; return 1; }
         try { ifs5.read(reinterpret_cast<char*>(B),i5.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (B)" << endl; return 1; }
-        if (openn::jordan_d(Y,X,U,Y1,W,B,N,T,dim,i1.iscolmajor()))
+        if (codee::jordan_d(Y,X,U,Y1,W,B,N,T,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

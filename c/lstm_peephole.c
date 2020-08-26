@@ -35,59 +35,56 @@
 //This is only really a CELL (~soma) stage in that case.
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <cblas.h>
-//#include <time.h>
+
+#ifdef I
+    #undef I
+#endif
 
 #ifdef __cplusplus
-namespace openn {
+namespace codee {
 extern "C" {
 #endif
 
-int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf, const float *Uo, const int N, const int T, const int dim, const char iscolmajor);
-int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double *Uf, const double *Uo, const int N, const int T, const int dim, const char iscolmajor);
+int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
+int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double *Uf, const double *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
-int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const float *Uo, const int N, const int T, const int dim, const char iscolmajor);
-int lstm_peephole_inplace_d (double *X, const double *Ui, const double *Uf, const double *Uo, const int N, const int T, const int dim, const char iscolmajor);
+int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
+int lstm_peephole_inplace_d (double *X, const double *Ui, const double *Uf, const double *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
-int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf, const float *Uo, const int N, const int T, const int dim, const char iscolmajor)
+int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
 {
     const float o = 1.0f;
-    const int N2 = 2*N, N3 = 3*N, NT = N*T, NT2 = 2*N*T, NT3 = 3*N*T;
-    int n, t, nT, tN, tN4;
+    const size_t N2 = 2*N, N3 = 3*N, NT = N*T, NT2 = 2*N*T, NT3 = 3*N*T;
+    size_t nT, tN, tN4;
+
     float *C, *I, *F, *O;
-    //struct timespec tic, toc;
+    if (!(C=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_s: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(I=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_s: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(F=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_s: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(O=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_s: problem with malloc. "); perror("malloc"); return 1; }
 
-    //Checks
-    if (N<1) { fprintf(stderr,"error in lstm_peephole_s: N (num neurons) must be positive\n"); return 1; }
-    if (T<1) { fprintf(stderr,"error in lstm_peephole_s: T (num time points) must be positive\n"); return 1; }
-
-    //Allocate
-    if (!(C=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_s: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(I=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_s: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(F=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_s: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(O=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_s: problem with malloc. "); perror("malloc"); return 1; }
-
-    //clock_gettime(CLOCK_REALTIME,&tic);
     if (dim==0)
     {
         if (iscolmajor)
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 I[n] = 1.0f / (1.0f+expf(-X[N+n]));
                 C[n] = I[n] / (1.0f+expf(-X[n]));
                 Y[n] = C[n] / (1.0f+expf(-X[N3+n]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
                 tN = t*N; tN4 = 4*tN;
-                cblas_scopy(N,&X[tN4+N],1,I,1); cblas_scopy(N,&X[tN4+N2],1,F,1); cblas_scopy(N,&X[tN4+N3],1,O,1);
-                cblas_sgemv(CblasColMajor,CblasNoTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_sgemv(CblasColMajor,CblasNoTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_sgemv(CblasColMajor,CblasNoTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_scopy((int)N,&X[tN4+N],1,I,1); cblas_scopy((int)N,&X[tN4+N2],1,F,1); cblas_scopy((int)N,&X[tN4+N3],1,O,1);
+                cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0f / (1.0f+expf(-I[n]));
                     C[n] = C[n]/(1.0f+expf(-F[n])) + I[n]/(1.0f+expf(-X[tN4+n]));
@@ -97,20 +94,20 @@ int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf,
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 nT = n*T;
                 I[n] = 1.0f / (1.0f+expf(-X[NT+nT]));
                 C[n] = I[n] / (1.0f+expf(-X[nT]));
                 Y[nT] = C[n] / (1.0f+expf(-X[NT3+nT]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
-                cblas_scopy(N,&X[NT+t],T,I,1); cblas_scopy(N,&X[NT2+t],T,F,1); cblas_scopy(N,&X[NT3+t],T,O,1);
-                cblas_sgemv(CblasRowMajor,CblasNoTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_sgemv(CblasRowMajor,CblasNoTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_sgemv(CblasRowMajor,CblasNoTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_scopy((int)N,&X[NT+t],(int)T,I,1); cblas_scopy((int)N,&X[NT2+t],(int)T,F,1); cblas_scopy((int)N,&X[NT3+t],(int)T,O,1);
+                cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0f / (1.0f+expf(-I[n]));
                     C[n] = C[n]/(1.0f+expf(-F[n])) + I[n]/(1.0f+expf(-X[t+n*T]));
@@ -123,20 +120,20 @@ int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf,
     {
         if (iscolmajor)
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 nT = n*T;
                 I[n] = 1.0f / (1.0f+expf(-X[NT+nT]));
                 C[n] = I[n] / (1.0f+expf(-X[nT]));
                 Y[nT] = C[n] / (1.0f+expf(-X[NT3+nT]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
-                cblas_scopy(N,&X[NT+t],T,I,1); cblas_scopy(N,&X[NT2+t],T,F,1); cblas_scopy(N,&X[NT3+t],T,O,1);
-                cblas_sgemv(CblasColMajor,CblasTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_sgemv(CblasColMajor,CblasTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_sgemv(CblasColMajor,CblasTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_scopy((int)N,&X[NT+t],(int)T,I,1); cblas_scopy((int)N,&X[NT2+t],(int)T,F,1); cblas_scopy((int)N,&X[NT3+t],(int)T,O,1);
+                cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0f / (1.0f+expf(-I[n]));
                     C[n] = C[n]/(1.0f+expf(-F[n])) + I[n]/(1.0f+expf(-X[t+n*T]));
@@ -146,20 +143,20 @@ int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf,
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 I[n] = 1.0f / (1.0f+expf(-X[N+n]));
                 C[n] = I[n] / (1.0f+expf(-X[n]));
                 Y[n] = C[n] / (1.0f+expf(-X[N3+n]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
                 tN = t*N; tN4 = 4*tN;
-                cblas_scopy(N,&X[tN4+N],1,I,1); cblas_scopy(N,&X[tN4+N2],1,F,1); cblas_scopy(N,&X[tN4+N3],1,O,1);
-                cblas_sgemv(CblasRowMajor,CblasTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_sgemv(CblasRowMajor,CblasTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_sgemv(CblasRowMajor,CblasTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_scopy((int)N,&X[tN4+N],1,I,1); cblas_scopy((int)N,&X[tN4+N2],1,F,1); cblas_scopy((int)N,&X[tN4+N3],1,O,1);
+                cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0f / (1.0f+expf(-I[n]));
                     C[n] = C[n]/(1.0f+expf(-F[n])) + I[n]/(1.0f+expf(-X[tN4+n]));
@@ -173,47 +170,40 @@ int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf,
         fprintf(stderr,"error in lstm_peephole_s: dim must be 0 or 1.\n"); return 1;
     }
 
-    //clock_gettime(CLOCK_REALTIME,&toc);
-    //fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
     return 0;
 }
 
 
-int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double *Uf, const double *Uo, const int N, const int T, const int dim, const char iscolmajor)
+int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double *Uf, const double *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
 {
     const double o = 1.0;
-    const int N2 = 2*N, N3 = 3*N, NT = N*T, NT2 = 2*N*T, NT3 = 3*N*T;
-    int n, t, nT, tN, tN4;
+    const size_t N2 = 2*N, N3 = 3*N, NT = N*T, NT2 = 2*N*T, NT3 = 3*N*T;
+    size_t nT, tN, tN4;
+
     double *C, *I, *F, *O;
-
-    //Checks
-    if (N<1) { fprintf(stderr,"error in lstm_peephole_d: N (num neurons) must be positive\n"); return 1; }
-    if (T<1) { fprintf(stderr,"error in lstm_peephole_d: T (num time points) must be positive\n"); return 1; }
-
-    //Allocate
-    if (!(C=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_d: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(I=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_d: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(F=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_d: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(O=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_d: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(C=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_d: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(I=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_d: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(F=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_d: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(O=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_d: problem with malloc. "); perror("malloc"); return 1; }
 
     if (dim==0)
     {
         if (iscolmajor)
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 I[n] = 1.0 / (1.0+exp(-X[N+n]));
                 C[n] = I[n] / (1.0+exp(-X[n]));
                 Y[n] = C[n] / (1.0+exp(-X[N3+n]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
                 tN = t*N; tN4 = 4*tN;
-                cblas_dcopy(N,&X[tN4+N],1,I,1); cblas_dcopy(N,&X[tN4+N2],1,F,1); cblas_dcopy(N,&X[tN4+N3],1,O,1);
-                cblas_dgemv(CblasColMajor,CblasNoTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_dgemv(CblasColMajor,CblasNoTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_dgemv(CblasColMajor,CblasNoTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_dcopy((int)N,&X[tN4+N],1,I,1); cblas_dcopy((int)N,&X[tN4+N2],1,F,1); cblas_dcopy((int)N,&X[tN4+N3],1,O,1);
+                cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0 / (1.0+exp(-I[n]));
                     C[n] = C[n]/(1.0+exp(-F[n])) + I[n]/(1.0+exp(-X[tN4+n]));
@@ -223,20 +213,20 @@ int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double 
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 nT = n*T;
                 I[n] = 1.0 / (1.0+exp(-X[NT+nT]));
                 C[n] = I[n] / (1.0+exp(-X[nT]));
                 Y[nT] = C[n] / (1.0+exp(-X[NT3+nT]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
-                cblas_dcopy(N,&X[NT+t],T,I,1); cblas_dcopy(N,&X[NT2+t],T,F,1); cblas_dcopy(N,&X[NT3+t],T,O,1);
-                cblas_dgemv(CblasRowMajor,CblasNoTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_dgemv(CblasRowMajor,CblasNoTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_dgemv(CblasRowMajor,CblasNoTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_dcopy((int)N,&X[NT+t],(int)T,I,1); cblas_dcopy((int)N,&X[NT2+t],(int)T,F,1); cblas_dcopy((int)N,&X[NT3+t],(int)T,O,1);
+                cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0 / (1.0+exp(-I[n]));
                     C[n] = C[n]/(1.0+exp(-F[n])) + I[n]/(1.0+exp(-X[t+n*T]));
@@ -249,20 +239,20 @@ int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double 
     {
         if (iscolmajor)
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 nT = n*T;
                 I[n] = 1.0 / (1.0+exp(-X[NT+nT]));
                 C[n] = I[n] / (1.0+exp(-X[nT]));
                 Y[nT] = C[n] / (1.0+exp(-X[NT3+nT]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
-                cblas_dcopy(N,&X[NT+t],T,I,1); cblas_dcopy(N,&X[NT2+t],T,F,1); cblas_dcopy(N,&X[NT3+t],T,O,1);
-                cblas_dgemv(CblasColMajor,CblasTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_dgemv(CblasColMajor,CblasTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_dgemv(CblasColMajor,CblasTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_dcopy((int)N,&X[NT+t],(int)T,I,1); cblas_dcopy((int)N,&X[NT2+t],(int)T,F,1); cblas_dcopy((int)N,&X[NT3+t],(int)T,O,1);
+                cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0 / (1.0+exp(-I[n]));
                     C[n] = C[n]/(1.0+exp(-F[n])) + I[n]/(1.0+exp(-X[t+n*T]));
@@ -272,20 +262,20 @@ int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double 
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 I[n] = 1.0 / (1.0+exp(-X[N+n]));
                 C[n] = I[n] / (1.0+exp(-X[n]));
                 Y[n] = C[n] / (1.0+exp(-X[N3+n]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
                 tN = t*N; tN4 = 4*tN;
-                cblas_dcopy(N,&X[tN4+N],1,I,1); cblas_dcopy(N,&X[tN4+N2],1,F,1); cblas_dcopy(N,&X[tN4+N3],1,O,1);
-                cblas_dgemv(CblasRowMajor,CblasTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_dgemv(CblasRowMajor,CblasTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_dgemv(CblasRowMajor,CblasTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_dcopy((int)N,&X[tN4+N],1,I,1); cblas_dcopy((int)N,&X[tN4+N2],1,F,1); cblas_dcopy((int)N,&X[tN4+N3],1,O,1);
+                cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0 / (1.0+exp(-I[n]));
                     C[n] = C[n]/(1.0+exp(-F[n])) + I[n]/(1.0+exp(-X[tN4+n]));
@@ -304,43 +294,36 @@ int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double 
 
 
 
-int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const float *Uo, const int N, const int T, const int dim, const char iscolmajor)
+int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
 {
     const float o = 1.0f;
-    const int N2 = 2*N, N3 = 3*N, NT = N*T, NT2 = 2*N*T, NT3 = 3*N*T;
-    int n, t, nT, tN, tN4;
+    const size_t N2 = 2*N, N3 = 3*N, NT = N*T, NT2 = 2*N*T, NT3 = 3*N*T;
+    size_t nT, tN, tN4;
+
     float *C, *I, *F, *O;
-    //struct timespec tic, toc;
+    if (!(C=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(I=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(F=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(O=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
 
-    //Checks
-    if (N<1) { fprintf(stderr,"error in lstm_peephole_inplace_s: N (num neurons) must be positive\n"); return 1; }
-    if (T<1) { fprintf(stderr,"error in lstm_peephole_inplace_s: T (num time points) must be positive\n"); return 1; }
-
-    //Allocate
-    if (!(C=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(I=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(F=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(O=(float *)malloc((size_t)(N)*sizeof(float)))) { fprintf(stderr,"error in lstm_peephole_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
-
-    //clock_gettime(CLOCK_REALTIME,&tic);
     if (dim==0)
     {
         if (iscolmajor)
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 I[n] = 1.0f / (1.0f+expf(-X[N+n]));
                 C[n] = I[n] / (1.0f+expf(-X[n]));
                 X[n] = C[n] / (1.0f+expf(-X[N3+n]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
                 tN = t*N; tN4 = 4*tN;
-                cblas_scopy(N,&X[tN4+N],1,I,1); cblas_scopy(N,&X[tN4+N2],1,F,1); cblas_scopy(N,&X[tN4+N3],1,O,1);
-                cblas_sgemv(CblasColMajor,CblasNoTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_sgemv(CblasColMajor,CblasNoTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_sgemv(CblasColMajor,CblasNoTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_scopy((int)N,&X[tN4+N],1,I,1); cblas_scopy((int)N,&X[tN4+N2],1,F,1); cblas_scopy((int)N,&X[tN4+N3],1,O,1);
+                cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0f / (1.0f+expf(-I[n]));
                     C[n] = C[n]/(1.0f+expf(-F[n])) + I[n]/(1.0f+expf(-X[tN4+n]));
@@ -350,20 +333,20 @@ int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const f
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 nT = n*T;
                 I[n] = 1.0f / (1.0f+expf(-X[NT+nT]));
                 C[n] = I[n] / (1.0f+expf(-X[nT]));
                 X[nT] = C[n] / (1.0f+expf(-X[NT3+nT]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
-                cblas_scopy(N,&X[NT+t],T,I,1); cblas_scopy(N,&X[NT2+t],T,F,1); cblas_scopy(N,&X[NT3+t],T,O,1);
-                cblas_sgemv(CblasRowMajor,CblasNoTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_sgemv(CblasRowMajor,CblasNoTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_sgemv(CblasRowMajor,CblasNoTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_scopy((int)N,&X[NT+t],(int)T,I,1); cblas_scopy((int)N,&X[NT2+t],(int)T,F,1); cblas_scopy((int)N,&X[NT3+t],(int)T,O,1);
+                cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0f / (1.0f+expf(-I[n]));
                     C[n] = C[n]/(1.0f+expf(-F[n])) + I[n]/(1.0f+expf(-X[t+n*T]));
@@ -376,20 +359,20 @@ int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const f
     {
         if (iscolmajor)
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 nT = n*T;
                 I[n] = 1.0f / (1.0f+expf(-X[NT+nT]));
                 C[n] = I[n] / (1.0f+expf(-X[nT]));
                 X[nT] = C[n] / (1.0f+expf(-X[NT3+nT]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
-                cblas_scopy(N,&X[NT+t],T,I,1); cblas_scopy(N,&X[NT2+t],T,F,1); cblas_scopy(N,&X[NT3+t],T,O,1);
-                cblas_sgemv(CblasColMajor,CblasTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_sgemv(CblasColMajor,CblasTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_sgemv(CblasColMajor,CblasTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_scopy((int)N,&X[NT+t],(int)T,I,1); cblas_scopy((int)N,&X[NT2+t],(int)T,F,1); cblas_scopy((int)N,&X[NT3+t],(int)T,O,1);
+                cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0f / (1.0f+expf(-I[n]));
                     C[n] = C[n]/(1.0f+expf(-F[n])) + I[n]/(1.0f+expf(-X[t+n*T]));
@@ -399,20 +382,20 @@ int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const f
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 I[n] = 1.0f / (1.0f+expf(-X[N+n]));
                 C[n] = I[n] / (1.0f+expf(-X[n]));
                 X[n] = C[n] / (1.0f+expf(-X[N3+n]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
                 tN = t*N; tN4 = 4*tN;
-                cblas_scopy(N,&X[tN4+N],1,I,1); cblas_scopy(N,&X[tN4+N2],1,F,1); cblas_scopy(N,&X[tN4+N3],1,O,1);
-                cblas_sgemv(CblasRowMajor,CblasTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_sgemv(CblasRowMajor,CblasTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_sgemv(CblasRowMajor,CblasTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_scopy((int)N,&X[tN4+N],1,I,1); cblas_scopy((int)N,&X[tN4+N2],1,F,1); cblas_scopy((int)N,&X[tN4+N3],1,O,1);
+                cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0f / (1.0f+expf(-I[n]));
                     C[n] = C[n]/(1.0f+expf(-F[n])) + I[n]/(1.0f+expf(-X[tN4+n]));
@@ -426,47 +409,40 @@ int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const f
         fprintf(stderr,"error in lstm_peephole_inplace_s: dim must be 0 or 1.\n"); return 1;
     }
 
-    //clock_gettime(CLOCK_REALTIME,&toc);
-    //fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
     return 0;
 }
 
 
-int lstm_peephole_inplace_d (double *X, const double *Ui, const double *Uf, const double *Uo, const int N, const int T, const int dim, const char iscolmajor)
+int lstm_peephole_inplace_d (double *X, const double *Ui, const double *Uf, const double *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
 {
     const double o = 1.0;
-    const int N2 = 2*N, N3 = 3*N, NT = N*T, NT2 = 2*N*T, NT3 = 3*N*T;
-    int n, t, nT, tN, tN4;
+    const size_t N2 = 2*N, N3 = 3*N, NT = N*T, NT2 = 2*N*T, NT3 = 3*N*T;
+    size_t nT, tN, tN4;
+
     double *C, *I, *F, *O;
-
-    //Checks
-    if (N<1) { fprintf(stderr,"error in lstm_peephole_inplace_d: N (num neurons) must be positive\n"); return 1; }
-    if (T<1) { fprintf(stderr,"error in lstm_peephole_inplace_d: T (num time points) must be positive\n"); return 1; }
-
-    //Allocate
-    if (!(C=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(I=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(F=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
-    if (!(O=(double *)malloc((size_t)(N)*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(C=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(I=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(F=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
+    if (!(O=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_peephole_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
 
     if (dim==0)
     {
         if (iscolmajor)
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 I[n] = 1.0 / (1.0+exp(-X[N+n]));
                 C[n] = I[n] / (1.0+exp(-X[n]));
                 X[n] = C[n] / (1.0+exp(-X[N3+n]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
                 tN = t*N; tN4 = 4*tN;
-                cblas_dcopy(N,&X[tN4+N],1,I,1); cblas_dcopy(N,&X[tN4+N2],1,F,1); cblas_dcopy(N,&X[tN4+N3],1,O,1);
-                cblas_dgemv(CblasColMajor,CblasNoTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_dgemv(CblasColMajor,CblasNoTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_dgemv(CblasColMajor,CblasNoTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_dcopy((int)N,&X[tN4+N],1,I,1); cblas_dcopy((int)N,&X[tN4+N2],1,F,1); cblas_dcopy((int)N,&X[tN4+N3],1,O,1);
+                cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0 / (1.0+exp(-I[n]));
                     C[n] = C[n]/(1.0+exp(-F[n])) + I[n]/(1.0+exp(-X[tN4+n]));
@@ -476,20 +452,20 @@ int lstm_peephole_inplace_d (double *X, const double *Ui, const double *Uf, cons
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 nT = n*T;
                 I[n] = 1.0 / (1.0+exp(-X[NT+nT]));
                 C[n] = I[n] / (1.0+exp(-X[nT]));
                 X[nT] = C[n] / (1.0+exp(-X[NT3+nT]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
-                cblas_dcopy(N,&X[NT+t],T,I,1); cblas_dcopy(N,&X[NT2+t],T,F,1); cblas_dcopy(N,&X[NT3+t],T,O,1);
-                cblas_dgemv(CblasRowMajor,CblasNoTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_dgemv(CblasRowMajor,CblasNoTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_dgemv(CblasRowMajor,CblasNoTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_dcopy((int)N,&X[NT+t],(int)T,I,1); cblas_dcopy((int)N,&X[NT2+t],(int)T,F,1); cblas_dcopy((int)N,&X[NT3+t],(int)T,O,1);
+                cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0 / (1.0+exp(-I[n]));
                     C[n] = C[n]/(1.0+exp(-F[n])) + I[n]/(1.0+exp(-X[t+n*T]));
@@ -502,20 +478,20 @@ int lstm_peephole_inplace_d (double *X, const double *Ui, const double *Uf, cons
     {
         if (iscolmajor)
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 nT = n*T;
                 I[n] = 1.0 / (1.0+exp(-X[NT+nT]));
                 C[n] = I[n] / (1.0+exp(-X[nT]));
                 X[nT] = C[n] / (1.0+exp(-X[NT3+nT]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
-                cblas_dcopy(N,&X[NT+t],T,I,1); cblas_dcopy(N,&X[NT2+t],T,F,1); cblas_dcopy(N,&X[NT3+t],T,O,1);
-                cblas_dgemv(CblasColMajor,CblasTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_dgemv(CblasColMajor,CblasTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_dgemv(CblasColMajor,CblasTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_dcopy((int)N,&X[NT+t],(int)T,I,1); cblas_dcopy((int)N,&X[NT2+t],(int)T,F,1); cblas_dcopy((int)N,&X[NT3+t],(int)T,O,1);
+                cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0 / (1.0+exp(-I[n]));
                     C[n] = C[n]/(1.0+exp(-F[n])) + I[n]/(1.0+exp(-X[t+n*T]));
@@ -525,20 +501,20 @@ int lstm_peephole_inplace_d (double *X, const double *Ui, const double *Uf, cons
         }
         else
         {
-            for (n=0; n<N; n++)
+            for (size_t n=0; n<N; ++n)
             {
                 I[n] = 1.0 / (1.0+exp(-X[N+n]));
                 C[n] = I[n] / (1.0+exp(-X[n]));
                 X[n] = C[n] / (1.0+exp(-X[N3+n]));
             }
-            for (t=1; t<T; t++)
+            for (size_t t=1; t<T; ++t)
             {
                 tN = t*N; tN4 = 4*tN;
-                cblas_dcopy(N,&X[tN4+N],1,I,1); cblas_dcopy(N,&X[tN4+N2],1,F,1); cblas_dcopy(N,&X[tN4+N3],1,O,1);
-                cblas_dgemv(CblasRowMajor,CblasTrans,N,N,o,Ui,N,C,1,o,I,1);
-                cblas_dgemv(CblasRowMajor,CblasTrans,N,N,o,Uf,N,C,1,o,F,1);
-                cblas_dgemv(CblasRowMajor,CblasTrans,N,N,o,Uo,N,C,1,o,O,1);
-                for (n=0; n<N; n++)
+                cblas_dcopy((int)N,&X[tN4+N],1,I,1); cblas_dcopy((int)N,&X[tN4+N2],1,F,1); cblas_dcopy((int)N,&X[tN4+N3],1,O,1);
+                cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,C,1,o,I,1);
+                cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,C,1,o,F,1);
+                cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,C,1,o,O,1);
+                for (size_t n=0; n<N; ++n)
                 {
                     I[n] = 1.0 / (1.0+exp(-I[n]));
                     C[n] = C[n]/(1.0+exp(-F[n])) + I[n]/(1.0+exp(-X[tN4+n]));

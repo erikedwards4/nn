@@ -2,9 +2,9 @@
 #include "grossberg2.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2};
-const size_t I = 8, O = 1;
-int dim, n, N, T;
+const valarray<size_t> oktypes = {1u,2u};
+const size_t I = 8u, O = 1u;
+size_t dim, N, T;
 double fs;
 
 //Description
@@ -61,10 +61,10 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = (i1.C==1u) ? 1 : 0; }
+if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-else { dim = a_d->ival[0]; }
-if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+else { dim = size_t(a_d->ival[0]); }
+if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 //Get fs
 fs = (a_fs->count>0) ? a_fs->dval[0] : 10000.0;
@@ -94,32 +94,32 @@ if (!i8.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 8 (gamma
 if (i1.R!=i2.R || i1.C!=i2.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 1 (Xe) and 2 (Xi) must have same size" << endl; return 1; }
 if (i3.N()!=1u)
 {
-    if ((dim==0 && i3.N()!=i1.R) || (dim==1 && i3.N()!=i1.C))
+    if ((dim==0u && i3.N()!=i1.R) || (dim==1u && i3.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length tau must equal N (num neurons)" << endl; return 1; }
 }
 if (i4.N()!=1u)
 {
-    if ((dim==0 && i4.N()!=i1.R) || (dim==1 && i4.N()!=i1.C))
+    if ((dim==0u && i4.N()!=i1.R) || (dim==1u && i4.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length alpha must equal N (num neurons)" << endl; return 1; }
 }
 if (i5.N()!=1u)
 {
-    if ((dim==0 && i5.N()!=i1.R) || (dim==1 && i5.N()!=i1.C))
+    if ((dim==0u && i5.N()!=i1.R) || (dim==1u && i5.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length betae must equal N (num neurons)" << endl; return 1; }
 }
 if (i6.N()!=1u)
 {
-    if ((dim==0 && i6.N()!=i1.R) || (dim==1 && i6.N()!=i1.C))
+    if ((dim==0u && i6.N()!=i1.R) || (dim==1u && i6.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length betai must equal N (num neurons)" << endl; return 1; }
 }
 if (i7.N()!=1u)
 {
-    if ((dim==0 && i7.N()!=i1.R) || (dim==1 && i7.N()!=i1.C))
+    if ((dim==0u && i7.N()!=i1.R) || (dim==1u && i7.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length gammae must equal N (num neurons)" << endl; return 1; }
 }
 if (i8.N()!=1u)
 {
-    if ((dim==0 && i8.N()!=i1.R) || (dim==1 && i8.N()!=i1.C))
+    if ((dim==0u && i8.N()!=i1.R) || (dim==1u && i8.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length gammai must equal N (num neurons)" << endl; return 1; }
 }
 
@@ -128,12 +128,12 @@ o1.F = i1.F; o1.T = i1.T;
 o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
-N = (dim==0) ? int(o1.R) : int(o1.C);
-T = (dim==0) ? int(o1.C) : int(o1.R);
-if (T<2) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
+N = (dim==0u) ? o1.R : o1.C;
+T = (dim==0u) ? o1.C : o1.R;
+if (T<2u) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *Xe, *Xi, *tau, *alpha, *betae, *betai, *gammae, *gammai;
     try { Xe = new float[i1.N()]; }
@@ -168,13 +168,13 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 7 (gammae)" << endl; return 1; }
     try { ifs8.read(reinterpret_cast<char*>(gammai),i8.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 8 (gammai)" << endl; return 1; }
-    if (i3.N()==1u) { for (n=1; n<N; n++) { tau[n] = tau[0]; } }
-    if (i4.N()==1u) { for (n=1; n<N; n++) { alpha[n] = alpha[0]; } }
-    if (i5.N()==1u) { for (n=1; n<N; n++) { betae[n] = betae[0]; } }
-    if (i6.N()==1u) { for (n=1; n<N; n++) { betai[n] = betai[0]; } }
-    if (i7.N()==1u) { for (n=1; n<N; n++) { gammae[n] = gammae[0]; } }
-    if (i8.N()==1u) { for (n=1; n<N; n++) { gammai[n] = gammai[0]; } }
-    if (openn::grossberg2_inplace_s(Xe,Xi,tau,alpha,betae,betai,gammae,gammai,N,T,dim,i1.iscolmajor(),float(fs)))
+    if (i3.N()==1u) { for (size_t n=1u; n<N; ++n) { tau[n] = tau[0]; } }
+    if (i4.N()==1u) { for (size_t n=1u; n<N; ++n) { alpha[n] = alpha[0]; } }
+    if (i5.N()==1u) { for (size_t n=1u; n<N; ++n) { betae[n] = betae[0]; } }
+    if (i6.N()==1u) { for (size_t n=1u; n<N; ++n) { betai[n] = betai[0]; } }
+    if (i7.N()==1u) { for (size_t n=1u; n<N; ++n) { gammae[n] = gammae[0]; } }
+    if (i8.N()==1u) { for (size_t n=1u; n<N; ++n) { gammai[n] = gammai[0]; } }
+    if (codee::grossberg2_inplace_s(Xe,Xi,tau,alpha,betae,betai,gammae,gammai,N,T,i1.iscolmajor(),dim,float(fs)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -185,4 +185,3 @@ if (i1.T==1)
 }
 
 //Finish
-

@@ -5,64 +5,44 @@
 #include <math.h>
 
 #ifdef __cplusplus
-namespace openn {
+namespace codee {
 extern "C" {
 #endif
 
-int softplus_s (float *Y, const float *X, const int N);
-int softplus_d (double *Y, const double *X, const int N);
+int softplus_s (float *Y, const float *X, const size_t N);
+int softplus_d (double *Y, const double *X, const size_t N);
 
-int softplus_inplace_s (float *X, const int N);
-int softplus_inplace_d (double *X, const int N);
+int softplus_inplace_s (float *X, const size_t N);
+int softplus_inplace_d (double *X, const size_t N);
 
 
-int softplus_s (float *Y, const float *X, const int N)
+int softplus_s (float *Y, const float *X, const size_t N)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in softplus_s: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { Y[n] = logf(1.0f+expf(X[n])); }
+    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = logf(1.0f+expf(*X)); }
 
     return 0;
 }
 
 
-int softplus_d (double *Y, const double *X, const int N)
+int softplus_d (double *Y, const double *X, const size_t N)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in softplus_d: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { Y[n] = log(1.0+exp(X[n])); }
+    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = log(1.0+exp(*X)); }
     
     return 0;
 }
 
 
-int softplus_inplace_s (float *X, const int N)
+int softplus_inplace_s (float *X, const size_t N)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in softplus_inplace_s: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { X[n] = logf(1.0f+expf(X[n])); }
+    for (size_t n=0; n<N; ++n, ++X) { *X = logf(1.0f+expf(*X)); }
 
     return 0;
 }
 
 
-int softplus_inplace_d (double *X, const int N)
+int softplus_inplace_d (double *X, const size_t N)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in softplus_inplace_d: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { X[n] = log(1.0+exp(X[n])); }
+    for (size_t n=0; n<N; ++n, ++X) { *X = log(1.0+exp(*X)); }
     
     return 0;
 }

@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,10 +9,9 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
+#include "../util/cmli.hpp"
 #include "fir.c"
 
 #ifdef I
@@ -29,12 +29,12 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2,101,102};
-    const size_t I = 2, O = 1;
+    const valarray<size_t> oktypes = {1u,2u,101u,102u};
+    const size_t I = 2u, O = 1u;
     ifstream ifs1, ifs2; ofstream ofs1;
     int8_t stdi1, stdi2, stdo1, wo1;
     ioinfo i1, i2, o1;
-    int dim, N, T, L;
+    size_t dim, N, T, L;
 
 
     //Description
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -123,10 +123,10 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = (i1.C==1u) ? 1 : 0; }
+    if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 
     //Checks
@@ -137,8 +137,8 @@ int main(int argc, char *argv[])
     if (!i2.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) must be a matrix" << endl; return 1; }
     if (i2.N()!=1u)
     {
-        if (dim==0 && i2.R!=i1.R) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) and 2 (B) must have same num rows for dim=0" << endl; return 1; }
-        if (dim==1 && i2.C!=i1.C) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) and 2 (B) must have same num cols for dim=1" << endl; return 1; }
+        if (dim==0u && i2.R!=i1.R) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) and 2 (B) must have same num rows for dim=0" << endl; return 1; }
+        if (dim==1u && i2.C!=i1.C) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) and 2 (B) must have same num cols for dim=1" << endl; return 1; }
     }
 
 
@@ -160,14 +160,14 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    N = (dim==0) ? int(o1.R) : int(o1.C);
-    T = (dim==0) ? int(o1.C) : int(o1.R);
-    L = (dim==0) ? int(i2.R) : int(i2.C);
-    if (T<2) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
+    N = (dim==0u) ? o1.R : o1.C;
+    T = (dim==0u) ? o1.C : o1.R;
+    L = (dim==0u) ? i2.R : i2.C;
+    if (T<2u) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
     
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *X, *B, *Y;
         try { X = new float[i1.N()]; }
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-        if (openn::fir_s(Y,X,B,N,T,L,dim,i1.iscolmajor()))
+        if (codee::fir_s(Y,X,B,N,T,L,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-        if (openn::fir_d(Y,X,B,N,T,L,dim,i1.iscolmajor()))
+        if (codee::fir_d(Y,X,B,N,T,L,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] B; delete[] Y;
     }
-    else if (i1.T==101)
+    else if (i1.T==101u)
     {
         float *X, *B, *Y;
         try { X = new float[2u*i1.N()]; }
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-        if (openn::fir_c(Y,X,B,N,T,L,dim,i1.iscolmajor()))
+        if (codee::fir_c(Y,X,B,N,T,L,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] B; delete[] Y;
     }
-    else if (i1.T==102)
+    else if (i1.T==102u)
     {
         double *X, *B, *Y;
         try { X = new double[2u*i1.N()]; }
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-        if (openn::fir_z(Y,X,B,N,T,L,dim,i1.iscolmajor()))
+        if (codee::fir_z(Y,X,B,N,T,L,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {

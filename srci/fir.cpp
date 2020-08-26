@@ -2,9 +2,9 @@
 #include "fir.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2,101,102};
-const size_t I = 2, O = 1;
-int dim, N, T, L;
+const valarray<size_t> oktypes = {1u,2u,101u,102u};
+const size_t I = 2u, O = 1u;
+size_t dim, N, T, L;
 
 //Description
 string descr;
@@ -46,10 +46,10 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = (i1.C==1u) ? 1 : 0; }
+if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-else { dim = a_d->ival[0]; }
-if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+else { dim = size_t(a_d->ival[0]); }
+if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 //Checks
 if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
@@ -59,8 +59,8 @@ if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) f
 if (!i2.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (B) must be a matrix" << endl; return 1; }
 if (i2.N()!=1u)
 {
-    if (dim==0 && i2.R!=i1.R) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) and 2 (B) must have same num rows for dim=0" << endl; return 1; }
-    if (dim==1 && i2.C!=i1.C) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) and 2 (B) must have same num cols for dim=1" << endl; return 1; }
+    if (dim==0u && i2.R!=i1.R) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) and 2 (B) must have same num rows for dim=0" << endl; return 1; }
+    if (dim==1u && i2.C!=i1.C) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) and 2 (B) must have same num cols for dim=1" << endl; return 1; }
 }
 
 //Set output header info
@@ -68,13 +68,13 @@ o1.F = i1.F; o1.T = i1.T;
 o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
-N = (dim==0) ? int(o1.R) : int(o1.C);
-T = (dim==0) ? int(o1.C) : int(o1.R);
-L = (dim==0) ? int(i2.R) : int(i2.C);
-if (T<2) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
+N = (dim==0u) ? o1.R : o1.C;
+T = (dim==0u) ? o1.C : o1.R;
+L = (dim==0u) ? i2.R : i2.C;
+if (T<2u) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *X, *B, *Y;
     try { X = new float[i1.N()]; }
@@ -87,7 +87,7 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (openn::fir_s(Y,X,B,N,T,L,dim,i1.iscolmajor()))
+    if (codee::fir_s(Y,X,B,N,T,L,i1.iscolmajor(),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -96,7 +96,7 @@ if (i1.T==1)
     }
     delete[] X; delete[] B; delete[] Y;
 }
-else if (i1.T==101)
+else if (i1.T==101u)
 {
     float *X, *B, *Y;
     try { X = new float[2u*i1.N()]; }
@@ -109,7 +109,7 @@ else if (i1.T==101)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(B),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (B)" << endl; return 1; }
-    if (openn::fir_c(Y,X,B,N,T,L,dim,i1.iscolmajor()))
+    if (codee::fir_c(Y,X,B,N,T,L,i1.iscolmajor(),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -120,4 +120,3 @@ else if (i1.T==101)
 }
 
 //Finish
-

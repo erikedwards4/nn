@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,11 +9,10 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
-#include "sqrt.c"
+#include "../util/cmli.hpp"
+#include "sin.c"
 
 #ifdef I
 #undef I
@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2,101,102};
-    const size_t I = 1, O = 1;
+    const valarray<size_t> oktypes = {1u,2u,101u,102u};
+    const size_t I = 1u, O = 1u;
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
@@ -38,12 +38,15 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "Gets square-root of each element of X.\n";
+    descr += "Activation function.\n";
+    descr += "Gets sin (sine) function of each element of X.\n";
+    descr += "This is a new periodic activation function.\n";
+    descr += "For each element: y = sine(x) \n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ sqrt X -o Y \n";
-    descr += "$ sqrt X > Y \n";
-    descr += "$ cat X | sqrt > Y \n";
+    descr += "$ sin X -o Y \n";
+    descr += "$ sin X > Y \n";
+    descr += "$ cat X | sin > Y \n";
 
 
     //Argtable
@@ -85,7 +88,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -118,14 +121,14 @@ int main(int argc, char *argv[])
 
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *X;
         try { X = new float[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (openn::sqrt_inplace_s(X,int(i1.N())))
+        if (codee::sin_inplace_s(X,i1.N()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -141,7 +144,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (openn::sqrt_inplace_d(X,int(i1.N())))
+        if (codee::sin_inplace_d(X,i1.N()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -150,14 +153,14 @@ int main(int argc, char *argv[])
         }
         delete[] X;
     }
-    else if (i1.T==101)
+    else if (i1.T==101u)
     {
         float *X;
-        try { X = new float[2*i1.N()]; }
+        try { X = new float[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (openn::sqrt_inplace_c(X,int(i1.N())))
+        if (codee::sin_inplace_c(X,i1.N()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -166,14 +169,14 @@ int main(int argc, char *argv[])
         }
         delete[] X;
     }
-    else if (i1.T==102)
+    else if (i1.T==102u)
     {
         double *X;
-        try { X = new double[2*i1.N()]; }
+        try { X = new double[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (openn::sqrt_inplace_z(X,int(i1.N())))
+        if (codee::sin_inplace_z(X,i1.N()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

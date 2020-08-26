@@ -3,9 +3,9 @@
 #include "lstm4.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2};
-const size_t I = 8, O = 1;
-int dim, N, T;
+const valarray<size_t> oktypes = {1u,2u};
+const size_t I = 8u, O = 1u;
+size_t dim, N, T;
 
 //Description
 string descr;
@@ -52,10 +52,10 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = 0; }
+if (a_d->count==0) { dim = 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-else { dim = a_d->ival[0]; }
-if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+else { dim = size_t(a_d->ival[0]); }
+if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 //Checks
 if (i1.T!=i2.T || i1.T!=i3.T || i1.T!=i4.T || i1.T!=i5.T || i1.T!=i6.T || i1.T!=i7.T || i1.T!=i8.T)
@@ -85,19 +85,19 @@ if (i5.R!=i6.R || i5.C!=i6.C) { cerr << progstr+": " << __LINE__ << errstr << "i
 if (i5.R!=i7.R || i5.C!=i7.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-8 (Uc, Ui, Uf, Uo) must have the same size" << endl; return 1; }
 if (i5.R!=i8.R || i5.C!=i8.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-8 (Uc, Ui, Uf, Uo) must have the same size" << endl; return 1; }
 if (i5.R!=i5.C || i6.R!=i6.C || i7.R!=i7.C || i8.R!=i8.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-8 (Uc, Ui, Uf, Uo) must be square" << endl; return 1; }
-if (dim==0 && i1.R!=i5.R) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-8 (Uc, Ui, Uf, Uo) must have size NxN" << endl; return 1; }
-if (dim==1 && i1.C!=i5.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-8 (Uc, Ui, Uf, Uo) must have size NxN" << endl; return 1; }
+if (dim==0u && i1.R!=i5.R) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-8 (Uc, Ui, Uf, Uo) must have size NxN" << endl; return 1; }
+if (dim==1u && i1.C!=i5.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 5-8 (Uc, Ui, Uf, Uo) must have size NxN" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;
 o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
-N = (dim==0) ? int(o1.R) : int(o1.C);
-T = (dim==0) ? int(o1.C) : int(o1.R);
+N = (dim==0u) ? o1.R : o1.C;
+T = (dim==0u) ? o1.C : o1.R;
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *Xc, *Xi, *Xf, *Xo, *Uc, *Ui, *Uf, *Uo;// *Y;
     try { Xc = new float[i1.N()]; }
@@ -135,8 +135,8 @@ if (i1.T==1)
     try { ifs8.read(reinterpret_cast<char*>(Uo),i8.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 8 (Uo)" << endl; return 1; }
     //auto tic = chrono::high_resolution_clock::now();
-    //if (openn::lstm4_s(Y,Xc,Xi,Xf,Xo,Uc,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
-    if (openn::lstm4_inplace_s(Xc,Xi,Xf,Xo,Uc,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
+    //if (codee::lstm4_s(Y,Xc,Xi,Xf,Xo,Uc,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
+    if (codee::lstm4_inplace_s(Xc,Xi,Xf,Xo,Uc,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -150,4 +150,3 @@ if (i1.T==1)
 }
 
 //Finish
-

@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,10 +9,9 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
+#include "../util/cmli.hpp"
 #include "softmax.c"
 
 #ifdef I
@@ -29,23 +29,27 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2};
-    const size_t I = 1, O = 1;
+    const valarray<size_t> oktypes = {1u,2u};
+    const size_t I = 1u, O = 1u;
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
-    int dim;
+    size_t dim;
 
 
     //Description
     string descr;
     descr += "Layer activation function.\n";
-    descr += "Gets softmax function for each row or col of X.\n";
-    descr += "The output Y has the same size as X, with:\n";
-    descr += "Y[r,c] = exp(X[r,c]) / sum(exp(X[:,c])),  for dim=0.\n";
-    descr += "Y[r,c] = exp(X[r,c]) / sum(exp(X[r,:])),  for dim=1.\n";
+    descr += "Gets softmax function for each vector in X.\n";
+    descr += "The output Y has the same size as X.\n";
     descr += "\n";
-    descr += "Use -d (--dim) to specify the dimension (axis) [default=0].\n";
+    descr += "For each vector x in X and y in Y:\n";
+    descr += "x[n] = exp(x[n]) / sum(exp(x[:])) \n";
+    descr += "\n";
+    descr += "Use -d (--dim) to specify the axis of the vectors in X.\n";
+    descr += "This is the dimension of length No, \n";
+    descr += "where No is the number of outputs from the layer.\n";
+    descr += "The default is 0 (along cols) unless X is a vector.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ softmax X -o Y \n";
@@ -93,7 +97,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -101,15 +105,14 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = 0; }
+    if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
 
     //Checks
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
-    if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must be a matrix" << endl; return 1; }
 
 
     //Set output header info
@@ -133,14 +136,14 @@ int main(int argc, char *argv[])
 
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *X;
         try { X = new float[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (openn::softmax_inplace_s(X,i1.iscolmajor(),int(i1.R),int(i1.C),dim))
+        if (codee::softmax_inplace_s(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -156,7 +159,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (openn::softmax_inplace_d(X,i1.iscolmajor(),int(i1.R),int(i1.C),dim))
+        if (codee::softmax_inplace_d(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

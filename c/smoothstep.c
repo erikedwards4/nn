@@ -4,35 +4,30 @@
 #include <stdio.h>
 
 #ifdef __cplusplus
-namespace openn {
+namespace codee {
 extern "C" {
 #endif
 
-int smoothstep_s (float *Y, const float *X, const int N, const int p);
-int smoothstep_d (double *Y, const double *X, const int N, const int p);
+int smoothstep_s (float *Y, const float *X, const size_t N, const int p);
+int smoothstep_d (double *Y, const double *X, const size_t N, const int p);
 
-int smoothstep_inplace_s (float *X, const int N, const int p);
-int smoothstep_inplace_d (double *X, const int N, const int p);
+int smoothstep_inplace_s (float *X, const size_t N, const int p);
+int smoothstep_inplace_d (double *X, const size_t N, const int p);
 
 
-int smoothstep_s (float *Y, const float *X, const int N, const int p)
+int smoothstep_s (float *Y, const float *X, const size_t N, const int p)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in smoothstep_s: N (num elements X) must be nonnegative\n"); return 1; }
-
     if (p==0)
     {
-        for (n=0; n<N; n++) { Y[n] = (X[n]<0.0f) ? 0.0f : (X[n]>1.0f) ? 1.0f : X[n]; }
+        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X<0.0f) ? 0.0f : (*X>1.0f) ? 1.0f : *X; }
     }
     else if (p==1)
     {
-        for (n=0; n<N; n++)
+        for (size_t n=0; n<N; ++n, ++X, ++Y)
         {
-            if (X[n]<0.0f) { Y[n] = 0.0f; }
-            else if (X[n]>1.0f) { Y[n] = 1.0f; }
-            else { Y[n] = X[n]*X[n]*(3.0f-2.0f*X[n]); }
+            if (*X<0.0f) { *Y = 0.0f; }
+            else if (*X>1.0f) { *Y = 1.0f; }
+            else { *Y = *X**X*(3.0f-2.0f**X); }
         }
     }
     else
@@ -44,24 +39,19 @@ int smoothstep_s (float *Y, const float *X, const int N, const int p)
 }
 
 
-int smoothstep_d (double *Y, const double *X, const int N, const int p)
+int smoothstep_d (double *Y, const double *X, const size_t N, const int p)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in smoothstep_d: N (num elements X) must be nonnegative\n"); return 1; }
-
     if (p==0)
     {
-        for (n=0; n<N; n++) { Y[n] = (X[n]<0.0) ? 0.0 : (X[n]>1.0) ? 1.0 : X[n]; }
+        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X<0.0) ? 0.0 : (*X>1.0) ? 1.0 : *X; }
     }
     else if (p==1)
     {
-        for (n=0; n<N; n++)
+        for (size_t n=0; n<N; ++n, ++X, ++Y)
         {
-            if (X[n]<0.0) { Y[n] = 0.0; }
-            else if (X[n]>1.0) { Y[n] = 1.0; }
-            else { Y[n] = X[n]*X[n]*(3.0-2.0*X[n]); }
+            if (*X<0.0) { *Y = 0.0; }
+            else if (*X>1.0) { *Y = 1.0; }
+            else { *Y = *X * *X * (3.0-2.0**X); }
         }
     }
     else
@@ -73,28 +63,23 @@ int smoothstep_d (double *Y, const double *X, const int N, const int p)
 }
 
 
-int smoothstep_inplace_s (float *X, const int N, const int p)
+int smoothstep_inplace_s (float *X, const size_t N, const int p)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in smoothstep_inplace_s: N (num elements X) must be nonnegative\n"); return 1; }
-
     if (p==0)
     {
-        for (n=0; n<N; n++)
+        for (size_t n=0; n<N; ++n, ++X)
         {
-            if (X[n]<0.0f) { X[n] = 0.0f; }
-            else if (X[n]>1.0f) { X[n] = 1.0f; }
+            if (*X<0.0f) { *X = 0.0f; }
+            else if (*X>1.0f) { *X = 1.0f; }
         }
     }
     else if (p==1)
     {
-        for (n=0; n<N; n++)
+        for (size_t n=0; n<N; ++n, ++X)
         {
-            if (X[n]<0.0f) { X[n] = 0.0f; }
-            else if (X[n]>1.0f) { X[n] = 1.0f; }
-            else { X[n] = X[n]*X[n]*(3.0f-2.0f*X[n]); }
+            if (*X<0.0f) { *X = 0.0f; }
+            else if (*X>1.0f) { *X = 1.0f; }
+            else { *X *= *X * (3.0f-2.0f**X); }
         }
     }
     else
@@ -106,28 +91,23 @@ int smoothstep_inplace_s (float *X, const int N, const int p)
 }
 
 
-int smoothstep_inplace_d (double *X, const int N, const int p)
+int smoothstep_inplace_d (double *X, const size_t N, const int p)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in smoothstep_inplace_d: N (num elements X) must be nonnegative\n"); return 1; }
-
     if (p==0)
     {
-        for (n=0; n<N; n++)
+        for (size_t n=0; n<N; ++n, ++X)
         {
-            if (X[n]<0.0) { X[n] = 0.0; }
-            else if (X[n]>1.0) { X[n] = 1.0; }
+            if (*X<0.0) { *X = 0.0; }
+            else if (*X>1.0) { *X = 1.0; }
         }
     }
     else if (p==1)
     {
-        for (n=0; n<N; n++)
+        for (size_t n=0; n<N; ++n, ++X)
         {
-            if (X[n]<0.0) { X[n] = 0.0; }
-            else if (X[n]>1.0) { X[n] = 1.0; }
-            else { X[n] = X[n]*X[n]*(3.0-2.0*X[n]); }
+            if (*X<0.0) { *X = 0.0; }
+            else if (*X>1.0) { *X = 1.0; }
+            else { *X *= *X * (3.0-2.0**X); }
         }
     }
     else

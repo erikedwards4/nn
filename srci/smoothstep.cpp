@@ -2,8 +2,8 @@
 #include "smoothstep.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2};
-const size_t I = 1, O = 1;
+const valarray<size_t> oktypes = {1u,2u};
+const size_t I = 1u, O = 1u;
 int n;
 
 //Description
@@ -12,12 +12,12 @@ descr += "Activation function.\n";
 descr += "Gets smoothstep function of each element of X.\n";
 descr += "This implementation only allows n=0 and n=1.\n";
 descr += "\n";
-descr += "If p=0, then this is the clamp function:\n";
+descr += "If n=0, then this is the clamp function:\n";
 descr += "For each element: y = 0,  if x<0   \n";
 descr += "                  y = x,  if 0<x<1 \n";
 descr += "                  y = 1,  if x>1   \n";
 descr += "\n";
-descr += "If p=1, then this has a sigmoid shape.\n";
+descr += "If n=1, then this has a sigmoid shape.\n";
 descr += "This is cubic Hermite interpolation after clamping.\n";
 descr += "For each element: y = 0,             if x<0  \n";
 descr += "                  y = 3*x^2 - 2*x^3, if 0<x<1\n";
@@ -51,14 +51,14 @@ o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
 //Other prep
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *X;
     try { X = new float[i1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    if (openn::smoothstep_inplace_s(X,int(i1.N()),n))
+    if (codee::smoothstep_inplace_s(X,i1.N(),n))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -69,4 +69,3 @@ if (i1.T==1)
 }
 
 //Finish
-

@@ -1,4 +1,8 @@
-//This gets softmax layer-wise activation function for X.
+//Vec2vec operation
+//"Betamax" of each vector in X.
+//This is just like softmax, except using exp(beta*X) instead of exp(X).
+//This is equivalent to using b^x instead of e^x, where beta = exp(b).
+//This has in-place and not-in-place versions.
 
 #include <stdio.h>
 #include <math.h>
@@ -8,16 +12,16 @@ namespace codee {
 extern "C" {
 #endif
 
-int softmax_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int softmax_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int betamax_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const float base);
+int betamax_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const double base);
 
-int softmax_inplace_s (float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
-int softmax_inplace_d (double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim);
+int betamax_inplace_s (float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const float base);
+int betamax_inplace_d (double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const double base);
 
 
-int softmax_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int betamax_s (float *Y, const float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const float base)
 {
-    if (dim>3) { fprintf(stderr,"error in softmax_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3) { fprintf(stderr,"error in betamax_s: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t L = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
@@ -30,7 +34,8 @@ int softmax_s (float *Y, const float *X, const size_t R, const size_t C, const s
     }
     else if (L==N)
     {
-        for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = expf(*X); sm += *Y; }
+        for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = powf(base,*X); sm += *Y; }
+        //for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = expf(*X*beta); sm += *Y; }
         for (size_t l=0; l<L; ++l) { *--Y /= sm; }
     }
     else
@@ -44,7 +49,7 @@ int softmax_s (float *Y, const float *X, const size_t R, const size_t C, const s
             for (size_t v=0; v<V; ++v)
             {
                 sm = 0.0f;
-                for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = expf(*X); sm += *Y; }
+                for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = powf(base,*X); sm += *Y; }
                 Y -= L;
                 for (size_t l=0; l<L; ++l, ++Y) { *Y /= sm; }
             }
@@ -56,7 +61,7 @@ int softmax_s (float *Y, const float *X, const size_t R, const size_t C, const s
                 for (size_t b=0; b<B; ++b, X-=K*L-1, ++Y)
                 {
                     sm = 0.0f;
-                    for (size_t l=0; l<L; ++l, X+=K, Y+=K) { *Y = expf(*X); sm += *Y; }
+                    for (size_t l=0; l<L; ++l, X+=K, Y+=K) { *Y = powf(base,*X); sm += *Y; }
                     for (size_t l=0; l<L; ++l) { Y-=K; *Y /= sm; }
                 }
             }
@@ -67,9 +72,9 @@ int softmax_s (float *Y, const float *X, const size_t R, const size_t C, const s
 }
 
 
-int softmax_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int betamax_d (double *Y, const double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const double base)
 {
-    if (dim>3) { fprintf(stderr,"error in softmax_d: dim must be in [0 3]\n"); return 1; }
+    if (dim>3) { fprintf(stderr,"error in betamax_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t L = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
@@ -82,7 +87,7 @@ int softmax_d (double *Y, const double *X, const size_t R, const size_t C, const
     }
     else if (L==N)
     {
-        for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = exp(*X); sm += *Y; }
+        for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = pow(base,*X); sm += *Y; }
         for (size_t l=0; l<L; ++l) { *--Y /= sm; }
     }
     else
@@ -96,7 +101,7 @@ int softmax_d (double *Y, const double *X, const size_t R, const size_t C, const
             for (size_t v=0; v<V; ++v)
             {
                 sm = 0.0;
-                for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = exp(*X); sm += *Y; }
+                for (size_t l=0; l<L; ++l, ++X, ++Y) { *Y = pow(base,*X); sm += *Y; }
                 Y -= L;
                 for (size_t l=0; l<L; ++l, ++Y) { *Y /= sm; }
             }
@@ -108,7 +113,7 @@ int softmax_d (double *Y, const double *X, const size_t R, const size_t C, const
                 for (size_t b=0; b<B; ++b, X-=K*L-1, ++Y)
                 {
                     sm = 0.0;
-                    for (size_t l=0; l<L; ++l, X+=K, Y+=K) { *Y = exp(*X); sm += *Y; }
+                    for (size_t l=0; l<L; ++l, X+=K, Y+=K) { *Y = pow(base,*X); sm += *Y; }
                     for (size_t l=0; l<L; ++l) { Y-=K; *Y /= sm; }
                 }
             }
@@ -119,9 +124,9 @@ int softmax_d (double *Y, const double *X, const size_t R, const size_t C, const
 }
 
 
-int softmax_inplace_s (float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int betamax_inplace_s (float *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const float base)
 {
-    if (dim>3) { fprintf(stderr,"error in softmax_inplace_s: dim must be in [0 3]\n"); return 1; }
+    if (dim>3) { fprintf(stderr,"error in betamax_inplace_s: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t L = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
@@ -134,7 +139,7 @@ int softmax_inplace_s (float *X, const size_t R, const size_t C, const size_t S,
     }
     else if (L==N)
     {
-        for (size_t l=0; l<L; ++l, ++X) { *X = expf(*X); sm += *X; }
+        for (size_t l=0; l<L; ++l, ++X) { *X = powf(base,*X); sm += *X; }
         for (size_t l=0; l<L; ++l) { *--X /= sm; }
     }
     else
@@ -148,7 +153,7 @@ int softmax_inplace_s (float *X, const size_t R, const size_t C, const size_t S,
             for (size_t v=0; v<V; ++v)
             {
                 sm = 0.0f;
-                for (size_t l=0; l<L; ++l, ++X) { *X = expf(*X); sm += *X; }
+                for (size_t l=0; l<L; ++l, ++X) { *X = powf(base,*X); sm += *X; }
                 X -= L;
                 for (size_t l=0; l<L; ++l, ++X) { *X /= sm; }
             }
@@ -160,7 +165,7 @@ int softmax_inplace_s (float *X, const size_t R, const size_t C, const size_t S,
                 for (size_t b=0; b<B; ++b, ++X)
                 {
                     sm = 0.0f;
-                    for (size_t l=0; l<L; ++l, X+=K) { *X = expf(*X); sm += *X; }
+                    for (size_t l=0; l<L; ++l, X+=K) { *X = powf(base,*X); sm += *X; }
                     for (size_t l=0; l<L; ++l) { X-=K; *X /= sm; }
                 }
             }
@@ -171,9 +176,9 @@ int softmax_inplace_s (float *X, const size_t R, const size_t C, const size_t S,
 }
 
 
-int softmax_inplace_d (double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim)
+int betamax_inplace_d (double *X, const size_t R, const size_t C, const size_t S, const size_t H, const char iscolmajor, const size_t dim, const double base)
 {
-    if (dim>3) { fprintf(stderr,"error in softmax_inplace_d: dim must be in [0 3]\n"); return 1; }
+    if (dim>3) { fprintf(stderr,"error in betamax_inplace_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
     const size_t L = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
@@ -186,7 +191,7 @@ int softmax_inplace_d (double *X, const size_t R, const size_t C, const size_t S
     }
     else if (L==N)
     {
-        for (size_t l=0; l<L; ++l, ++X) { *X = exp(*X); sm += *X; }
+        for (size_t l=0; l<L; ++l, ++X) { *X = pow(base,*X); sm += *X; }
         for (size_t l=0; l<L; ++l) { *--X /= sm; }
     }
     else
@@ -200,7 +205,7 @@ int softmax_inplace_d (double *X, const size_t R, const size_t C, const size_t S
             for (size_t v=0; v<V; ++v)
             {
                 sm = 0.0;
-                for (size_t l=0; l<L; ++l, ++X) { *X = exp(*X); sm += *X; }
+                for (size_t l=0; l<L; ++l, ++X) { *X = pow(base,*X); sm += *X; }
                 X -= L;
                 for (size_t l=0; l<L; ++l, ++X) { *X /= sm; }
             }
@@ -212,7 +217,7 @@ int softmax_inplace_d (double *X, const size_t R, const size_t C, const size_t S
                 for (size_t b=0; b<B; ++b, ++X)
                 {
                     sm = 0.0;
-                    for (size_t l=0; l<L; ++l, X+=K) { *X = exp(*X); sm += *X; }
+                    for (size_t l=0; l<L; ++l, X+=K) { *X = pow(base,*X); sm += *X; }
                     for (size_t l=0; l<L; ++l) { X-=K; *X /= sm; }
                 }
             }

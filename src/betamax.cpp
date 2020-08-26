@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,11 +9,10 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
-#include "max.c"
+#include "../util/cmli.hpp"
+#include "betamax.c"
 
 #ifdef I
 #undef I
@@ -29,38 +29,46 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2,101,102};
-    const size_t I = 1, O = 1;
+    const valarray<size_t> oktypes = {1u,2u};
+    const size_t I = 1u, O = 1u;
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
-    int dim;
+    size_t dim;
+    double base;
 
 
     //Description
     string descr;
-    descr += "Gets maximum of values along rows or cols of X.\n";
-    descr += "For complex X, output Y is real and has max of abs values.\n";
+    descr += "Layer activation function.\n";
+    descr += "Gets \"betamax\" function for each vector in X.\n";
+    descr += "The output Y has the same size as X.\n";
     descr += "\n";
-    descr += "Use -d (--dim) to give the dimension (axis) [default=0].\n";
-    descr += "Use -d0 to work along cols --> Y is a row vec.\n";
-    descr += "Use -d1 to work along rows --> Y is a col vec.\n";
+    descr += "For each vector x in X and y in Y:\n";
+    descr += "x[n] = exp(beta*x[n]) / sum(beta*exp(x[:])) \n";
+    descr += "     = b^x[n] / sum(b.^x[n]) \n";
+    descr += "where beta = log(b) and b = exp(beta).\n";
+    descr += "\n";
+    descr += "Use -d (--dim) to specify the axis of the vectors in X.\n";
+    descr += "This is the dimension of length N, \n";
+    descr += "where N is the number of neurons in the layer.\n";
+    descr += "The default is 0 (along cols) unless X is a vector.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ max X -o Y \n";
-    descr += "$ max X > Y \n";
-    descr += "$ max -d1 X > Y \n";
-    descr += "$ cat X | max > Y \n";
+    descr += "$ betamax X -o Y \n";
+    descr += "$ betamax X > Y \n";
+    descr += "$ cat X | betamax > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension [default=0]");
+    struct arg_dbl    *a_b = arg_dbln("b","base","<dbl>",0,1,"base value [default=e]");
+    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension (0 or 1) [default=0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_d, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_b, a_d, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -93,32 +101,30 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
 
     //Get options
 
+    //Get base
+    base = (a_b->count==0) ? exp(1.0) : a_b->dval[0];
+
     //Get dim
-    if (a_d->count==0) { dim = 0; }
+    if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
 
 
     //Checks
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
-    if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must be a matrix" << endl; return 1; }
 
 
     //Set output header info
-    o1.F = i1.F;
-    o1.T = (i1.T<100) ? i1.T : i1.T-100;
-    o1.R = (dim==0) ? 1u : i1.R;
-    o1.C = (dim==1) ? 1u : i1.C;
-    o1.S = (dim==2) ? 1u : i1.S;
-    o1.H = (dim==3) ? 1u : i1.H;
+    o1.F = i1.F; o1.T = i1.T;
+    o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
 
 
     //Open output
@@ -137,81 +143,37 @@ int main(int argc, char *argv[])
 
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
-        float *X; //*Y;
+        float *X;
         try { X = new float[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        //try { Y = new float[o1.N()]; }
-        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        //if (openn::max_s(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
-        if (openn::max_inplace_s(X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        if (codee::betamax_inplace_s(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,float(base)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; //delete[] Y;
+        delete[] X;
     }
     else if (i1.T==2)
     {
-        double *X; //*Y;
+        double *X;
         try { X = new double[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        //try { Y = new double[o1.N()]; }
-        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        //if (openn::max_d(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
-        if (openn::max_inplace_d(X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
+        if (codee::betamax_inplace_d(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,double(base)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; //delete[] Y;
-    }
-    else if (i1.T==101)
-    {
-        float *X; //*Y;
-        try { X = new float[2u*i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        //try { Y = new float[o1.N()]; }
-        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        //if (openn::max_c(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
-        if (openn::max_inplace_c(X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
-        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
-        if (wo1)
-        {
-            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-        }
-        delete[] X; //delete[] Y;
-    }
-    else if (i1.T==102)
-    {
-        double *X; //*Y;
-        try { X = new double[2u*i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
-        //try { Y = new double[o1.N()]; }
-        //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-        try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        //if (openn::max_z(Y,X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
-        if (openn::max_inplace_z(X,int(i1.R),int(i1.C),dim,i1.iscolmajor()))
-        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
-        if (wo1)
-        {
-            try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
-            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-        }
-        delete[] X; //delete[] Y;
+        delete[] X;
     }
     else
     {

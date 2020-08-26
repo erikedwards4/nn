@@ -1,36 +1,43 @@
 //Includes
-#include "softmax.c"
+#include "betamax.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
 const size_t I = 1u, O = 1u;
 size_t dim;
+double base;
 
 //Description
 string descr;
 descr += "Layer activation function.\n";
-descr += "Gets softmax function for each vector in X.\n";
+descr += "Gets \"betamax\" function for each vector in X.\n";
 descr += "The output Y has the same size as X.\n";
 descr += "\n";
 descr += "For each vector x in X and y in Y:\n";
-descr += "x[n] = exp(x[n]) / sum(exp(x[:])) \n";
+descr += "x[n] = exp(beta*x[n]) / sum(beta*exp(x[:])) \n";
+descr += "     = b^x[n] / sum(b.^x[n]) \n";
+descr += "where beta = log(b) and b = exp(beta).\n";
 descr += "\n";
 descr += "Use -d (--dim) to specify the axis of the vectors in X.\n";
-descr += "This is the dimension of length No, \n";
-descr += "where No is the number of outputs from the layer.\n";
+descr += "This is the dimension of length N, \n";
+descr += "where N is the number of neurons in the layer.\n";
 descr += "The default is 0 (along cols) unless X is a vector.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ softmax X -o Y \n";
-descr += "$ softmax X > Y \n";
-descr += "$ cat X | softmax > Y \n";
+descr += "$ betamax X -o Y \n";
+descr += "$ betamax X > Y \n";
+descr += "$ cat X | betamax > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
+struct arg_dbl    *a_b = arg_dbln("b","base","<dbl>",0,1,"base value [default=e]");
 struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension (0 or 1) [default=0]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
+
+//Get base
+base = (a_b->count==0) ? exp(1.0) : a_b->dval[0];
 
 //Get dim
 if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
@@ -55,7 +62,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::softmax_inplace_s(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+    if (codee::betamax_inplace_s(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim,float(base)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

@@ -2,144 +2,107 @@
 //This has in-place and not-in-place versions.
 
 #include <stdio.h>
-#include <string.h>
 #include <math.h>
 #include <complex.h>
 
 #ifdef __cplusplus
-namespace openn {
+namespace codee {
 extern "C" {
 #endif
 
-int atan_s (float *Y, const float *X, const int N);
-int atan_d (double *Y, const double *X, const int N);
-int atan_c (float *Y, const float *X, const int N);
-int atan_z (double *Y, const double *X, const int N);
+int atan_s (float *Y, const float *X, const size_t N);
+int atan_d (double *Y, const double *X, const size_t N);
+int atan_c (float *Y, const float *X, const size_t N);
+int atan_z (double *Y, const double *X, const size_t N);
 
-int atan_inplace_s (float *X, const int N);
-int atan_inplace_d (double *X, const int N);
-int atan_inplace_c (float *X, const int N);
-int atan_inplace_z (double *X, const int N);
+int atan_inplace_s (float *X, const size_t N);
+int atan_inplace_d (double *X, const size_t N);
+int atan_inplace_c (float *X, const size_t N);
+int atan_inplace_z (double *X, const size_t N);
 
 
-int atan_s (float *Y, const float *X, const int N)
+int atan_s (float *Y, const float *X, const size_t N)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in atan_s: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { Y[n] = atanf(X[n]); }
+    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = atanf(*X); }
 
     return 0;
 }
 
 
-int atan_d (double *Y, const double *X, const int N)
+int atan_d (double *Y, const double *X, const size_t N)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in atan_d: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { Y[n] = atan(X[n]); }
+    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = atan(*X); }
     
     return 0;
 }
 
 
-int atan_c (float *Y, const float *X, const int N)
+int atan_c (float *Y, const float *X, const size_t N)
 {
-    int n2;
     _Complex float y;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in atan_c: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n2=0; n2<2*N; n2+=2)
+    
+    for (size_t n=0; n<N; ++n, X+=2, ++Y)
     {
-        y = catanf(X[n2]+1.0if*X[n2+1]);
-        memcpy(&Y[n2],(float *)&y,2*sizeof(float));
+        y = catanf(*X + 1.0if**(X+1));
+        *Y = *(float *)&y; *++Y = *((float *)&y+1);
     }
     
     return 0;
 }
 
 
-int atan_z (double *Y, const double *X, const int N)
+int atan_z (double *Y, const double *X, const size_t N)
 {
-    int n2;
+    _Complex double y;
+    
+    for (size_t n=0; n<N; ++n, X+=2, ++Y)
+    {
+        y = catan(*X + 1.0i**(X+1));
+        *Y = *(double *)&y; *++Y = *((double *)&y+1);
+    }
+    
+    return 0;
+}
+
+
+int atan_inplace_s (float *X, const size_t N)
+{
+    for (size_t n=0; n<N; ++n, ++X) { *X = atanf(*X); }
+
+    return 0;
+}
+
+
+int atan_inplace_d (double *X, const size_t N)
+{
+    for (size_t n=0; n<N; ++n, ++X) { *X = atan(*X); }
+    
+    return 0;
+}
+
+
+int atan_inplace_c (float *X, const size_t N)
+{
+    _Complex float y;
+    
+    for (size_t n=0; n<N; ++n, ++X)
+    {
+        y = catanf(*X + 1.0if**(X+1));
+        *X = *(float *)&y; *++X = *((float *)&y+1);
+    }
+    
+    return 0;
+}
+
+
+int atan_inplace_z (double *X, const size_t N)
+{
     _Complex double y;
 
-    //Checks
-    if (N<0) { fprintf(stderr,"error in atan_z: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n2=0; n2<2*N; n2+=2)
+    for (size_t n=0; n<N; ++n, ++X)
     {
-        y = catan(X[n2]+1.0i*X[n2+1]);
-        memcpy(&Y[n2],(double *)&y,2*sizeof(double));
-    }
-    
-    return 0;
-}
-
-
-int atan_inplace_s (float *X, const int N)
-{
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in atan_inplace_s: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { X[n] = atanf(X[n]); }
-
-    return 0;
-}
-
-
-int atan_inplace_d (double *X, const int N)
-{
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in atan_inplace_d: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { X[n] = atan(X[n]); }
-    
-    return 0;
-}
-
-
-int atan_inplace_c (float *X, const int N)
-{
-    int n2;
-    _Complex float x;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in atan_inplace_c: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n2=0; n2<2*N; n2+=2)
-    {
-        x = catanf(X[n2]+1.0if*X[n2+1]);
-        memcpy(&X[n2],(float *)&x,2*sizeof(float));
-    }
-    
-    return 0;
-}
-
-
-int atan_inplace_z (double *X, const int N)
-{
-    int n2;
-    _Complex double x;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in atan_inplace_z: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n2=0; n2<2*N; n2+=2)
-    {
-        x = catan(X[n2]+1.0i*X[n2+1]);
-        memcpy(&X[n2],(double *)&x,2*sizeof(double));
+        y = catan(*X + 1.0i**(X+1));
+        *X = *(double *)&y; *++X = *((double *)&y+1);
     }
     
     return 0;

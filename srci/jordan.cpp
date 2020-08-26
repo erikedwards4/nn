@@ -2,9 +2,9 @@
 #include "jordan.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2};
-const size_t I = 5, O = 1;
-int dim, N, T;
+const valarray<size_t> oktypes = {1u,2u};
+const size_t I = 5u, O = 1u;
+size_t dim, N, T;
 
 //Description
 string descr;
@@ -53,10 +53,10 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = 0; }
+if (a_d->count==0) { dim = 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-else { dim = a_d->ival[0]; }
-if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+else { dim = size_t(a_d->ival[0]); }
+if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 //Checks
 if (i1.T!=i2.T || i1.T!=i3.T || i1.T!=i4.T || i1.T!=i5.T) { cerr << progstr+": " << __LINE__ << errstr << "all inputs must have the same data type" << endl; return 1; }
@@ -74,14 +74,14 @@ if (!i4.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 4 (W) mu
 if (!i5.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 5 (B) must be a vector" << endl; return 1; }
 if (!i2.issquare()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (U) must be square" << endl; return 1; }
 if (!i4.issquare()) { cerr << progstr+": " << __LINE__ << errstr << "input 4 (W) must be square" << endl; return 1; }
-if (dim==0)
+if (dim==0u)
 {
     if (i2.R!=i1.R) { cerr << progstr+": " << __LINE__ << errstr << "nrows U must equal nrows X for dim=0" << endl; return 1; }
     if (i3.N()!=i2.C) { cerr << progstr+": " << __LINE__ << errstr << "length Y1 must equal ncols U for dim=0" << endl; return 1; }
     if (i4.C!=i3.N()) { cerr << progstr+": " << __LINE__ << errstr << "ncols W must equal length Y1 for dim=0" << endl; return 1; }
     if (i5.N()!=i4.R) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal nrows W for dim=0" << endl; return 1; }
 }
-if (dim==1)
+if (dim==1u)
 {
     if (i2.C!=i1.C) { cerr << progstr+": " << __LINE__ << errstr << "ncols U must equal ncols X for dim=1" << endl; return 1; }
     if (i3.N()!=i2.R) { cerr << progstr+": " << __LINE__ << errstr << "length Y1 must equal nrows U for dim=1" << endl; return 1; }
@@ -89,20 +89,20 @@ if (dim==1)
     if (i5.N()!=i4.C) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal ncols W for dim=1" << endl; return 1; }
 }
 
-if (dim==1 && i1.C!=i2.R) { cerr << progstr+": " << __LINE__ << errstr << "nrows W must equal ncols X for dim=1" << endl; return 1; }
-if (dim==0 && i3.N()!=i2.R) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal nrows W for dim=0" << endl; return 1; }
-if (dim==1 && i3.N()!=i2.C) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal ncols W for dim=1" << endl; return 1; }
+if (dim==1u && i1.C!=i2.R) { cerr << progstr+": " << __LINE__ << errstr << "nrows W must equal ncols X for dim=1" << endl; return 1; }
+if (dim==0u && i3.N()!=i2.R) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal nrows W for dim=0" << endl; return 1; }
+if (dim==1u && i3.N()!=i2.C) { cerr << progstr+": " << __LINE__ << errstr << "length B must equal ncols W for dim=1" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;
 o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
-N = (dim==0) ? int(o1.R) : int(o1.C);
-T = (dim==0) ? int(o1.C) : int(o1.R);
+N = (dim==0u) ? o1.R : o1.C;
+T = (dim==0u) ? o1.C : o1.R;
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *X, *U, *Y1, *W, *B, *Y;
     try { X = new float[i1.N()]; }
@@ -127,7 +127,7 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (W)" << endl; return 1; }
     try { ifs5.read(reinterpret_cast<char*>(B),i5.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (B)" << endl; return 1; }
-    if (openn::jordan_s(Y,X,U,Y1,W,B,N,T,dim,i1.iscolmajor()))
+    if (codee::jordan_s(Y,X,U,Y1,W,B,N,T,i1.iscolmajor(),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -138,4 +138,3 @@ if (i1.T==1)
 }
 
 //Finish
-

@@ -8,81 +8,61 @@
 //#include <time.h>
 
 #ifdef __cplusplus
-namespace openn {
+namespace codee {
 extern "C" {
 #endif
 
-int signum_s (float *Y, const float *X, const int N, const float thresh);
-int signum_d (double *Y, const double *X, const int N, const double thresh);
+int signum_s (float *Y, const float *X, const size_t N, const float thresh);
+int signum_d (double *Y, const double *X, const size_t N, const double thresh);
 
-int signum_inplace_s (float *X, const int N, const float thresh);
-int signum_inplace_d (double *X, const int N, const double thresh);
+int signum_inplace_s (float *X, const size_t N, const float thresh);
+int signum_inplace_d (double *X, const size_t N, const double thresh);
 
 
-int signum_s (float *Y, const float *X, const int N, const float thresh)
+int signum_s (float *Y, const float *X, const size_t N, const float thresh)
 {
-    int n;
-    //struct timespec tic, toc;
+    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
-    //Checks
-    if (N<0) { fprintf(stderr,"error in signum_s: N (num elements X) must be nonnegative\n"); return 1; }
-
-    //clock_gettime(CLOCK_REALTIME,&tic);
-    for (n=0; n<N; n++) { Y[n] = (X[n]>thresh) - (X[n]<thresh); }
-    // for (n=0; n<N; n++)
+    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X>thresh) - (*X<thresh); }
+    // for (size_t n=0; n<N; ++n, ++X, ++Y)
     // {
-    //     if (X[n]<thresh) { Y[n] = -1.0f; }
-    //     else if (X[n]>thresh) { Y[n] = 1.0f; }
-    //     else { Y[n] = 0.0f; }
+    //     if (*X<thresh) { *Y = -1.0f; }
+    //     else if (*X>thresh) { *Y = 1.0f; }
+    //     else { *Y = 0.0f; }
     // }
-    //clock_gettime(CLOCK_REALTIME,&toc);
-    //fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
+
+    //clock_gettime(CLOCK_REALTIME,&toc); fprintf(stderr,"elapsed time = %.6f ms\n",(toc.tv_sec-tic.tv_sec)*1e3+(toc.tv_nsec-tic.tv_nsec)/1e6);
 
     return 0;
 }
 
 
-int signum_d (double *Y, const double *X, const int N, const double thresh)
+int signum_d (double *Y, const double *X, const size_t N, const double thresh)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in signum_d: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++) { Y[n] = (X[n]>thresh) - (X[n]<thresh); }
+    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X>thresh) - (*X<thresh); }
     
     return 0;
 }
 
 
-int signum_inplace_s (float *X, const int N, const float thresh)
+int signum_inplace_s (float *X, const size_t N, const float thresh)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in signum_inplace_s: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++)
+    for (size_t n=0; n<N; ++n, ++X)
     {
-        if (X[n]<thresh) { X[n] = -1.0f; }
-        else if (X[n]>thresh) { X[n] = 1.0f; }
+        if (*X<thresh) { *X = -1.0f; }
+        else if (*X>thresh) { *X = 1.0f; }
     }
 
     return 0;
 }
 
 
-int signum_inplace_d (double *X, const int N, const double thresh)
+int signum_inplace_d (double *X, const size_t N, const double thresh)
 {
-    int n;
-
-    //Checks
-    if (N<0) { fprintf(stderr,"error in signum_inplace_d: N (num elements X) must be nonnegative\n"); return 1; }
-
-    for (n=0; n<N; n++)
+    for (size_t n=0; n<N; ++n, ++X)
     {
-        if (X[n]<thresh) { X[n] = -1.0; }
-        else if (X[n]>thresh) { X[n] = 1.0; }
+        if (*X<thresh) { *X = -1.0; }
+        else if (*X>thresh) { *X = 1.0; }
     }
     
     return 0;

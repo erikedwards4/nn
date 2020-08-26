@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,10 +9,9 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
+#include "../util/cmli.hpp"
 //#include <chrono>
 #include "gru_min2.c"
 
@@ -30,12 +30,12 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2};
-    const size_t I = 4, O = 1;
+    const valarray<size_t> oktypes = {1u,2u};
+    const size_t I = 4u, O = 1u;
     ifstream ifs1, ifs2, ifs3, ifs4; ofstream ofs1;
     int8_t stdi1, stdi2, stdi3, stdi4, stdo1, wo1;
     ioinfo i1, i2, i3, i4, o1;
-    int dim, N, T;
+    size_t dim, N, T;
 
 
     //Description
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0 || (i3.T==oktypes).sum()==0 || (i4.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -130,10 +130,10 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = 0; }
+    if (a_d->count==0) { dim = 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 
     //Checks
@@ -151,8 +151,8 @@ int main(int argc, char *argv[])
     if (i1.R!=i2.R || i1.C!=i2.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 1 and 2 (X, Xf) must have the same size" << endl; return 1; }
     if (i3.R!=i4.R || i3.C!=i4.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 3 and 4 (U, Uf) must have the same size" << endl; return 1; }
     if (i3.R!=i3.C || i4.R!=i4.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 3 and 4 (U, Uf) must be square" << endl; return 1; }
-    if (dim==0 && i1.R!=i3.R) { cerr << progstr+": " << __LINE__ << errstr << "inputs 3 and 4 (U, Uf) must have size NxN" << endl; return 1; }
-    if (dim==1 && i1.C!=i3.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 3 and 4 (U, Uf) must have size NxN" << endl; return 1; }
+    if (dim==0u && i1.R!=i3.R) { cerr << progstr+": " << __LINE__ << errstr << "inputs 3 and 4 (U, Uf) must have size NxN" << endl; return 1; }
+    if (dim==1u && i1.C!=i3.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 3 and 4 (U, Uf) must have size NxN" << endl; return 1; }
 
 
     //Set output header info
@@ -173,12 +173,12 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    N = (dim==0) ? int(o1.R) : int(o1.C);
-    T = (dim==0) ? int(o1.C) : int(o1.R);
+    N = (dim==0u) ? o1.R : o1.C;
+    T = (dim==0u) ? o1.C : o1.R;
     
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *X, *Xf, *U, *Uf;// *Y;
         try { X = new float[i1.N()]; }
@@ -200,8 +200,8 @@ int main(int argc, char *argv[])
         try { ifs4.read(reinterpret_cast<char*>(Uf),i4.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (Uf)" << endl; return 1; }
         //auto tic = chrono::high_resolution_clock::now();
-        //if (openn::gru_min2_s(Y,X,Xf,U,Uf,N,T,dim,i1.iscolmajor()))
-        if (openn::gru_min2_inplace_s(X,Xf,U,Uf,N,T,dim,i1.iscolmajor()))
+        //if (codee::gru_min2_s(Y,X,Xf,U,Uf,N,T,i1.iscolmajor(),dim))
+        if (codee::gru_min2_inplace_s(X,Xf,U,Uf,N,T,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -235,8 +235,8 @@ int main(int argc, char *argv[])
         try { ifs4.read(reinterpret_cast<char*>(Uf),i4.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (Uf)" << endl; return 1; }
         //auto tic = chrono::high_resolution_clock::now();
-        //if (openn::gru_min2_d(Y,X,Xf,U,Uf,N,T,dim,i1.iscolmajor()))
-        if (openn::gru_min2_inplace_d(X,Xf,U,Uf,N,T,dim,i1.iscolmajor()))
+        //if (codee::gru_min2_d(Y,X,Xf,U,Uf,N,T,i1.iscolmajor(),dim))
+        if (codee::gru_min2_inplace_d(X,Xf,U,Uf,N,T,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {

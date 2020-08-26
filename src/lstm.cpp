@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,10 +9,9 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
+#include "../util/cmli.hpp"
 //#include <chrono>
 #include "lstm.c"
 
@@ -30,12 +30,12 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2};
-    const size_t I = 5, O = 1;
+    const valarray<size_t> oktypes = {1u,2u};
+    const size_t I = 5u, O = 1u;
     ifstream ifs1, ifs2, ifs3, ifs4, ifs5; ofstream ofs1;
     int8_t stdi1, stdi2, stdi3, stdi4, stdi5, stdo1, wo1;
     ioinfo i1, i2, i3, i4, i5, o1;
-    int dim, N, T;
+    size_t dim, N, T;
 
 
     //Description
@@ -45,14 +45,13 @@ int main(int argc, char *argv[])
     descr += "where Xc is the cell input, and\n";
     descr += "Xi, Xf, Xo are driving inputs for the input, forget, output gates.\n";
     descr += "\n";
-    descr += "Input X has size 4NxT or Tx4N, where N is the number of neurons\n";
+    descr += "Input X has size NxT or TxN, where N is the number of neurons\n";
     descr += "and T is the number of observations (e.g. time points).\n";
     descr += "\n";
-    descr += "X has 4N time-series because, for each of N neurons, \n";
-    descr += "it stacks the usual Xc, Xi, Xf, Xo into one matrix: \n";
+    descr += "X has N time-series because it stacks the 4 driving inputs into one matrix: \n";
     descr += "For dim==0, X = [Xc; Xi; Xf; Xo], and for dim==1, X = [Xc Xi Xf Xo]. \n";
     descr += "\n";
-    descr += "Use -d (--dim) to specify the dimension (axis) of length 4N [default=0].\n";
+    descr += "Use -d (--dim) to specify the dimension (axis) of length N [default=0].\n";
     descr += "\n";
     descr += "For dim=0, C[:,t] = tanh{Xc[:,t] + Uc*Y[:,t-1]} \n";
     descr += "           I[:,t] = sig{Xi[:,t] + Ui*Y[:,t-1]} \n";
@@ -137,7 +136,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0 || (i3.T==oktypes).sum()==0 || (i4.T==oktypes).sum()==0 || (i5.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -145,10 +144,10 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = 0; }
+    if (a_d->count==0) { dim = 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 
     //Checks
@@ -170,16 +169,16 @@ int main(int argc, char *argv[])
     if (i2.R!=i4.R || i2.C!=i4.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 2-5 (Uc, Ui, Uf, Uo) must have the same size" << endl; return 1; }
     if (i2.R!=i5.R || i2.C!=i5.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 2-5 (Uc, Ui, Uf, Uo) must have the same size" << endl; return 1; }
     if (i2.R!=i2.C || i3.R!=i3.C || i4.R!=i4.C || i5.R!=i5.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 2-5 (Uc, Ui, Uf, Uo) must be square" << endl; return 1; }
-    if (dim==0 && i1.R%4u) { cerr << progstr+": " << __LINE__ << errstr << "num rows X must be multiple of 4 for dim=0" << endl; return 1; }
-    if (dim==1 && i1.C%4u) { cerr << progstr+": " << __LINE__ << errstr << "num cols X must be multiple of 4 for dim=1" << endl; return 1; }
-    if (dim==0 && i1.R!=4u*i5.R) { cerr << progstr+": " << __LINE__ << errstr << "inputs 2-5 (Uc, Ui, Uf, Uo) must have size NxN" << endl; return 1; }
-    if (dim==1 && i1.C!=4u*i5.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 2-5 (Uc, Ui, Uf, Uo) must have size NxN" << endl; return 1; }
+    if (dim==0u && i1.R%4u) { cerr << progstr+": " << __LINE__ << errstr << "num rows X must be multiple of 4 for dim=0" << endl; return 1; }
+    if (dim==1u && i1.C%4u) { cerr << progstr+": " << __LINE__ << errstr << "num cols X must be multiple of 4 for dim=1" << endl; return 1; }
+    if (dim==0u && i1.R!=4u*i5.R) { cerr << progstr+": " << __LINE__ << errstr << "inputs 2-5 (Uc, Ui, Uf, Uo) must have size NxN" << endl; return 1; }
+    if (dim==1u && i1.C!=4u*i5.C) { cerr << progstr+": " << __LINE__ << errstr << "inputs 2-5 (Uc, Ui, Uf, Uo) must have size NxN" << endl; return 1; }
 
 
     //Set output header info
     o1.F = i1.F; o1.T = i1.T;
-    o1.R = (dim==0) ? i1.R/4u : i1.R;
-    o1.C = (dim==1) ? i1.C/4u : i1.C;
+    o1.R = (dim==0u) ? i1.R/4u : i1.R;
+    o1.C = (dim==1u) ? i1.C/4u : i1.C;
     o1.S = i1.S; o1.H = i1.H;
 
 
@@ -196,12 +195,12 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    N = (dim==0) ? int(o1.R) : int(o1.C);
-    T = (dim==0) ? int(o1.C) : int(o1.R);
+    N = (dim==0u) ? o1.R : o1.C;
+    T = (dim==0u) ? o1.C : o1.R;
     
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *X, *Uc, *Ui, *Uf, *Uo;// *Y;
         try { X = new float[i1.N()]; }
@@ -227,14 +226,14 @@ int main(int argc, char *argv[])
         try { ifs5.read(reinterpret_cast<char*>(Uo),i5.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (Uo)" << endl; return 1; }
         //auto tic = chrono::high_resolution_clock::now();
-        //if (openn::lstm_s(Y,X,Uc,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
-        if (openn::lstm_inplace_s(X,Uc,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
-        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
+        //if (codee::lstm_s(Y,X,Uc,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
+        if (codee::lstm_inplace_s(X,Uc,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             //try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-            if ((dim==0 && o1.isrowmajor()) || (dim==1 && o1.iscolmajor()))
+            if ((dim==0u && o1.isrowmajor()) || (dim==1u && o1.iscolmajor()))
             {
                 try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
                 catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
@@ -244,9 +243,9 @@ int main(int argc, char *argv[])
                 float *Y;
                 try { Y = new float[o1.N()]; }
                 catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-                for (int t=0; t<T; t++)
+                for (size_t t=0u; t<T; ++t)
                 {
-                    try { cblas_scopy(N,&X[4*t*N],1,&Y[t*N],1); }
+                    try { cblas_scopy((int)N,&X[4*t*N],1,&Y[t*N],1); }
                     catch(...) { cerr << progstr+": " << __LINE__ << errstr << "problem copying to output file (Y)" << endl; return 1; }
                 }
                 try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -285,14 +284,14 @@ int main(int argc, char *argv[])
         try { ifs5.read(reinterpret_cast<char*>(Uo),i5.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (Uo)" << endl; return 1; }
         //auto tic = chrono::high_resolution_clock::now();
-        //if (openn::lstm_d(Y,X,Uc,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
-        if (openn::lstm_inplace_d(X,Uc,Ui,Uf,Uo,N,T,dim,i1.iscolmajor()))
-        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
+        //if (codee::lstm_d(Y,X,Uc,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
+        if (codee::lstm_inplace_d(X,Uc,Ui,Uf,Uo,N,T,i1.iscolmajor(),dim))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             //try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
-            if ((dim==0 && o1.isrowmajor()) || (dim==1 && o1.iscolmajor()))
+            if ((dim==0u && o1.isrowmajor()) || (dim==1u && o1.iscolmajor()))
             {
                 try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
                 catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
@@ -302,9 +301,9 @@ int main(int argc, char *argv[])
                 double *Y;
                 try { Y = new double[o1.N()]; }
                 catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-                for (int t=0; t<T; t++)
+                for (size_t t=0u; t<T; ++t)
                 {
-                    try { cblas_dcopy(N,&X[4*t*N],1,&Y[t*N],1); }
+                    try { cblas_dcopy((int)N,&X[4*t*N],1,&Y[t*N],1); }
                     catch(...) { cerr << progstr+": " << __LINE__ << errstr << "problem copying to output file (Y)" << endl; return 1; }
                 }
                 try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }

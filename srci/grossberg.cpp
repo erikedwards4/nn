@@ -2,9 +2,9 @@
 #include "grossberg.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2,101,102};
-const size_t I = 5, O = 1;
-int dim, n, N, T;
+const valarray<size_t> oktypes = {1u,2u,101u,102u};
+const size_t I = 5u, O = 1u;
+size_t dim, N, T;
 double fs;
 
 //Description
@@ -60,20 +60,20 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = (i1.C==1u) ? 1 : 0; }
+if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-else { dim = a_d->ival[0]; }
-if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+else { dim = size_t(a_d->ival[0]); }
+if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 //Get fs
 fs = (a_fs->count>0) ? a_fs->dval[0] : 10000.0;
 if (fs<=0.0) { cerr << progstr+": " << __LINE__ << errstr << "fs (sample rate) must be positive" << endl; return 1; }
 
 //Checks
-if (i1.T!=i2.T && i1.T-100!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
-if (i1.T!=i3.T && i1.T-100!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
-if (i1.T!=i4.T && i1.T-100!=i4.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
-if (i1.T!=i5.T && i1.T-100!=i5.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+if (i1.T!=i2.T && i1.T-100u!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+if (i1.T!=i3.T && i1.T-100u!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+if (i1.T!=i4.T && i1.T-100u!=i4.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
+if (i1.T!=i5.T && i1.T-100u!=i5.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have compatible data types" << endl; return 1; }
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
 if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) must be a matrix" << endl; return 1; }
 if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (taus) found to be empty" << endl; return 1; }
@@ -86,22 +86,22 @@ if (i5.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 5 (gamm
 if (!i5.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 5 (gammas) must be a vector or scalar" << endl; return 1; }
 if (i2.N()!=1u)
 {
-    if ((dim==0 && i2.N()!=i1.R) || (dim==1 && i2.N()!=i1.C))
+    if ((dim==0u && i2.N()!=i1.R) || (dim==1u && i2.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length taus must equal N (num neurons)" << endl; return 1; }
 }
 if (i3.N()!=1u)
 {
-    if ((dim==0 && i3.N()!=i1.R) || (dim==1 && i3.N()!=i1.C))
+    if ((dim==0u && i3.N()!=i1.R) || (dim==1u && i3.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length alphas must equal N (num neurons)" << endl; return 1; }
 }
 if (i4.N()!=1u)
 {
-    if ((dim==0 && i4.N()!=i1.R) || (dim==1 && i4.N()!=i1.C))
+    if ((dim==0u && i4.N()!=i1.R) || (dim==1u && i4.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length betas must equal N (num neurons)" << endl; return 1; }
 }
 if (i5.N()!=1u)
 {
-    if ((dim==0 && i5.N()!=i1.R) || (dim==1 && i5.N()!=i1.C))
+    if ((dim==0u && i5.N()!=i1.R) || (dim==1u && i5.N()!=i1.C))
     { cerr << progstr+": " << __LINE__ << errstr << "length gammas must equal N (num neurons)" << endl; return 1; }
 }
 
@@ -110,12 +110,12 @@ o1.F = i1.F; o1.T = i1.T;
 o1.R = i1.R; o1.C = i1.C; o1.S = i1.S; o1.H = i1.H;
 
 //Other prep
-N = (dim==0) ? int(o1.R) : int(o1.C);
-T = (dim==0) ? int(o1.C) : int(o1.R);
-if (T<2) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
+N = (dim==0u) ? o1.R : o1.C;
+T = (dim==0u) ? o1.C : o1.R;
+if (T<2u) { cerr << progstr+": " << __LINE__ << errstr << "num time points must be > 1" << endl; return 1; }
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *X, *taus, *alphas, *betas, *gammas;
     try { X = new float[i1.N()]; }
@@ -138,11 +138,11 @@ if (i1.T==1)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (betas)" << endl; return 1; }
     try { ifs5.read(reinterpret_cast<char*>(gammas),i5.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (gammas)" << endl; return 1; }
-    if (i2.N()==1u) { for (n=1; n<N; n++) { taus[n] = taus[0]; } }
-    if (i3.N()==1u) { for (n=1; n<N; n++) { alphas[n] = alphas[0]; } }
-    if (i4.N()==1u) { for (n=1; n<N; n++) { betas[n] = betas[0]; } }
-    if (i5.N()==1u) { for (n=1; n<N; n++) { gammas[n] = gammas[0]; } }
-    if (openn::grossberg_inplace_s(X,taus,alphas,betas,gammas,N,T,dim,i1.iscolmajor(),float(fs)))
+    if (i2.N()==1u) { for (size_t n=1u; n<N; ++n) { taus[n] = taus[0]; } }
+    if (i3.N()==1u) { for (size_t n=1u; n<N; ++n) { alphas[n] = alphas[0]; } }
+    if (i4.N()==1u) { for (size_t n=1u; n<N; ++n) { betas[n] = betas[0]; } }
+    if (i5.N()==1u) { for (size_t n=1u; n<N; ++n) { gammas[n] = gammas[0]; } }
+    if (codee::grossberg_inplace_s(X,taus,alphas,betas,gammas,N,T,i1.iscolmajor(),dim,float(fs)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -151,7 +151,7 @@ if (i1.T==1)
     }
     delete[] X; delete[] taus; delete[] alphas; delete[] betas; delete[] gammas;
 }
-else if (i1.T==101)
+else if (i1.T==101u)
 {
     float *X, *taus, *alphas, *betas, *gammas;
     try { X = new float[2u*i1.N()]; }
@@ -174,11 +174,11 @@ else if (i1.T==101)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 4 (betas)" << endl; return 1; }
     try { ifs5.read(reinterpret_cast<char*>(gammas),i5.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 5 (gammas)" << endl; return 1; }
-    if (i2.N()==1u) { for (n=1; n<N; n++) { taus[n] = taus[0]; } }
-    if (i3.N()==1u) { for (n=1; n<N; n++) { alphas[n] = alphas[0]; } }
-    if (i4.N()==1u) { for (n=1; n<N; n++) { betas[n] = betas[0]; } }
-    if (i5.N()==1u) { for (n=1; n<N; n++) { gammas[n] = gammas[0]; } }
-    if (openn::grossberg_inplace_c(X,taus,alphas,betas,gammas,N,T,dim,i1.iscolmajor(),float(fs)))
+    if (i2.N()==1u) { for (size_t n=1u; n<N; ++n) { taus[n] = taus[0]; } }
+    if (i3.N()==1u) { for (size_t n=1u; n<N; ++n) { alphas[n] = alphas[0]; } }
+    if (i4.N()==1u) { for (size_t n=1u; n<N; ++n) { betas[n] = betas[0]; } }
+    if (i5.N()==1u) { for (size_t n=1u; n<N; ++n) { gammas[n] = gammas[0]; } }
+    if (codee::grossberg_inplace_c(X,taus,alphas,betas,gammas,N,T,i1.iscolmajor(),dim,float(fs)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
@@ -189,4 +189,3 @@ else if (i1.T==101)
 }
 
 //Finish
-

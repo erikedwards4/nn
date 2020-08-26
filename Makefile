@@ -1,120 +1,67 @@
 #@author Erik Edwards
-#@date 2019-2020
+#@date 2018-present
+#@license BSD 3-clause
 
-#openN is my own library of functions for computational neurons in C and C++.
-#This is the makefile for the CMLI wrappers to use openN at the command-line.
+#nn is my own library of functions for neural networks (NNs)
+#and computational neurons in C and C++.
+#This is the makefile for the C++ wrappers to use at the command-line.
 
 #Project is organized as:
-#Math  : some useful math functions
-#Input : input side of neurons
-#INPUT : input side for layers of neurons
-#Output: output side of neurons
-#OUTPUT: output side for layers of neurons
+#IN : input side (~synapses+dendrites) for neurons and layers of neurons
+#CELL: middle part (~soma) for neurons and layers of neurons
+#OUT: output side (~axon hillock) for neurons and layers of neurons
+
+#That is, each neuron or each layer has 3 "components" -- IN, CELL and OUT.
+#For most NNs, the IN side is an affine transform (weights and biases),
+#the CELL is just the identity, and the OUT side is a static nonlinearity.
+#Thus, a "ReLU neuron" is an affine transform (IN) followed by a ReLU nonlinearity (OUT).
+#Here, the IN/OUT sides are decoupled to allow better flexibility and coding focus/modularity.
+#The CELL part is required for RNNs (LSTMs, etc.) and for model neurons of computational neurosci.
 
 SHELL=/bin/bash
-
-ss=bin/srci2src
-
+ss=../util/bin/srci2src
 CC=clang++
-
 
 ifeq ($(CC),clang++)
 	STD=-std=c++11
-	WFLAG=-Weverything -Wno-c++98-compat -Wno-padded -Wno-old-style-cast -Wno-gnu-imaginary-constant
+	WFLAG=-Weverything -Wno-c++98-compat -Wno-old-style-cast -Wno-gnu-imaginary-constant
 else
 	STD=-std=gnu++14
 	WFLAG=-Wall -Wextra
 endif
 
-CFLAGS=$(WFLAG) -O3 $(STD) -march=native -Ic
+INCLS=-Ic -I../util
+CFLAGS=$(WFLAG) $(STD) -O2 -ffast-math -march=native $(INCLS)
 #LIBS=-largtable2 -lopenblas -llapacke -llapack -lfftw3f -lfftw3 -lm
 
 
-all: srci2src MATH IN CELL OUT
+All: all
+all: Dirs IN CELL OUT Clean
 	rm -f 7 obj/*.o
 
-srci2src: src/srci2src.cpp
-	$(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-
-
-
-#MATH: some useful math functions
-MATH: Split_Join Nonlin Stats
-
-#Split_Join: utilities to split matrix into several, or join several matrices into one.
-Split_Join: split2 split3 join2 join3
-split2: srci/split2.cpp c/split2.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-split3: srci/split3.cpp c/split3.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-join2: srci/join2.cpp c/join2.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-join3: srci/join3.cpp c/join3.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-
-#Nonlin: various static nonlinearities
-Nonlin: abs square sqrt cbrt log log2 log10 pow exp deadzone
-abs: srci/abs.cpp c/abs.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-square: srci/square.cpp c/square.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-sqrt: srci/sqrt.cpp c/sqrt.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-cbrt: srci/cbrt.cpp c/cbrt.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-log: srci/log.cpp c/log.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-log2: srci/log2.cpp c/log2.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-log10: srci/log10.cpp c/log10.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-pow: srci/pow.cpp c/pow.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-exp: srci/exp.cpp c/exp.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
-deadzone: srci/deadzone.cpp c/deadzone.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
-
-#Stats: some basic statistics calculated row-wise or column-wise
-Stats: sum asum cnt min max range median mean std var norm1 norm2
-sum: srci/sum.cpp c/sum.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-asum: srci/asum.cpp c/asum.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-cnt: srci/cnt.cpp c/cnt.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-min: srci/min.cpp c/min.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-max: srci/max.cpp c/max.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-range: srci/range.cpp c/range.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-median: srci/median.cpp c/median.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-mean: srci/mean.cpp c/mean.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-std: srci/std.cpp c/std.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-var: srci/var.cpp c/var.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
-norm1: srci/norm1.cpp c/norm1.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-norm2: srci/norm2.cpp c/norm2.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-
+Dirs:
+	mkdir -pm 777 bin obj
 
 
 #IN: input side of neurons (~dendrites)
-#For now, I only implement the usual wieghts and weights+biases (great majority of neuron models use this).
-IN: linear0 linear
-linear0: srci/linear0.cpp c/linear0.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+#For now, I only implement the usual weights (linear) and weights+biases (affine).
+#The great majority of neuron models use this.
+#Later, this can include biologically-motivated dendrites and synapses.
+IN: Linear Conv
+
+Linear: linear affine
 linear: srci/linear.cpp c/linear.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+affine: srci/affine.cpp c/affine.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
+Conv: #conv conv_fft maxpool avgpool
 
 
 #CELL: middle part of neurons (~soma)
+#For most NNs in ML, this is just an identity (so can be also be skipped).
+#However, for RNNs (LSTMs, etc.), this is the main part of the neuron (or layer of neurons).
+#For computational neuroscience, many other possibilities exist, and a few critical ones are implemented here.
 CELL: Basic Model RNN
 
 Basic: identity integrate fir
@@ -127,7 +74,7 @@ fir: srci/fir.cpp c/fir.c
 
 Model: fukushima fukushima2 hopfield grossberg grossberg2
 fukushima: srci/fukushima.cpp c/fukushima.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas
 fukushima2: srci/fukushima2.cpp c/fukushima2.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 hopfield: srci/hopfield.cpp c/hopfield.c
@@ -162,11 +109,11 @@ lstm_peephole4: srci/lstm_peephole4.cpp c/lstm_peephole4.c
 
 
 #OUT: output side of neurons (~axon hillock and axon)
-OUT: Activations_Static Activations_Other #CN_Neurons DEQ_Neurons
+OUT: Static_Act Other_Act #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply without modification to single neurons or to layers of neurons.
-Activations_Static: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish
+Static_Act: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish sin
 step: srci/step.cpp c/step.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 signum: srci/signum.cpp c/signum.c
@@ -213,15 +160,20 @@ silu: srci/silu.cpp c/silu.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 swish: srci/swish.cpp c/swish.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+sin: srci/sin.cpp c/sin.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+
 
 #Other OUT Activation functions 
+#Softmax is inherently layer-wise (output of any single neuron depends on the whole layer).
 #Maxout can be applied without modification to layers or single neurons, but it is not a static nonlinearity.
-#Softmax is inherently layer-wise (output of any single neuron depends on layer).
-Activations_Other: maxout softmax
+Other_Act: maxout softmax betamax
 maxout: srci/maxout.cpp c/maxout.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 softmax: srci/softmax.cpp c/softmax.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+betamax: srci/betamax.cpp c/betamax.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 
 
 
@@ -232,5 +184,8 @@ softmax: srci/softmax.cpp c/softmax.c
 #DEQ_Neurons: vanderpol fitzhugh nagumo izhikevich wang
 
 
+#make clean
+Clean: clean
 clean:
 	find ./obj -type f -name *.o | xargs rm -f
+	rm -f 7 X* Y* x* y*

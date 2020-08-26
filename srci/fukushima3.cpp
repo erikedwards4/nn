@@ -1,12 +1,11 @@
 //Includes
 //#include <chrono>
-#include <cblas.h>
 #include "fukushima.c"
 
 //Declarations
-const valarray<uint8_t> oktypes = {1,2};
-const size_t I = 1, O = 1;
-int dim, N, T;
+const valarray<size_t> oktypes = {1u,2u};
+const size_t I = 1u, O = 1u;
+size_t dim, N, T;
 
 //Description
 string descr;
@@ -51,15 +50,15 @@ struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 //Get options
 
 //Get dim
-if (a_d->count==0) { dim = 0; }
+if (a_d->count==0) { dim = 0u; }
 else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-else { dim = a_d->ival[0]; }
-if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+else { dim = size_t(a_d->ival[0]); }
+if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
 if (!i1.iscube()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must be a cube" << endl; return 1; }
-if (i1.S!=2) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must have 2 slices" << endl; return 1; }
+if (i1.S!=2u) { cerr << progstr+": " << __LINE__ << errstr << "input (X) must have 2 slices" << endl; return 1; }
 
 //Set output header info
 o1.F = i1.F; o1.T = i1.T;
@@ -67,22 +66,22 @@ o1.R = i1.R; o1.C = i1.C;
 o1.S = 1u; o1.H = i1.H;
 
 //Other prep
-N = (dim==0) ? int(o1.R) : int(o1.C);
-T = (dim==0) ? int(o1.C) : int(o1.R);
+N = (dim==0u) ? o1.R : o1.C;
+T = (dim==0u) ? o1.C : o1.R;
 
 //Process
-if (i1.T==1)
+if (i1.T==1u)
 {
     float *X;
     try { X = new float[i1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (openn::fukushima_inplace_s(X,N,T,dim,i1.iscolmajor()))
+    if (codee::fukushima_inplace_s(X,N,T,i1.iscolmajor(),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
     if (wo1)
     {
-        if ((dim==0 && o1.isrowmajor()) || (dim==1 && o1.iscolmajor()))
+        if ((dim==0u && o1.isrowmajor()) || (dim==1u && o1.iscolmajor()))
         {
             try { ofs1.write(reinterpret_cast<char*>(X),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
@@ -92,9 +91,9 @@ if (i1.T==1)
             float *Y;
             try { Y = new float[o1.N()]; }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-            for (int t=0; t<T; t++)
+            for (size_t t=0u; t<T; ++t)
             {
-                try { cblas_scopy(N,&X[2*t*N],1,&Y[t*N],1); }
+                try { cblas_scopy(N,&X[2u*t*N],1,&Y[t*N],1); }
                 catch(...) { cerr << progstr+": " << __LINE__ << errstr << "problem copying to output file (Y)" << endl; return 1; }
             }
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
@@ -106,4 +105,3 @@ if (i1.T==1)
 }
 
 //Finish
-

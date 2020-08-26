@@ -1,5 +1,6 @@
 //@author Erik Edwards
-//@date 2019-2020
+//@date 2018-present
+//@license BSD 3-clause
 
 
 #include <iostream>
@@ -8,12 +9,10 @@
 #include <string>
 #include <cstring>
 #include <valarray>
-#include <complex>
 #include <unordered_map>
 #include <argtable2.h>
-#include "/home/erik/codee/cmli/cmli.hpp"
+#include "../util/cmli.hpp"
 //#include <chrono>
-#include <cblas.h>
 #include "fukushima2.c"
 
 #ifdef I
@@ -31,12 +30,12 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<uint8_t> oktypes = {1,2};
-    const size_t I = 2, O = 1;
+    const valarray<size_t> oktypes = {1u,2u};
+    const size_t I = 2u, O = 1u;
     ifstream ifs1, ifs2; ofstream ofs1;
     int8_t stdi1, stdi2, stdo1, wo1;
     ioinfo i1, i2, o1;
-    int dim, N, T;
+    size_t dim, N, T;
 
 
     //Description
@@ -65,13 +64,14 @@ int main(int argc, char *argv[])
     descr += "           Xi: T x N \n";
     descr += "           Y:  T x N \n";
     descr += "\n";
-    descr += "The output Y should be passed through an activation function,\n";
-    descr += "where the original model used a ReLU activation function.\n";
+    descr += "The output Y should be passed through an activation function with range [0 1].\n";
+    descr += "The original model used a ReLU activation function, but that is not \n";
+    descr += "included here so that other activation functions can be tried. \n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ fukushima Xe Xi -o Y \n";
-    descr += "$ fukushima Xe Xi > Y \n";
-    descr += "$ cat Xi | fukushima Xe - > Y \n";
+    descr += "$ fukushima2 Xe Xi -o Y \n";
+    descr += "$ fukushima2 Xe Xi > Y \n";
+    descr += "$ cat Xi | fukushima2 Xe - > Y \n";
 
 
     //Argtable
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
-        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1]) ? "}" : ","); }
+        for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
         cerr << endl; return 1;
     }
 
@@ -127,10 +127,10 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get dim
-    if (a_d->count==0) { dim = 0; }
+    if (a_d->count==0) { dim = 0u; }
     else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = a_d->ival[0]; }
-    if (dim>1) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
+    else { dim = size_t(a_d->ival[0]); }
+    if (dim>1u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1}" << endl; return 1; }
 
 
     //Checks
@@ -160,12 +160,12 @@ int main(int argc, char *argv[])
 
 
     //Other prep
-    N = (dim==0) ? int(o1.R) : int(o1.C);
-    T = (dim==0) ? int(o1.C) : int(o1.R);
+    N = (dim==0u) ? o1.R : o1.C;
+    T = (dim==0u) ? o1.C : o1.R;
     
 
     //Process
-    if (i1.T==1)
+    if (i1.T==1u)
     {
         float *Xe, *Xi; //*Y;
         try { Xe = new float[i1.N()]; }
@@ -179,8 +179,8 @@ int main(int argc, char *argv[])
         try { ifs2.read(reinterpret_cast<char*>(Xi),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (Xi)" << endl; return 1; }
         //auto tic = chrono::high_resolution_clock::now();
-        //if (openn::fukushima_s(Y,X,N,T,dim,i1.iscolmajor()))
-        if (openn::fukushima2_inplace_s(Xe,Xi,N,T,dim,i1.iscolmajor()))
+        //if (codee::fukushima_s(Y,X,N,T,i1.iscolmajor(),dim))
+        if (codee::fukushima2_inplace_s(Xe,Xi,N,T,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
@@ -206,8 +206,8 @@ int main(int argc, char *argv[])
         try { ifs2.read(reinterpret_cast<char*>(Xi),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (Xi)" << endl; return 1; }
         //auto tic = chrono::high_resolution_clock::now();
-        //if (openn::fukushima_d(Y,X,N,T,dim,i1.iscolmajor()))
-        if (openn::fukushima2_inplace_d(Xe,Xi,N,T,dim,i1.iscolmajor()))
+        //if (codee::fukushima_d(Y,X,N,T,i1.iscolmajor(),dim))
+        if (codee::fukushima2_inplace_d(Xe,Xi,N,T,i1.iscolmajor(),dim))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; } 
         if (wo1)
         {
