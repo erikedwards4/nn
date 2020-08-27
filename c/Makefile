@@ -2,10 +2,11 @@
 #@date 2017-present
 #@license BSD 3-clause
 
-#nn is my own library of C functions for computational neurons in C.
+#nn is my own library of C functions for NNs (neural networks) and computational neurons.
 
 #This is the Makefile used during development of the C functions.
 #Since these are not stand-alone programs (no main functions), the only outputs are object files to obj.
+#It is not necessary to run this when making the C++ command-line tools.
 
 #Project is organized as:
 #IN  : input side of neurons and layers of neurons
@@ -32,7 +33,10 @@ CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
 
 
 All: all
-all: IN CELL OUT Clean
+all: Dirs IN CELL OUT Clean
+
+Dirs:
+	mkdir -pm 777 obj
 
 
 #IN: input side of neurons/layers
