@@ -50,30 +50,31 @@ For Ubuntu, these are available by apt-get:
 sudo apt-get install libargtable2-0 libblas3 libopenblas-base
 ```
 
+You must first install the util library:  
+https://github.com/erikedwards4/util  
+And install nn into the same parent directory as util.  
+Preferably: /opt/codee/util and /opt/codee/nn  
+For full examples and support functions, also install math and dsp:  
+https://github.com/erikedwards4/math  
+https://github.com/erikedwards4/dsp  
+
+
 
 ## Installation
-```console
+```
 cd /opt/codee
 git clone https://github.com/erikedwards4/nn
 cd /opt/codee/nn
 make
 ```
 
-Each C function can also be compiled separately; see c subdirectory Makefile for details.  
-To make an archive library:  
-```console
-cd /opt/codee/nn/c
-make libnn.a CC=clang
-```
-This creates /opt/codee/nn/lib/libnn.a with all of the C object files.  
-This could be useful if trying to use the C functions in other applications.  
-Change clang to clang++ to compile for use with C++ applications.  
+Each C function can also be compiled and used separately; see c subdirectory Makefile for details.  
 
 
 ## Usage
 See each resulting command-line tool for help (use -h or --help option).  
 For example:  
-```console
+```
 /opt/codee/math/bin/log2 --help
 ```
 
@@ -101,4 +102,3 @@ This is currently only to view the project in progress.
 
 ## License
 [BSD 3-Clause](https://choosealicense.com/licenses/bsd-3-clause/)
-
