@@ -1,0 +1,14 @@
+7
+b2b
+b2t
+t2b
+*.a
+*.so
+*.o
+**/c/old/
+**/c/old2/
+**/c_old/
+**/bin/
+**/obj/
+**/srci/old/
+
