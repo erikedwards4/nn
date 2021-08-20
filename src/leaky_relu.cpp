@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "relu.c"
+#include "leaky_relu.c"
 
 #ifdef I
 #undef I
@@ -39,14 +39,16 @@ int main(int argc, char *argv[])
     //Description
     string descr;
     descr += "Activation function.\n";
-    descr += "Gets ReLU (Rectified Linear Unit) of each element of X.\n";
-    descr += "For each element: y = 0,  if x<0. \n";
-    descr += "                  y = x,  if x>=0. \n";
+    descr += "Gets leaky ReLU of each element of X.\n";
+    descr += "For each element: y = 0.01*x,  if x<0. \n";
+    descr += "                  y = x,       if x>=0. \n";
+    descr += "\n";
+    descr += "This is equal to the parametric ReLU with alpha=0.01.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ relu X -o Y \n";
-    descr += "$ relu X > Y \n";
-    descr += "$ cat X | relu > Y \n";
+    descr += "$ leaky_relu X -o Y \n";
+    descr += "$ leaky_relu X > Y \n";
+    descr += "$ cat X | leaky_relu > Y \n";
 
 
     //Argtable
@@ -128,7 +130,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::relu_inplace_s(X,i1.N()))
+        if (codee::leaky_relu_inplace_s(X,i1.N()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -144,7 +146,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::relu_inplace_d(X,i1.N()))
+        if (codee::leaky_relu_inplace_d(X,i1.N()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
