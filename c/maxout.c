@@ -25,19 +25,19 @@ int maxout_s (float *Y, const float *X, const size_t R, const size_t C, const si
     if (dim>3) { fprintf(stderr,"error in maxout_s: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     if (Lx%M) { fprintf(stderr,"error in maxout_s: each vector in X must have length that is multiple of M\n"); return 1; }
     const size_t Ly = Lx / M;
     float mx;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==1)
     {
-        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X; }
     }
     else if (Lx==N)
     {
-        for (size_t l=0; l<Ly; ++l, X-=Lx-1, ++Y)
+        for (size_t l=0u; l<Ly; ++l, X-=Lx-1, ++Y)
         {
             mx = *X; X += Ly;
             for (size_t m=1; m<M; ++m, X+=Ly) { if (*X>mx) { mx = *X; } }
@@ -46,15 +46,15 @@ int maxout_s (float *Y, const float *X, const size_t R, const size_t C, const si
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
 
-        if (K==1 && (G==1 || B==1))
+        if (K==1u && (G==1u || B==1u))
         {
             for (size_t v=0; v<V; ++v, X-=Ly-1)
             {
-                for (size_t l=0; l<Ly; ++l, ++Y)
+                for (size_t l=0u; l<Ly; ++l, ++Y)
                 {
                     mx = *X; X += Ly;
                     for (size_t m=1; m<M; ++m, X+=Ly) { if (*X>mx) { mx = *X; } }
@@ -65,11 +65,11 @@ int maxout_s (float *Y, const float *X, const size_t R, const size_t C, const si
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=B*(Lx-1), Y+=B*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=B*(Lx-1), Y+=B*(Ly-1))
             {
-                for (size_t b=0; b<B; ++b, X-=K*Ly-1, Y-=K*Ly-1)
+                for (size_t b=B; b>0u; --b, X-=K*Ly-1, Y-=K*Ly-1)
                 {
-                    for (size_t l=0; l<Ly; ++l, X-=K*(Lx-1), Y+=K)
+                    for (size_t l=0u; l<Ly; ++l, X-=K*(Lx-1), Y+=K)
                     {
                         mx = *X; X += K*Ly;
                         for (size_t m=1; m<M; ++m, X+=K*Ly) { if (*X>mx) { mx = *X; } }
@@ -89,19 +89,19 @@ int maxout_d (double *Y, const double *X, const size_t R, const size_t C, const 
     if (dim>3) { fprintf(stderr,"error in maxout_d: dim must be in [0 3]\n"); return 1; }
 
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     if (Lx%M) { fprintf(stderr,"error in maxout_d: each vector in X must have length that is multiple of M\n"); return 1; }
     const size_t Ly = Lx / M;
     double mx;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==1)
     {
-        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = *X; }
+        for (size_t n=0u; n<N; ++n, ++X, ++Y) { *Y = *X; }
     }
     else if (Lx==N)
     {
-        for (size_t l=0; l<Ly; ++l, X-=Lx-1, ++Y)
+        for (size_t l=0u; l<Ly; ++l, X-=Lx-1, ++Y)
         {
             mx = *X; X += Ly;
             for (size_t m=1; m<M; ++m, X+=Ly) { if (*X>mx) { mx = *X; } }
@@ -110,15 +110,15 @@ int maxout_d (double *Y, const double *X, const size_t R, const size_t C, const 
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
 
-        if (K==1 && (G==1 || B==1))
+        if (K==1u && (G==1u || B==1u))
         {
             for (size_t v=0; v<V; ++v, X-=Ly-1)
             {
-                for (size_t l=0; l<Ly; ++l, ++Y)
+                for (size_t l=0u; l<Ly; ++l, ++Y)
                 {
                     mx = *X; X += Ly;
                     for (size_t m=1; m<M; ++m, X+=Ly) { if (*X>mx) { mx = *X; } }
@@ -129,11 +129,11 @@ int maxout_d (double *Y, const double *X, const size_t R, const size_t C, const 
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=B*(Lx-1), Y+=B*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=B*(Lx-1), Y+=B*(Ly-1))
             {
-                for (size_t b=0; b<B; ++b, X-=K*Ly-1, Y-=K*Ly-1)
+                for (size_t b=B; b>0u; --b, X-=K*Ly-1, Y-=K*Ly-1)
                 {
-                    for (size_t l=0; l<Ly; ++l, X-=K*(Lx-1), Y+=K)
+                    for (size_t l=0u; l<Ly; ++l, X-=K*(Lx-1), Y+=K)
                     {
                         mx = *X; X += K*Ly;
                         for (size_t m=1; m<M; ++m, X+=K*Ly) { if (*X>mx) { mx = *X; } }

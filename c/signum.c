@@ -23,8 +23,8 @@ int signum_s (float *Y, const float *X, const size_t N, const float thresh)
 {
     //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X>thresh) - (*X<thresh); }
-    // for (size_t n=0; n<N; ++n, ++X, ++Y)
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X>thresh) - (*X<thresh); }
+    // for (size_t n=N; n>0u; --n, ++X, ++Y)
     // {
     //     if (*X<thresh) { *Y = -1.0f; }
     //     else if (*X>thresh) { *Y = 1.0f; }
@@ -39,7 +39,7 @@ int signum_s (float *Y, const float *X, const size_t N, const float thresh)
 
 int signum_d (double *Y, const double *X, const size_t N, const double thresh)
 {
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X>thresh) - (*X<thresh); }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X>thresh) - (*X<thresh); }
     
     return 0;
 }
@@ -47,7 +47,7 @@ int signum_d (double *Y, const double *X, const size_t N, const double thresh)
 
 int signum_inplace_s (float *X, const size_t N, const float thresh)
 {
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         if (*X<thresh) { *X = -1.0f; }
         else if (*X>thresh) { *X = 1.0f; }
@@ -59,7 +59,7 @@ int signum_inplace_s (float *X, const size_t N, const float thresh)
 
 int signum_inplace_d (double *X, const size_t N, const double thresh)
 {
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         if (*X<thresh) { *X = -1.0; }
         else if (*X>thresh) { *X = 1.0; }

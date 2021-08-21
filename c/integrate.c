@@ -37,53 +37,53 @@ int integrate_s (float *Y, const float *X, const float *tau, const size_t N, con
     if (fs<=0.0f) { fprintf(stderr,"error in integrate_s: fs (sample rate) must be positive\n"); return 1; }
     if (tau[0]<=0.0f) { fprintf(stderr,"error in integrate_s: taus must be positive\n"); return 1; }
 
-    if (N==1)
+    if (N==1u)
     {
         a = expf(-1.0f/(fs*tau[0])); b = 1.0f - a;
         Y[0] = b*X[0];
-        for (size_t t=1; t<T; ++t) { Y[t] = a*Y[t-1] + b*X[t]; }
+        for (size_t t=1u; t<T; ++t) { Y[t] = a*Y[t-1] + b*X[t]; }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 Y[n] = b*X[n];
-                for (size_t t=1; t<T; ++t) { Y[n+t*N] = a*Y[n+(t-1)*N] + b*X[n+t*N]; }
+                for (size_t t=1u; t<T; ++t) { Y[n+t*N] = a*Y[n+(t-1)*N] + b*X[n+t*N]; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 Y[nT] = b*X[nT];
-                for (size_t t=1; t<T; ++t) { Y[nT+t] = a*Y[nT+t-1] + b*X[nT+t]; }
+                for (size_t t=1u; t<T; ++t) { Y[nT+t] = a*Y[nT+t-1] + b*X[nT+t]; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 Y[nT] = b*X[nT];
-                for (size_t t=1; t<T; ++t) { Y[nT+t] = a*Y[nT+t-1] + b*X[nT+t]; }
+                for (size_t t=1u; t<T; ++t) { Y[nT+t] = a*Y[nT+t-1] + b*X[nT+t]; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 Y[n] = b*X[n];
-                for (size_t t=1; t<T; ++t) { Y[n+t*N] = a*Y[n+(t-1)*N] + b*X[n+t*N]; }
+                for (size_t t=1u; t<T; ++t) { Y[n+t*N] = a*Y[n+(t-1)*N] + b*X[n+t*N]; }
             }
         }
     }
@@ -104,53 +104,53 @@ int integrate_d (double *Y, const double *X, const double *tau, const size_t N, 
     size_t nT;
     double a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = exp(-1.0/(fs*tau[0])); b = 1.0 - a;
         Y[0] = b*X[0];
-        for (size_t t=1; t<T; ++t) { Y[t] = a*Y[t-1] + b*X[t]; }
+        for (size_t t=1u; t<T; ++t) { Y[t] = a*Y[t-1] + b*X[t]; }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 Y[n] = b*X[n];
-                for (size_t t=1; t<T; ++t) { Y[n+t*N] = a*Y[n+(t-1)*N] + b*X[n+t*N]; }
+                for (size_t t=1u; t<T; ++t) { Y[n+t*N] = a*Y[n+(t-1)*N] + b*X[n+t*N]; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 Y[nT] = b*X[nT];
-                for (size_t t=1; t<T; ++t) { Y[nT+t] = a*Y[nT+t-1] + b*X[nT+t]; }
+                for (size_t t=1u; t<T; ++t) { Y[nT+t] = a*Y[nT+t-1] + b*X[nT+t]; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 Y[nT] = b*X[nT];
-                for (size_t t=1; t<T; ++t) { Y[nT+t] = a*Y[nT+t-1] + b*X[nT+t]; }
+                for (size_t t=1u; t<T; ++t) { Y[nT+t] = a*Y[nT+t-1] + b*X[nT+t]; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 Y[n] = b*X[n];
-                for (size_t t=1; t<T; ++t) { Y[n+t*N] = a*Y[n+(t-1)*N] + b*X[n+t*N]; }
+                for (size_t t=1u; t<T; ++t) { Y[n+t*N] = a*Y[n+(t-1)*N] + b*X[n+t*N]; }
             }
         }
     }
@@ -171,25 +171,25 @@ int integrate_c (float *Y, const float *X, const float *tau, const size_t N, con
     size_t nT;
     float a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = expf(-1.0f/(fs*tau[0])); b = 1.0f - a;
         Y[0] = b*X[0]; Y[1] = b*X[1];
-        for (size_t t=1; t<T; ++t)
+        for (size_t t=1u; t<T; ++t)
         {
             Y[2*t] = a*Y[2*t-2] + b*X[2*t];
             Y[2*t+1] = a*Y[2*t-1] + b*X[2*t+1];
         }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 Y[2*n] = b*X[2*n]; Y[2*n+1] = b*X[2*n+1];
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     Y[2*(n+t*N)] = a*Y[2*(n+(t-1)*N)] + b*X[2*(n+t*N)];
                     Y[2*(n+t*N)+1] = a*Y[2*(n+(t-1)*N)+1] + b*X[2*(n+t*N)+1];
@@ -198,12 +198,12 @@ int integrate_c (float *Y, const float *X, const float *tau, const size_t N, con
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 Y[2*nT] = b*X[2*nT]; Y[2*nT+1] = b*X[2*nT+1];
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     Y[2*(nT+t)] = a*Y[2*(nT+t-1)] + b*X[2*(nT+t)];
                     Y[2*(nT+t)+1] = a*Y[2*(nT+t-1)+1] + b*X[2*(nT+t)+1];
@@ -211,16 +211,16 @@ int integrate_c (float *Y, const float *X, const float *tau, const size_t N, con
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 Y[2*nT] = b*X[2*nT]; Y[2*nT+1] = b*X[2*nT+1];
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     Y[2*(nT+t)] = a*Y[2*(nT+t-1)] + b*X[2*(nT+t)];
                     Y[2*(nT+t)+1] = a*Y[2*(nT+t-1)+1] + b*X[2*(nT+t)+1];
@@ -229,11 +229,11 @@ int integrate_c (float *Y, const float *X, const float *tau, const size_t N, con
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 Y[2*n] = b*X[2*n]; Y[2*n+1] = b*X[2*n+1];
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     Y[2*(n+t*N)] = a*Y[2*(n+(t-1)*N)] + b*X[2*(n+t*N)];
                     Y[2*(n+t*N)+1] = a*Y[2*(n+(t-1)*N)+1] + b*X[2*(n+t*N)+1];
@@ -258,25 +258,25 @@ int integrate_z (double *Y, const double *X, const double *tau, const size_t N, 
     size_t nT;
     double a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = exp(-1.0/(fs*tau[0])); b = 1.0 - a;
         Y[0] = b*X[0]; Y[1] = b*X[1];
-        for (size_t t=1; t<T; ++t)
+        for (size_t t=1u; t<T; ++t)
         {
             Y[2*t] = a*Y[2*t-2] + b*X[2*t];
             Y[2*t+1] = a*Y[2*t-1] + b*X[2*t+1];
         }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 Y[2*n] = b*X[2*n]; Y[2*n+1] = b*X[2*n+1];
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     Y[2*(n+t*N)] = a*Y[2*(n+(t-1)*N)] + b*X[2*(n+t*N)];
                     Y[2*(n+t*N)+1] = a*Y[2*(n+(t-1)*N)+1] + b*X[2*(n+t*N)+1];
@@ -285,12 +285,12 @@ int integrate_z (double *Y, const double *X, const double *tau, const size_t N, 
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 Y[2*nT] = b*X[2*nT]; Y[2*nT+1] = b*X[2*nT+1];
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     Y[2*(nT+t)] = a*Y[2*(nT+t-1)] + b*X[2*(nT+t)];
                     Y[2*(nT+t)+1] = a*Y[2*(nT+t-1)+1] + b*X[2*(nT+t)+1];
@@ -298,16 +298,16 @@ int integrate_z (double *Y, const double *X, const double *tau, const size_t N, 
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 Y[2*nT] = b*X[2*nT]; Y[2*nT+1] = b*X[2*nT+1];
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     Y[2*(nT+t)] = a*Y[2*(nT+t-1)] + b*X[2*(nT+t)];
                     Y[2*(nT+t)+1] = a*Y[2*(nT+t-1)+1] + b*X[2*(nT+t)+1];
@@ -316,11 +316,11 @@ int integrate_z (double *Y, const double *X, const double *tau, const size_t N, 
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 Y[2*n] = b*X[2*n]; Y[2*n+1] = b*X[2*n+1];
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     Y[2*(n+t*N)] = a*Y[2*(n+(t-1)*N)] + b*X[2*(n+t*N)];
                     Y[2*(n+t*N)+1] = a*Y[2*(n+(t-1)*N)+1] + b*X[2*(n+t*N)+1];
@@ -345,53 +345,53 @@ int integrate_inplace_s (float *X, const float *tau, const size_t N, const size_
     size_t nT;
     float a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = expf(-1.0f/(fs*tau[0])); b = 1.0f - a;
         X[0] *= b;
-        for (size_t t=1; t<T; ++t) { X[t] = a*X[t-1] + b*X[t]; }
+        for (size_t t=1u; t<T; ++t) { X[t] = a*X[t-1] + b*X[t]; }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 X[n] *= b;
-                for (size_t t=1; t<T; ++t) { X[n+t*N] = a*X[n+(t-1)*N] + b*X[n+t*N]; }
+                for (size_t t=1u; t<T; ++t) { X[n+t*N] = a*X[n+(t-1)*N] + b*X[n+t*N]; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 X[nT] *= b;
-                for (size_t t=1; t<T; ++t) { X[nT+t] = a*X[nT+t-1] + b*X[nT+t]; }
+                for (size_t t=1u; t<T; ++t) { X[nT+t] = a*X[nT+t-1] + b*X[nT+t]; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 X[nT] *= b;
-                for (size_t t=1; t<T; ++t) { X[nT+t] = a*X[nT+t-1] + b*X[nT+t]; }
+                for (size_t t=1u; t<T; ++t) { X[nT+t] = a*X[nT+t-1] + b*X[nT+t]; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 X[n] *= b;
-                for (size_t t=1; t<T; ++t) { X[n+t*N] = a*X[n+(t-1)*N] + b*X[n+t*N]; }
+                for (size_t t=1u; t<T; ++t) { X[n+t*N] = a*X[n+(t-1)*N] + b*X[n+t*N]; }
             }
         }
     }
@@ -412,53 +412,53 @@ int integrate_inplace_d (double *X, const double *tau, const size_t N, const siz
     size_t nT;
     double a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = exp(-1.0/(fs*tau[0])); b = 1.0 - a;
         X[0] *= b;
-        for (size_t t=1; t<T; ++t) { X[t] = a*X[t-1] + b*X[t]; }
+        for (size_t t=1u; t<T; ++t) { X[t] = a*X[t-1] + b*X[t]; }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 X[n] *= b;
-                for (size_t t=1; t<T; ++t) { X[n+t*N] = a*X[n+(t-1)*N] + b*X[n+t*N]; }
+                for (size_t t=1u; t<T; ++t) { X[n+t*N] = a*X[n+(t-1)*N] + b*X[n+t*N]; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 X[nT] *= b;
-                for (size_t t=1; t<T; ++t) { X[nT+t] = a*X[nT+t-1] + b*X[nT+t]; }
+                for (size_t t=1u; t<T; ++t) { X[nT+t] = a*X[nT+t-1] + b*X[nT+t]; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 X[nT] *= b;
-                for (size_t t=1; t<T; ++t) { X[nT+t] = a*X[nT+t-1] + b*X[nT+t]; }
+                for (size_t t=1u; t<T; ++t) { X[nT+t] = a*X[nT+t-1] + b*X[nT+t]; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 X[n] *= b;
-                for (size_t t=1; t<T; ++t) { X[n+t*N] = a*X[n+(t-1)*N] + b*X[n+t*N]; }
+                for (size_t t=1u; t<T; ++t) { X[n+t*N] = a*X[n+(t-1)*N] + b*X[n+t*N]; }
             }
         }
     }
@@ -479,25 +479,25 @@ int integrate_inplace_c (float *X, const float *tau, const size_t N, const size_
     size_t nT;
     float a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = expf(-1.0f/(fs*tau[0])); b = 1.0f - a;
         X[0] *= b; X[1] *= b;
-        for (size_t t=1; t<T; ++t)
+        for (size_t t=1u; t<T; ++t)
         {
             X[2*t] = a*X[2*t-2] + b*X[2*t];
             X[2*t+1] = a*X[2*t-1] + b*X[2*t+1];
         }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 X[2*n] *= b; X[2*n+1] *= b;
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     X[2*(n+t*N)] = a*X[2*(n+(t-1)*N)] + b*X[2*(n+t*N)];
                     X[2*(n+t*N)+1] = a*X[2*(n+(t-1)*N)+1] + b*X[2*(n+t*N)+1];
@@ -506,12 +506,12 @@ int integrate_inplace_c (float *X, const float *tau, const size_t N, const size_
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 X[2*nT] *= b; X[2*nT+1] *= b;
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     X[2*(nT+t)] = a*X[2*(nT+t-1)] + b*X[2*(nT+t)];
                     X[2*(nT+t)+1] = a*X[2*(nT+t-1)+1] + b*X[2*(nT+t)+1];
@@ -519,16 +519,16 @@ int integrate_inplace_c (float *X, const float *tau, const size_t N, const size_
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 X[2*nT] *= b; X[2*nT+1] *= b;
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     X[2*(nT+t)] = a*X[2*(nT+t-1)] + b*X[2*(nT+t)];
                     X[2*(nT+t)+1] = a*X[2*(nT+t-1)+1] + b*X[2*(nT+t)+1];
@@ -537,11 +537,11 @@ int integrate_inplace_c (float *X, const float *tau, const size_t N, const size_
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a;
                 X[2*n] *= b; X[2*n+1] *= b;
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     X[2*(n+t*N)] = a*X[2*(n+(t-1)*N)] + b*X[2*(n+t*N)];
                     X[2*(n+t*N)+1] = a*X[2*(n+(t-1)*N)+1] + b*X[2*(n+t*N)+1];
@@ -566,25 +566,25 @@ int integrate_inplace_z (double *X, const double *tau, const size_t N, const siz
     size_t nT;
     double a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = exp(-1.0/(fs*tau[0])); b = 1.0 - a;
         X[0] *= b; X[1] *= b;
-        for (size_t t=1; t<T; ++t)
+        for (size_t t=1u; t<T; ++t)
         {
             X[2*t] = a*X[2*t-2] + b*X[2*t];
             X[2*t+1] = a*X[2*t-1] + b*X[2*t+1];
         }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 X[2*n] *= b; X[2*n+1] *= b;
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     X[2*(n+t*N)] = a*X[2*(n+(t-1)*N)] + b*X[2*(n+t*N)];
                     X[2*(n+t*N)+1] = a*X[2*(n+(t-1)*N)+1] + b*X[2*(n+t*N)+1];
@@ -593,12 +593,12 @@ int integrate_inplace_z (double *X, const double *tau, const size_t N, const siz
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 X[2*nT] *= b; X[2*nT+1] *= b;
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     X[2*(nT+t)] = a*X[2*(nT+t-1)] + b*X[2*(nT+t)];
                     X[2*(nT+t)+1] = a*X[2*(nT+t-1)+1] + b*X[2*(nT+t)+1];
@@ -606,16 +606,16 @@ int integrate_inplace_z (double *X, const double *tau, const size_t N, const siz
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 X[2*nT] *= b; X[2*nT+1] *= b;
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     X[2*(nT+t)] = a*X[2*(nT+t-1)] + b*X[2*(nT+t)];
                     X[2*(nT+t)+1] = a*X[2*(nT+t-1)+1] + b*X[2*(nT+t)+1];
@@ -624,11 +624,11 @@ int integrate_inplace_z (double *X, const double *tau, const size_t N, const siz
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a;
                 X[2*n] *= b; X[2*n+1] *= b;
-                for (size_t t=1; t<T; ++t)
+                for (size_t t=1u; t<T; ++t)
                 {
                     X[2*(n+t*N)] = a*X[2*(n+(t-1)*N)] + b*X[2*(n+t*N)];
                     X[2*(n+t*N)+1] = a*X[2*(n+(t-1)*N)+1] + b*X[2*(n+t*N)+1];

@@ -23,8 +23,8 @@ int asinh_inplace_z (double *X, const size_t N);
 
 int asinh_s (float *Y, const float *X, const size_t N)
 {
-    //for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = asinhf(*X); }
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = logf(*X + sqrtf(fmaf(*X,*X,1.0f))); }
+    //for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = asinhf(*X); }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = logf(*X + sqrtf(fmaf(*X,*X,1.0f))); }
 
     return 0;
 }
@@ -32,8 +32,8 @@ int asinh_s (float *Y, const float *X, const size_t N)
 
 int asinh_d (double *Y, const double *X, const size_t N)
 {
-    //for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = asinh(*X); }
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = log(*X + sqrt(fma(*X,*X,1.0))); }
+    //for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = asinh(*X); }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = log(*X + sqrt(fma(*X,*X,1.0))); }
     
     return 0;
 }
@@ -43,7 +43,7 @@ int asinh_c (float *Y, const float *X, const size_t N)
 {
     _Complex float x, y;
 
-    for (size_t n=0; n<N; ++n, X+=2, ++Y)
+    for (size_t n=N; n>0u; --n, X+=2, ++Y)
     {
         //y = casinhf(X[n2]+1.0if*X[n2+1]);
         x = *X + 1.0if**(X+1);
@@ -59,7 +59,7 @@ int asinh_z (double *Y, const double *X, const size_t N)
 {
     _Complex double x, y;
 
-    for (size_t n=0; n<N; ++n, X+=2, ++Y)
+    for (size_t n=N; n>0u; --n, X+=2, ++Y)
     {
         //y = casinh(X[n2]+1.0if*X[n2+1]);
         x = *X + 1.0i**(X+1);
@@ -73,8 +73,8 @@ int asinh_z (double *Y, const double *X, const size_t N)
 
 int asinh_inplace_s (float *X, const size_t N)
 {
-    //for (size_t n=0; n<N; ++n, ++X) { *X = asinhf(*X); }
-    for (size_t n=0; n<N; ++n, ++X) { *X = logf(*X + sqrtf(fmaf(*X,*X,1.0f))); }
+    //for (size_t n=N; n>0u; --n, ++X) { *X = asinhf(*X); }
+    for (size_t n=N; n>0u; --n, ++X) { *X = logf(*X + sqrtf(fmaf(*X,*X,1.0f))); }
 
     return 0;
 }
@@ -82,8 +82,8 @@ int asinh_inplace_s (float *X, const size_t N)
 
 int asinh_inplace_d (double *X, const size_t N)
 {
-    //for (size_t n=0; n<N; ++n, ++X) { *X = asinh(*X); }
-    for (size_t n=0; n<N; ++n, ++X) { *X = log(*X + sqrt(fma(*X,*X,1.0))); }
+    //for (size_t n=N; n>0u; --n, ++X) { *X = asinh(*X); }
+    for (size_t n=N; n>0u; --n, ++X) { *X = log(*X + sqrt(fma(*X,*X,1.0))); }
     
     return 0;
 }
@@ -93,7 +93,7 @@ int asinh_inplace_c (float *X, const size_t N)
 {
     _Complex float x, y;
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         //y = casinhf(X[n2]+1.0if*X[n2+1]);
         x = *X + 1.0if**(X+1);
@@ -109,7 +109,7 @@ int asinh_inplace_z (double *X, const size_t N)
 {
     _Complex double x, y;
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         //y = casinh(X[n2]+1.0i*X[n2+1]);
         x = *X + 1.0i**(X+1);

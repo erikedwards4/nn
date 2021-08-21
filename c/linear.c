@@ -33,11 +33,11 @@ int linear_z (double *Y, const double *X, const double *W, const size_t R, const
 int linear_s (float *Y, const float *X, const float *W, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Ly, const char iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Nw = Lx*Ly;
     float sm2;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==N)
     {
         if (Nw<30000)
@@ -56,11 +56,11 @@ int linear_s (float *Y, const float *X, const float *W, const size_t R, const si
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
 
-        if (K==1 && (G==1 || B==1))
+        if (K==1u && (G==1u || B==1u))
         {
             if (Nw<4500)
             {
@@ -82,9 +82,9 @@ int linear_s (float *Y, const float *X, const float *W, const size_t R, const si
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=B*(Lx-1), Y+=B*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=B*(Lx-1), Y+=B*(Ly-1))
             {
-                for (size_t b=0; b<B; ++b, ++X, W-=Nw, Y-=K*Ly-1)
+                for (size_t b=B; b>0u; --b, ++X, W-=Nw, Y-=K*Ly-1)
                 {
                     for (size_t ly=0; ly<Ly; ++ly, X-=K*Lx, Y+=K)
                     {
@@ -104,11 +104,11 @@ int linear_s (float *Y, const float *X, const float *W, const size_t R, const si
 int linear_d (double *Y, const double *X, const double *W, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Ly, const char iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Nw = Lx*Ly;
     double sm2;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==N)
     {
         if (Nw<30000)
@@ -127,11 +127,11 @@ int linear_d (double *Y, const double *X, const double *W, const size_t R, const
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
 
-        if (K==1 && (G==1 || B==1))
+        if (K==1u && (G==1u || B==1u))
         {
             if (Nw<4500)
             {
@@ -153,9 +153,9 @@ int linear_d (double *Y, const double *X, const double *W, const size_t R, const
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=B*(Lx-1), Y+=B*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=B*(Lx-1), Y+=B*(Ly-1))
             {
-                for (size_t b=0; b<B; ++b, ++X, W-=Nw, Y-=K*Ly-1)
+                for (size_t b=B; b>0u; --b, ++X, W-=Nw, Y-=K*Ly-1)
                 {
                     for (size_t ly=0; ly<Ly; ++ly, X-=K*Lx, Y+=K)
                     {
@@ -175,11 +175,11 @@ int linear_d (double *Y, const double *X, const double *W, const size_t R, const
 int linear_c (float *Y, const float *X, const float *W, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Ly, const char iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Nw = Lx*Ly;
     float sm2r, sm2i, xr, xi, ar, ai;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==N)
     {
         if (Nw<30000)
@@ -205,11 +205,11 @@ int linear_c (float *Y, const float *X, const float *W, const size_t R, const si
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
 
-        if (K==1 && (G==1 || B==1))
+        if (K==1u && (G==1u || B==1u))
         {
             if (Nw<4500)
             {
@@ -238,9 +238,9 @@ int linear_c (float *Y, const float *X, const float *W, const size_t R, const si
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=2*B*(Lx-1), Y+=2*B*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=2*B*(Lx-1), Y+=2*B*(Ly-1))
             {
-                for (size_t b=0; b<B; ++b, ++X, W-=2*Nw, Y-=2*K*Ly-2)
+                for (size_t b=B; b>0u; --b, ++X, W-=2*Nw, Y-=2*K*Ly-2)
                 {
                     for (size_t ly=0; ly<Ly; ++ly, X-=2*K*Lx, Y+=2*K-1)
                     {
@@ -266,11 +266,11 @@ int linear_c (float *Y, const float *X, const float *W, const size_t R, const si
 int linear_z (double *Y, const double *X, const double *W, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Ly, const char iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Nw = Lx*Ly;
     double sm2r, sm2i, xr, xi, ar, ai;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==N)
     {
         if (Nw<150)
@@ -296,11 +296,11 @@ int linear_z (double *Y, const double *X, const double *W, const size_t R, const
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t B = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t B = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/B;
 
-        if (K==1 && (G==1 || B==1))
+        if (K==1u && (G==1u || B==1u))
         {
             if (Nw<4500)
             {
@@ -329,9 +329,9 @@ int linear_z (double *Y, const double *X, const double *W, const size_t R, const
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=2*B*(Lx-1), Y+=2*B*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=2*B*(Lx-1), Y+=2*B*(Ly-1))
             {
-                for (size_t b=0; b<B; ++b, ++X, W-=2*Nw, Y-=2*K*Ly-2)
+                for (size_t b=B; b>0u; --b, ++X, W-=2*Nw, Y-=2*K*Ly-2)
                 {
                     for (size_t ly=0; ly<Ly; ++ly, X-=2*K*Lx, Y+=2*K-1)
                     {

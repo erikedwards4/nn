@@ -26,8 +26,8 @@ int tanh_s (float *Y, const float *X, const size_t N)
 {
     float xp, xm;
 
-    //for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = tanhf(*X); }
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { xp = expf(*X); xm = expf(-*X); *Y = (xp-xm)/(xp+xm); }
+    //for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = tanhf(*X); }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { xp = expf(*X); xm = expf(-*X); *Y = (xp-xm)/(xp+xm); }
 
     return 0;
 }
@@ -37,8 +37,8 @@ int tanh_d (double *Y, const double *X, const size_t N)
 {
     double xp, xm;
     
-    //for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = tanh(*X); }
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { xp = exp(*X); xm = exp(-*X); *Y = (xp-xm)/(xp+xm); }
+    //for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = tanh(*X); }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { xp = exp(*X); xm = exp(-*X); *Y = (xp-xm)/(xp+xm); }
     
     return 0;
 }
@@ -48,7 +48,7 @@ int tanh_c (float *Y, const float *X, const size_t N)
 {
     _Complex float y, xp, xm;
 
-    for (size_t n=0; n<N; ++n, X+=2, ++Y)
+    for (size_t n=N; n>0u; --n, X+=2, ++Y)
     {
         //y = ctanhf(X[n2]+1.0if*X[n2+1]);
         xp = cexpf(*X + 1.0if**(X+1));
@@ -65,7 +65,7 @@ int tanh_z (double *Y, const double *X, const size_t N)
 {
     _Complex double y, xp, xm;
 
-    for (size_t n=0; n<N; ++n, X+=2, ++Y)
+    for (size_t n=N; n>0u; --n, X+=2, ++Y)
     {
         xp = cexp(*X + 1.0i**(X+1));
         xm = cexp(-*X - 1.0i**(X+1));
@@ -81,9 +81,9 @@ int tanh_inplace_s (float *X, const size_t N)
 {
     float xp, xm;
 
-    //for (size_t n=0; n<N; ++n, ++X) { *X = tanhf(*X); }
-    //for (size_t n=0; n<N; ++n, ++X) { x = expf(2.0f**X); *X = (x-1.0f)/(x+1.0f); }   //this is faster, but less numerical accuracy
-    for (size_t n=0; n<N; ++n, ++X) { xp = expf(*X); xm = expf(-*X); *X = (xp-xm)/(xp+xm); }
+    //for (size_t n=N; n>0u; --n, ++X) { *X = tanhf(*X); }
+    //for (size_t n=N; n>0u; --n, ++X) { x = expf(2.0f**X); *X = (x-1.0f)/(x+1.0f); }   //this is faster, but less numerical accuracy
+    for (size_t n=N; n>0u; --n, ++X) { xp = expf(*X); xm = expf(-*X); *X = (xp-xm)/(xp+xm); }
 
     return 0;
 }
@@ -93,8 +93,8 @@ int tanh_inplace_d (double *X, const size_t N)
 {
     double xp, xm;
 
-    //for (size_t n=0; n<N; ++n, ++X) { *X = tanh(*X); }
-    for (size_t n=0; n<N; ++n, ++X) { xp = exp(*X); xm = exp(-*X); *X = (xp-xm)/(xp+xm); }
+    //for (size_t n=N; n>0u; --n, ++X) { *X = tanh(*X); }
+    for (size_t n=N; n>0u; --n, ++X) { xp = exp(*X); xm = exp(-*X); *X = (xp-xm)/(xp+xm); }
     
     return 0;
 }
@@ -104,7 +104,7 @@ int tanh_inplace_c (float *X, const size_t N)
 {
     _Complex float y, xp, xm;
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         //x = ctanhf(X[n2]+1.0if*X[n2+1]);
         xp = cexpf(*X + 1.0if**(X+1));
@@ -121,7 +121,7 @@ int tanh_inplace_z (double *X, const size_t N)
 {
     _Complex double y, xp, xm;
     
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         //x = ctanh(X[n2]+1.0i*X[n2+1]);
         xp = cexp(*X + 1.0i**(X+1));

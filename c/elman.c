@@ -27,9 +27,9 @@ int elman_s (float *Y, const float *X, const float *U, float *H, const float *W,
 {
     const float o = 1.0f;
 
-    if (N==1)
+    if (N==1u)
     {
-        for (size_t t=0; t<T; ++t)
+        for (size_t t=0u; t<T; ++t)
         {
             H[0] = 1.0f / (1.0f+expf(-X[t]-U[0]*H[0]));
             Y[t] = 1.0f / (1.0f+expf(-B[0]-W[0]*H[0]));
@@ -40,60 +40,60 @@ int elman_s (float *Y, const float *X, const float *U, float *H, const float *W,
         float *tmp;
         if (!(tmp=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in elman_s: problem with malloc. "); perror("malloc"); return 1; }
 
-        if (dim==0)
+        if (dim==0u)
         {
             if (iscolmajor)
             {
-                for (size_t t=0; t<T; ++t)
+                for (size_t t=0u; t<T; ++t)
                 {
                     cblas_scopy((int)N,&X[t*N],1,tmp,1);
                     cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-tmp[n])); }
                     //cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[t*N],1);
-                    //for (size_t n=0; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-X[t*N+n])); }
-                    //for (size_t n=0; n<N; ++n) { Y[t*N+n] = 1.0f/(1.0f+expf(-cblas_sdot((int)N,&W[n],(int)N,H,1)-B[n])); }
+                    //for (size_t n=0u; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-X[t*N+n])); }
+                    //for (size_t n=0u; n<N; ++n) { Y[t*N+n] = 1.0f/(1.0f+expf(-cblas_sdot((int)N,&W[n],(int)N,H,1)-B[n])); }
                     cblas_scopy((int)N,B,1,tmp,1);
                     cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,W,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { Y[t*N+n] = 1.0f/(1.0f+expf(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { Y[t*N+n] = 1.0f/(1.0f+expf(-tmp[n])); }
                 }
             }
             else
             {
-                for (size_t t=0; t<T; ++t)
+                for (size_t t=0u; t<T; ++t)
                 {
                     cblas_scopy((int)N,&X[t],(int)T,tmp,1);
                     cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-tmp[n])); }
                     cblas_scopy((int)N,B,1,tmp,1);
                     cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,W,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { Y[t+n*T] = 1.0f/(1.0f+expf(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { Y[t+n*T] = 1.0f/(1.0f+expf(-tmp[n])); }
                 }
             }
         }
-        else if (dim==1)
+        else if (dim==1u)
         {
             if (iscolmajor)
             {
-                for (size_t t=0; t<T; ++t)
+                for (size_t t=0u; t<T; ++t)
                 {
                     cblas_scopy((int)N,&X[t],(int)T,tmp,1);
                     cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-tmp[n])); }
                     cblas_scopy((int)N,B,1,tmp,1);
                     cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,W,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { Y[t+n*T] = 1.0f/(1.0f+expf(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { Y[t+n*T] = 1.0f/(1.0f+expf(-tmp[n])); }
                 }
             }
             else
             {
-                for (size_t t=0; t<T; ++t)
+                for (size_t t=0u; t<T; ++t)
                 {
                     cblas_scopy((int)N,&X[t*N],1,tmp,1);
                     cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { H[n] = 1.0f/(1.0f+expf(-tmp[n])); }
                     cblas_scopy((int)N,B,1,tmp,1);
                     cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,W,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { Y[t*N+n] = 1.0f/(1.0f+expf(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { Y[t*N+n] = 1.0f/(1.0f+expf(-tmp[n])); }
                 }
             }
         }
@@ -111,9 +111,9 @@ int elman_d (double *Y, const double *X, const double *U, double *H, const doubl
 {
     const double o = 1.0;
 
-    if (N==1)
+    if (N==1u)
     {
-        for (size_t t=0; t<T; ++t)
+        for (size_t t=0u; t<T; ++t)
         {
             H[0] = 1.0 / (1.0+exp(-X[t]-U[0]*H[0]));
             Y[t] = 1.0 / (1.0+exp(-B[0]-W[0]*H[0]));
@@ -124,57 +124,57 @@ int elman_d (double *Y, const double *X, const double *U, double *H, const doubl
         double *tmp;
         if (!(tmp=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in elman_d: problem with malloc. "); perror("malloc"); return 1; }
 
-        if (dim==0)
+        if (dim==0u)
         {
             if (iscolmajor)
             {
-                for (size_t t=0; t<T; ++t)
+                for (size_t t=0u; t<T; ++t)
                 {
                     cblas_dcopy((int)N,&X[t*N],1,tmp,1);
                     cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { H[n] = 1.0/(1.0+exp(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { H[n] = 1.0/(1.0+exp(-tmp[n])); }
                     cblas_dcopy((int)N,B,1,tmp,1);
                     cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,W,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { Y[t*N+n] = 1.0/(1.0+exp(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { Y[t*N+n] = 1.0/(1.0+exp(-tmp[n])); }
                 }
             }
             else
             {
-                for (size_t t=0; t<T; ++t)
+                for (size_t t=0u; t<T; ++t)
                 {
                     cblas_dcopy((int)N,&X[t],(int)T,tmp,1);
                     cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { H[n] = 1.0/(1.0+exp(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { H[n] = 1.0/(1.0+exp(-tmp[n])); }
                     cblas_dcopy((int)N,B,1,tmp,1);
                     cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,W,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { Y[t+n*T] = 1.0/(1.0+exp(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { Y[t+n*T] = 1.0/(1.0+exp(-tmp[n])); }
                 }
             }
         }
-        else if (dim==1)
+        else if (dim==1u)
         {
             if (iscolmajor)
             {
-                for (size_t t=0; t<T; ++t)
+                for (size_t t=0u; t<T; ++t)
                 {
                     cblas_dcopy((int)N,&X[t],(int)T,tmp,1);
                     cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { H[n] = 1.0/(1.0+exp(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { H[n] = 1.0/(1.0+exp(-tmp[n])); }
                     cblas_dcopy((int)N,B,1,tmp,1);
                     cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,W,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { Y[t+n*T] = 1.0/(1.0+exp(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { Y[t+n*T] = 1.0/(1.0+exp(-tmp[n])); }
                 }
             }
             else
             {
-                for (size_t t=0; t<T; ++t)
+                for (size_t t=0u; t<T; ++t)
                 {
                     cblas_dcopy((int)N,&X[t*N],1,tmp,1);
                     cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { H[n] = 1.0/(1.0+exp(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { H[n] = 1.0/(1.0+exp(-tmp[n])); }
                     cblas_dcopy((int)N,B,1,tmp,1);
                     cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,W,(int)N,H,1,o,tmp,1);
-                    for (size_t n=0; n<N; ++n) { Y[t*N+n] = 1.0/(1.0+exp(-tmp[n])); }
+                    for (size_t n=0u; n<N; ++n) { Y[t*N+n] = 1.0/(1.0+exp(-tmp[n])); }
                 }
             }
         }

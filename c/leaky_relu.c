@@ -17,7 +17,7 @@ int leaky_relu_inplace_d (double *X, const size_t N);
 
 int leaky_relu_s (float *Y, const float *X, const size_t N)
 {
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X<0.0f) ? 0.01f**X : *X; }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0f) ? 0.01f**X : *X; }
 
     return 0;
 }
@@ -25,7 +25,7 @@ int leaky_relu_s (float *Y, const float *X, const size_t N)
 
 int leaky_relu_d (double *Y, const double *X, const size_t N)
 {
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X<0.0) ? 0.01**X : *X; }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0) ? 0.01**X : *X; }
     
     return 0;
 }
@@ -33,7 +33,7 @@ int leaky_relu_d (double *Y, const double *X, const size_t N)
 
 int leaky_relu_inplace_s (float *X, const size_t N)
 {
-    for (size_t n=0; n<N; ++n, ++X) { if(*X<0.0f) { *X *= 0.01f; } }
+    for (size_t n=N; n>0u; --n, ++X) { if(*X<0.0f) { *X *= 0.01f; } }
 
     return 0;
 }
@@ -41,7 +41,7 @@ int leaky_relu_inplace_s (float *X, const size_t N)
 
 int leaky_relu_inplace_d (double *X, const size_t N)
 {
-    for (size_t n=0; n<N; ++n, ++X) { if(*X<0.0) { *X *= 0.01; } }
+    for (size_t n=N; n>0u; --n, ++X) { if(*X<0.0) { *X *= 0.01; } }
     
     return 0;
 }

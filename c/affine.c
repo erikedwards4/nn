@@ -37,11 +37,11 @@ int affine_z (double *Y, const double *X, const double *W, const double *B, cons
 int affine_s (float *Y, const float *X, const float *W, const float *B, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Ly, const char iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Nw = Lx*Ly;
     float sm2;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==N)
     {
         if (Nw<30000)
@@ -62,11 +62,11 @@ int affine_s (float *Y, const float *X, const float *W, const float *B, const si
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t BS = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t BS = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/BS;
 
-        if (K==1 && (G==1 || BS==1))
+        if (K==1u && (G==1u || BS==1))
         {
             if (Nw<1000)
             {
@@ -93,7 +93,7 @@ int affine_s (float *Y, const float *X, const float *W, const float *B, const si
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=BS*(Lx-1), Y+=BS*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=BS*(Lx-1), Y+=BS*(Ly-1))
             {
                 for (size_t b=0; b<BS; ++b, ++X, W-=Lx*Ly, B-=Ly, Y-=K*Ly-1)
                 {
@@ -115,11 +115,11 @@ int affine_s (float *Y, const float *X, const float *W, const float *B, const si
 int affine_d (double *Y, const double *X, const double *W, const double *B, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Ly, const char iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Nw = Lx*Ly;
     double sm2;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==N)
     {
         if (Nw<30000)
@@ -140,11 +140,11 @@ int affine_d (double *Y, const double *X, const double *W, const double *B, cons
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t BS = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t BS = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/BS;
 
-        if (K==1 && (G==1 || BS==1))
+        if (K==1u && (G==1u || BS==1))
         {
             if (Nw<1000)
             {
@@ -171,7 +171,7 @@ int affine_d (double *Y, const double *X, const double *W, const double *B, cons
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=BS*(Lx-1), Y+=BS*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=BS*(Lx-1), Y+=BS*(Ly-1))
             {
                 for (size_t b=0; b<BS; ++b, ++X, W-=Lx*Ly, B-=Ly, Y-=K*Ly-1)
                 {
@@ -193,11 +193,11 @@ int affine_d (double *Y, const double *X, const double *W, const double *B, cons
 int affine_c (float *Y, const float *X, const float *W, const float *B, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Ly, const char iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Nw = Lx*Ly;
     float xr, xi, ar, ai, sm2r, sm2i;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==N)
     {
         if (Lx<30000)
@@ -225,11 +225,11 @@ int affine_c (float *Y, const float *X, const float *W, const float *B, const si
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t BS = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t BS = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/BS;
 
-        if (K==1 && (G==1 || BS==1))
+        if (K==1u && (G==1u || BS==1))
         {
             if (Nw<4500)
             {
@@ -263,7 +263,7 @@ int affine_c (float *Y, const float *X, const float *W, const float *B, const si
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=2*BS*(Lx-1), Y+=2*BS*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=2*BS*(Lx-1), Y+=2*BS*(Ly-1))
             {
                 for (size_t b=0; b<BS; ++b, X+=2, W-=2*Nw, B-=2*Ly, Y-=2*K*Ly-2)
                 {
@@ -291,11 +291,11 @@ int affine_c (float *Y, const float *X, const float *W, const float *B, const si
 int affine_z (double *Y, const double *X, const double *W, const double *B, const size_t R, const size_t C, const size_t S, const size_t H, const size_t Ly, const char iscolmajor, const size_t dim)
 {
     const size_t N = R*C*S*H;
-    const size_t Lx = (dim==0) ? R : (dim==1) ? C : (dim==2) ? S : H;
+    const size_t Lx = (dim==0u) ? R : (dim==1u) ? C : (dim==2u) ? S : H;
     const size_t Nw = Lx*Ly;
     double xr, xi, ar, ai, sm2r, sm2i;
 
-    if (N==0) {}
+    if (N==0u) {}
     else if (Lx==N)
     {
         if (Lx<30000)
@@ -323,11 +323,11 @@ int affine_z (double *Y, const double *X, const double *W, const double *B, cons
     }
     else
     {
-        const size_t K = (iscolmajor) ? ((dim==0) ? 1 : (dim==1) ? R : (dim==2) ? R*C : R*C*S) : ((dim==0) ? C*S*H : (dim==1) ? S*H : (dim==2) ? H : 1);
-        const size_t BS = (iscolmajor && dim==0) ? C*S*H : K;
+        const size_t K = (iscolmajor) ? ((dim==0u) ? 1u : (dim==1u) ? R : (dim==2u) ? R*C : R*C*S) : ((dim==0u) ? C*S*H : (dim==1u) ? S*H : (dim==2u) ? H : 1u);
+        const size_t BS = (iscolmajor && dim==0u) ? C*S*H : K;
         const size_t V = N/Lx, G = V/BS;
 
-        if (K==1 && (G==1 || BS==1))
+        if (K==1u && (G==1u || BS==1))
         {
             if (Nw<4500)
             {
@@ -361,7 +361,7 @@ int affine_z (double *Y, const double *X, const double *W, const double *B, cons
         }
         else
         {
-            for (size_t g=0; g<G; ++g, X+=2*BS*(Lx-1), Y+=2*BS*(Ly-1))
+            for (size_t g=G; g>0u; --g, X+=2*BS*(Lx-1), Y+=2*BS*(Ly-1))
             {
                 for (size_t b=0; b<BS; ++b, X+=2, W-=2*Nw, B-=2*Ly, Y-=2*K*Ly-2)
                 {

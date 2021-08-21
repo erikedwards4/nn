@@ -35,19 +35,19 @@ int iir_inplace_s (float *X, const float *A, const size_t N, const size_t T, con
     if (T<1) { fprintf(stderr,"error in iir_s: T (num time points) must be positive\n"); return 1; }
     if (Q<0) { fprintf(stderr,"error in iir_s: Q (filter order) must be nonnegative\n"); return 1; }
 
-    if (N==1)
+    if (N==1u)
     {
         if (A[0]!=1.0f) { cblas_sscal((int)T,1.0f/A[0],A,1); cblas_sscal((int)(N*T),1.0f/A[0],X,1); }
         for (size_t t=1; t<M; ++t) { X[t] -= cblas_sdot(t,&A[M-t],1,&X[0],1); }
         for (size_t t=M; t<T; ++t) { X[t] -= cblas_sdot(M,&A[0],1,&X[t-M],1); }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (N<3)
         {
             if (iscolmajor)
             {
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     if (A[n*Q1]!=1.0f) { cblas_sscal((int)T,1.0f/A[n*Q1],&A[n*Q1],1); }
                 }
@@ -90,7 +90,7 @@ int iir_inplace_s (float *X, const float *A, const size_t N, const size_t T, con
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (R==1)
         {
@@ -159,7 +159,7 @@ int iir_d (double *X, const char iscolmajor, const size_t R, const size_t C, con
     if (C<1) { fprintf(stderr,"error in iir_d: C (ncols X) must be positive\n"); return 1; }
     if (N<1) { fprintf(stderr,"error in iir_d: N (filter order) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (C==1)
         {
@@ -209,7 +209,7 @@ int iir_d (double *X, const char iscolmajor, const size_t R, const size_t C, con
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (R==1)
         {
@@ -279,7 +279,7 @@ int iir_c (float *X, const char iscolmajor, const size_t R, const size_t C, cons
     if (C<1) { fprintf(stderr,"error in iir_c: C (ncols X) must be positive\n"); return 1; }
     if (N<1) { fprintf(stderr,"error in iir_c: N (filter order) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -292,7 +292,7 @@ int iir_c (float *X, const char iscolmajor, const size_t R, const size_t C, cons
             for (size_t n=M; n<R; ++n) { cblas_cgemv(CblasRowMajor,CblasTrans,M,(int)C,&a[0],&X[2*(n-M)*C],(int)C,&A[0],1,&b[0],&X[2*n*C],1); }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
@@ -325,7 +325,7 @@ int iir_z (double *X, const char iscolmajor, const size_t R, const size_t C, con
     if (C<1) { fprintf(stderr,"error in iir_z: C (ncols X) must be positive\n"); return 1; }
     if (N<1) { fprintf(stderr,"error in iir_z: N (filter order) must be positive\n"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
@@ -338,7 +338,7 @@ int iir_z (double *X, const char iscolmajor, const size_t R, const size_t C, con
             for (size_t n=M; n<R; ++n) { cblas_zgemv(CblasRowMajor,CblasTrans,M,(int)C,&a[0],&X[2*(n-M)*C],(int)C,&A[0],1,&b[0],&X[2*n*C],1); }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
