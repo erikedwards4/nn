@@ -19,11 +19,11 @@ int smoothstep_s (float *Y, const float *X, const size_t N, const int p)
 {
     if (p==0)
     {
-        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X<0.0f) ? 0.0f : (*X>1.0f) ? 1.0f : *X; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0f) ? 0.0f : (*X>1.0f) ? 1.0f : *X; }
     }
     else if (p==1)
     {
-        for (size_t n=0; n<N; ++n, ++X, ++Y)
+        for (size_t n=N; n>0u; --n, ++X, ++Y)
         {
             if (*X<0.0f) { *Y = 0.0f; }
             else if (*X>1.0f) { *Y = 1.0f; }
@@ -43,11 +43,11 @@ int smoothstep_d (double *Y, const double *X, const size_t N, const int p)
 {
     if (p==0)
     {
-        for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = (*X<0.0) ? 0.0 : (*X>1.0) ? 1.0 : *X; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0) ? 0.0 : (*X>1.0) ? 1.0 : *X; }
     }
     else if (p==1)
     {
-        for (size_t n=0; n<N; ++n, ++X, ++Y)
+        for (size_t n=N; n>0u; --n, ++X, ++Y)
         {
             if (*X<0.0) { *Y = 0.0; }
             else if (*X>1.0) { *Y = 1.0; }
@@ -67,7 +67,7 @@ int smoothstep_inplace_s (float *X, const size_t N, const int p)
 {
     if (p==0)
     {
-        for (size_t n=0; n<N; ++n, ++X)
+        for (size_t n=N; n>0u; --n, ++X)
         {
             if (*X<0.0f) { *X = 0.0f; }
             else if (*X>1.0f) { *X = 1.0f; }
@@ -75,7 +75,7 @@ int smoothstep_inplace_s (float *X, const size_t N, const int p)
     }
     else if (p==1)
     {
-        for (size_t n=0; n<N; ++n, ++X)
+        for (size_t n=N; n>0u; --n, ++X)
         {
             if (*X<0.0f) { *X = 0.0f; }
             else if (*X>1.0f) { *X = 1.0f; }
@@ -95,7 +95,7 @@ int smoothstep_inplace_d (double *X, const size_t N, const int p)
 {
     if (p==0)
     {
-        for (size_t n=0; n<N; ++n, ++X)
+        for (size_t n=N; n>0u; --n, ++X)
         {
             if (*X<0.0) { *X = 0.0; }
             else if (*X>1.0) { *X = 1.0; }
@@ -103,7 +103,7 @@ int smoothstep_inplace_d (double *X, const size_t N, const int p)
     }
     else if (p==1)
     {
-        for (size_t n=0; n<N; ++n, ++X)
+        for (size_t n=N; n>0u; --n, ++X)
         {
             if (*X<0.0) { *X = 0.0; }
             else if (*X>1.0) { *X = 1.0; }

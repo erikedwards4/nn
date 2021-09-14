@@ -50,11 +50,11 @@ int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const 
     if (!(F=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in gru_min_s: problem with malloc. "); perror("malloc"); return 1; }
     if (!(H=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in gru_min_s: problem with malloc. "); perror("malloc"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 F[n] = 1.0f / (1.0f+expf(-X[N+n]));
                 Y[n] = (1.0f-F[n]) * tanhf(X[n]);
@@ -64,14 +64,14 @@ int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const 
                 tN = t*N; tN2 = 2*tN;
                 cblas_scopy((int)N,&X[tN2+N],1,F,1);
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&Y[tN-N],1,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0f / (1.0f+expf(-F[n]));
                     H[n] = F[n] * Y[tN-N+n];
                 }
                 cblas_scopy((int)N,&X[tN2],1,&Y[tN],1);
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&Y[tN],1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     Y[tN+n] = H[n] + (1.0f-F[n])*tanhf(Y[tN+n]);
                 }
@@ -79,7 +79,7 @@ int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const 
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 F[n] = 1.0f / (1.0f+expf(-X[NT+nT]));
@@ -89,14 +89,14 @@ int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const 
             {
                 cblas_scopy((int)N,&X[NT+t],(int)T,F,1);
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&Y[t-1],(int)T,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0f / (1.0f+expf(-F[n]));
                     H[n] = F[n] * Y[t-1+n*T];
                 }
                 cblas_scopy((int)N,&X[t],(int)T,&Y[t],(int)T);
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&Y[t],(int)T);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     nT = n*T;
                     Y[t+nT] = H[n] + (1.0f-F[n])*tanhf(Y[t+nT]);
@@ -104,11 +104,11 @@ int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const 
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 F[n] = 1.0f / (1.0f+expf(-X[NT+nT]));
@@ -118,14 +118,14 @@ int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const 
             {
                 cblas_scopy((int)N,&X[NT+t],(int)T,F,1);
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&Y[t-1],(int)T,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0f / (1.0f+expf(-F[n]));
                     H[n] = F[n] * Y[t-1+n*T];
                 }
                 cblas_scopy((int)N,&X[t],(int)T,&Y[t],(int)T);
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&Y[t],(int)T);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     nT = n*T;
                     Y[t+nT] = H[n] + (1.0f-F[n])*tanhf(Y[t+nT]);
@@ -134,7 +134,7 @@ int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const 
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 F[n] = 1.0f / (1.0f+expf(-X[N+n]));
                 Y[n] = (1.0f-F[n]) * tanhf(X[n]);
@@ -144,14 +144,14 @@ int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const 
                 tN = t*N; tN2 = 2*tN;
                 cblas_scopy((int)N,&X[tN2+N],1,F,1);
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&Y[tN-N],1,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0f / (1.0f+expf(-F[n]));
                     H[n] = F[n] * Y[tN-N+n];
                 }
                 cblas_scopy((int)N,&X[tN2],1,&Y[tN],1);
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&Y[tN],1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     Y[tN+n] = H[n] + (1.0f-F[n])*tanhf(Y[tN+n]);
                 }
@@ -177,11 +177,11 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
     if (!(F=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in gru_min_d: problem with malloc. "); perror("malloc"); return 1; }
     if (!(H=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in gru_min_d: problem with malloc. "); perror("malloc"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 F[n] = 1.0 / (1.0+exp(-X[N+n]));
                 Y[n] = (1.0-F[n]) * tanh(X[n]);
@@ -191,14 +191,14 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
                 tN = t*N; tN2 = 2*tN;
                 cblas_dcopy((int)N,&X[tN2+N],1,F,1);
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&Y[tN-N],1,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0 / (1.0+exp(-F[n]));
                     H[n] = F[n] * Y[tN-N+n];
                 }
                 cblas_dcopy((int)N,&X[tN2],1,&Y[tN],1);
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&Y[tN],1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     Y[tN+n] = H[n] + (1.0-F[n])*tanh(Y[tN+n]);
                 }
@@ -206,7 +206,7 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 F[n] = 1.0 / (1.0+exp(-X[NT+nT]));
@@ -216,14 +216,14 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
             {
                 cblas_dcopy((int)N,&X[NT+t],(int)T,F,1);
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&Y[t-1],(int)T,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0 / (1.0+exp(-F[n]));
                     H[n] = F[n] * Y[t-1+n*T];
                 }
                 cblas_dcopy((int)N,&X[t],(int)T,&Y[t],(int)T);
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&Y[t],(int)T);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     nT = n*T;
                     Y[t+nT] = H[n] + (1.0-F[n])*tanh(Y[t+nT]);
@@ -231,11 +231,11 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 F[n] = 1.0 / (1.0+exp(-X[NT+nT]));
@@ -245,14 +245,14 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
             {
                 cblas_dcopy((int)N,&X[NT+t],(int)T,F,1);
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&Y[t-1],(int)T,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0 / (1.0+exp(-F[n]));
                     H[n] = F[n] * Y[t-1+n*T];
                 }
                 cblas_dcopy((int)N,&X[t],(int)T,&Y[t],(int)T);
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&Y[t],(int)T);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     nT = n*T;
                     Y[t+nT] = H[n] + (1.0-F[n])*tanh(Y[t+nT]);
@@ -261,7 +261,7 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 F[n] = 1.0 / (1.0+exp(-X[N+n]));
                 Y[n] = (1.0-F[n]) * tanh(X[n]);
@@ -271,14 +271,14 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
                 tN = t*N; tN2 = 2*tN;
                 cblas_dcopy((int)N,&X[tN2+N],1,F,1);
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&Y[tN-N],1,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0 / (1.0+exp(-F[n]));
                     H[n] = F[n] * Y[tN-N+n];
                 }
                 cblas_dcopy((int)N,&X[tN2],1,&Y[tN],1);
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&Y[tN],1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     Y[tN+n] = H[n] + (1.0-F[n])*tanh(Y[tN+n]);
                 }
@@ -305,12 +305,12 @@ int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N
     if (!(F=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in gru_inplace_min2_s: problem with malloc. "); perror("malloc"); return 1; }
     if (!(H=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in gru_inplace_min2_s: problem with malloc. "); perror("malloc"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
             fprintf(stderr,"d0, colmajor \n");
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 F[n] = 1.0f / (1.0f+expf(-X[N+n]));
                 X[n] = (1.0f-F[n]) * tanhf(X[n]);
@@ -320,13 +320,13 @@ int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N
                 tN = t*N; tN2 = 2*tN;
                 cblas_scopy((int)N,&X[tN2+N],1,F,1);
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&X[tN2-N2],1,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0f / (1.0f+expf(-F[n]));
                     H[n] = F[n]*X[tN2-N2+n];
                 }
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[tN2],1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     X[tN2+n] = F[n]*X[tN2-N2+n] + (1.0f-F[n])*tanhf(X[tN2+n]);
                 }
@@ -334,7 +334,7 @@ int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 F[n] = 1.0f / (1.0f+expf(-X[NT+nT]));
@@ -344,13 +344,13 @@ int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N
             {
                 cblas_scopy((int)N,&X[NT+t],(int)T,F,1);
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&X[t-1],(int)T,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0f / (1.0f+expf(-F[n]));
                     H[n] = F[n]*X[t-1+n*T];
                 }
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[t],(int)T);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     nT = n*T;
                     X[t+nT] = F[n]*X[t-1+nT] + (1.0f-F[n])*tanhf(X[t+nT]);
@@ -358,11 +358,11 @@ int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 F[n] = 1.0f / (1.0f+expf(-X[NT+nT]));
@@ -372,13 +372,13 @@ int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N
             {
                 cblas_scopy((int)N,&X[NT+t],(int)T,F,1);
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&X[t-1],(int)T,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0f / (1.0f+expf(-F[n]));
                     H[n] = F[n]*X[t-1+n*T];
                 }
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[t],(int)T);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     nT = n*T;
                     X[t+nT] = F[n]*X[t-1+nT] + (1.0f-F[n])*tanhf(X[t+nT]);
@@ -387,7 +387,7 @@ int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 F[n] = 1.0f / (1.0f+expf(-X[N+n]));
                 X[n] = (1.0f-F[n]) * tanhf(X[n]);
@@ -397,13 +397,13 @@ int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N
                 tN = t*N; tN2 = 2*tN;
                 cblas_scopy((int)N,&X[tN2+N],1,F,1);
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&X[tN2-N2],1,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0f / (1.0f+expf(-F[n]));
                     H[n] = F[n]*X[tN2-N2+n];
                 }
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[tN2],1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     X[tN2+n] = F[n]*X[tN2-N2+n] + (1.0f-F[n])*tanhf(X[tN2+n]);
                 }
@@ -429,11 +429,11 @@ int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_
     if (!(F=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in gru_inplace_min2_d: problem with malloc. "); perror("malloc"); return 1; }
     if (!(H=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in gru_inplace_min2_d: problem with malloc. "); perror("malloc"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 F[n] = 1.0 / (1.0+exp(-X[N+n]));
                 X[n] = (1.0-F[n]) * tanh(X[n]);
@@ -443,13 +443,13 @@ int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_
                 tN = t*N; tN2 = 2*tN;
                 cblas_dcopy((int)N,&X[tN2+N],1,F,1);
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&X[tN2-N2],1,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0 / (1.0+exp(-F[n]));
                     H[n] = F[n]*X[tN2-N2+n];
                 }
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[tN2],1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     X[tN2+n] = F[n]*X[tN2-N2+n] + (1.0-F[n])*tanh(X[tN2+n]);
                 }
@@ -457,7 +457,7 @@ int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 F[n] = 1.0 / (1.0+exp(-X[NT+nT]));
@@ -467,13 +467,13 @@ int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_
             {
                 cblas_dcopy((int)N,&X[NT+t],(int)T,F,1);
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&X[t-1],(int)T,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0 / (1.0+exp(-F[n]));
                     H[n] = F[n]*X[t-1+n*T];
                 }
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[t],(int)T);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     nT = n*T;
                     X[t+nT] = F[n]*X[t-1+nT] + (1.0-F[n])*tanh(X[t+nT]);
@@ -481,11 +481,11 @@ int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 F[n] = 1.0 / (1.0+exp(-X[NT+nT]));
@@ -495,13 +495,13 @@ int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_
             {
                 cblas_dcopy((int)N,&X[NT+t],(int)T,F,1);
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&X[t-1],(int)T,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0 / (1.0+exp(-F[n]));
                     H[n] = F[n]*X[t-1+n*T];
                 }
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[t],(int)T);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     nT = n*T;
                     X[t+nT] = F[n]*X[t-1+nT] + (1.0-F[n])*tanh(X[t+nT]);
@@ -510,7 +510,7 @@ int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 F[n] = 1.0 / (1.0+exp(-X[N+n]));
                 X[n] = (1.0-F[n]) * tanh(X[n]);
@@ -520,13 +520,13 @@ int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_
                 tN = t*N; tN2 = 2*tN;
                 cblas_dcopy((int)N,&X[tN2+N],1,F,1);
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&X[tN2-N2],1,o,F,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     F[n] = 1.0 / (1.0+exp(-F[n]));
                     H[n] = F[n]*X[tN2-N2+n];
                 }
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,U,(int)N,H,1,o,&X[tN2],1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     X[tN2+n] = F[n]*X[tN2-N2+n] + (1.0-F[n])*tanh(X[tN2+n]);
                 }

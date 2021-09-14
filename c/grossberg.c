@@ -47,17 +47,17 @@ int grossberg_s (float *Y, const float *X, const float *tau, const float *alpha,
     size_t nT;
     float a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = expf(-1.0f/(fs*tau[0])); b = 1.0f - a; a -= b*alpha[0];
         Y[0] = b*gamma[0]*X[0];
         for (size_t t=1; t<T; ++t) { Y[t] = a*Y[t-1] + b*(gamma[0]-beta[0]*Y[t-1])*X[t]; }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 Y[n] = b*gamma[n]*X[n];
@@ -66,7 +66,7 @@ int grossberg_s (float *Y, const float *X, const float *tau, const float *alpha,
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 nT = n*T; Y[nT] = b*gamma[n]*X[nT];
@@ -74,11 +74,11 @@ int grossberg_s (float *Y, const float *X, const float *tau, const float *alpha,
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 nT = n*T; Y[nT] = b*gamma[n]*X[nT];
@@ -87,7 +87,7 @@ int grossberg_s (float *Y, const float *X, const float *tau, const float *alpha,
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 Y[n] = b*gamma[n]*X[n];
@@ -114,17 +114,17 @@ int grossberg_d (double *Y, const double *X, const double *tau, const double *al
     size_t nT;
     double a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = exp(-1.0/(fs*tau[0])); b = 1.0 - a; a -= b*alpha[0];
         Y[0] = b*gamma[0]*X[0];
         for (size_t t=1; t<T; ++t) { Y[t] = a*Y[t-1] + b*(gamma[0]-beta[0]*Y[t-1])*X[t]; }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 Y[n] = b*gamma[n]*X[n];
@@ -133,7 +133,7 @@ int grossberg_d (double *Y, const double *X, const double *tau, const double *al
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 nT = n*T; Y[nT] = b*gamma[n]*X[nT];
@@ -141,11 +141,11 @@ int grossberg_d (double *Y, const double *X, const double *tau, const double *al
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 nT = n*T; Y[nT] = b*gamma[n]*X[nT];
@@ -154,7 +154,7 @@ int grossberg_d (double *Y, const double *X, const double *tau, const double *al
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 Y[n] = b*gamma[n]*X[n];
@@ -181,7 +181,7 @@ int grossberg_c (float *Y, const float *X, const float *tau, const float *alpha,
     size_t nT;
     float a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = expf(-1.0f/(fs*tau[0])); b = 1.0f - a; a -= b*alpha[0];
         Y[0] = b*gamma[0]*X[0]; Y[1] = b*gamma[0]*X[1];
@@ -191,11 +191,11 @@ int grossberg_c (float *Y, const float *X, const float *tau, const float *alpha,
             Y[2*t+1] = a*Y[2*(t-1)+1] + b*(gamma[0]-beta[0]*Y[2*(t-1)+1])*X[2*t+1];
         }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 Y[2*n] = b*gamma[n]*X[2*n]; Y[2*n+1] = b*gamma[n]*X[2*n+1];
@@ -208,7 +208,7 @@ int grossberg_c (float *Y, const float *X, const float *tau, const float *alpha,
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 nT = n*T; Y[2*nT] = b*gamma[n]*X[2*nT]; Y[2*nT+1] = b*gamma[n]*X[2*nT+1];
@@ -220,11 +220,11 @@ int grossberg_c (float *Y, const float *X, const float *tau, const float *alpha,
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 nT = n*T; Y[2*nT] = b*gamma[n]*X[2*nT]; Y[2*nT+1] = b*gamma[n]*X[2*nT+1];
@@ -237,7 +237,7 @@ int grossberg_c (float *Y, const float *X, const float *tau, const float *alpha,
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 Y[2*n] = b*gamma[n]*X[2*n]; Y[2*n+1] = b*gamma[n]*X[2*n+1];
@@ -268,7 +268,7 @@ int grossberg_z (double *Y, const double *X, const double *tau, const double *al
     size_t nT;
     double a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = exp(-1.0/(fs*tau[0])); b = 1.0 - a; a -= b*alpha[0];
         Y[0] = b*gamma[0]*X[0]; Y[1] = b*gamma[0]*X[1];
@@ -278,11 +278,11 @@ int grossberg_z (double *Y, const double *X, const double *tau, const double *al
             Y[2*t+1] = a*Y[2*(t-1)+1] + b*(gamma[0]-beta[0]*Y[2*(t-1)+1])*X[2*t+1];
         }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 Y[2*n] = b*gamma[n]*X[2*n]; Y[2*n+1] = b*gamma[n]*X[2*n+1];
@@ -295,7 +295,7 @@ int grossberg_z (double *Y, const double *X, const double *tau, const double *al
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 nT = n*T; Y[2*nT] = b*gamma[n]*X[2*nT]; Y[2*nT+1] = b*gamma[n]*X[2*nT+1];
@@ -307,11 +307,11 @@ int grossberg_z (double *Y, const double *X, const double *tau, const double *al
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 nT = n*T; Y[2*nT] = b*gamma[n]*X[2*nT]; Y[2*nT+1] = b*gamma[n]*X[2*nT+1];
@@ -324,7 +324,7 @@ int grossberg_z (double *Y, const double *X, const double *tau, const double *al
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 Y[2*n] = b*gamma[n]*X[2*n]; Y[2*n+1] = b*gamma[n]*X[2*n+1];
@@ -355,17 +355,17 @@ int grossberg_inplace_s (float *X, const float *tau, const float *alpha, const f
     size_t nT;
     float a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = expf(-1.0f/(fs*tau[0])); b = 1.0f - a; a -= b*alpha[0];
         X[0] = b*gamma[0]*X[0];
         for (size_t t=1; t<T; ++t) { X[t] = a*X[t-1] + b*(gamma[0]-beta[0]*X[t-1])*X[t]; }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 X[n] = b*gamma[n]*X[n];
@@ -374,7 +374,7 @@ int grossberg_inplace_s (float *X, const float *tau, const float *alpha, const f
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 nT = n*T; X[nT] = b*gamma[n]*X[nT];
@@ -382,11 +382,11 @@ int grossberg_inplace_s (float *X, const float *tau, const float *alpha, const f
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 nT = n*T; X[nT] = b*gamma[n]*X[nT];
@@ -395,7 +395,7 @@ int grossberg_inplace_s (float *X, const float *tau, const float *alpha, const f
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 X[n] = b*gamma[n]*X[n];
@@ -422,17 +422,17 @@ int grossberg_inplace_d (double *X, const double *tau, const double *alpha, cons
     size_t nT;
     double a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = exp(-1.0/(fs*tau[0])); b = 1.0 - a; a -= b*alpha[0];
         X[0] = b*gamma[0]*X[0];
         for (size_t t=1; t<T; ++t) { X[t] = a*X[t-1] + b*(gamma[0]-beta[0]*X[t-1])*X[t]; }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 X[n] = b*gamma[n]*X[n];
@@ -441,7 +441,7 @@ int grossberg_inplace_d (double *X, const double *tau, const double *alpha, cons
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 nT = n*T; X[nT] = b*gamma[n]*X[nT];
@@ -449,11 +449,11 @@ int grossberg_inplace_d (double *X, const double *tau, const double *alpha, cons
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 nT = n*T; X[nT] = b*gamma[n]*X[nT];
@@ -462,7 +462,7 @@ int grossberg_inplace_d (double *X, const double *tau, const double *alpha, cons
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 X[n] = b*gamma[n]*X[n];
@@ -489,7 +489,7 @@ int grossberg_inplace_c (float *X, const float *tau, const float *alpha, const f
     size_t nT;
     float a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = expf(-1.0f/(fs*tau[0])); b = 1.0f - a; a -= b*alpha[0];
         X[0] = b*gamma[0]*X[0]; X[1] = b*gamma[0]*X[1];
@@ -499,11 +499,11 @@ int grossberg_inplace_c (float *X, const float *tau, const float *alpha, const f
             X[2*t+1] = a*X[2*(t-1)+1] + b*(gamma[0]-beta[0]*X[2*(t-1)+1])*X[2*t+1];
         }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 X[2*n] = b*gamma[n]*X[2*n]; X[2*n+1] = b*gamma[n]*X[2*n+1];
@@ -516,7 +516,7 @@ int grossberg_inplace_c (float *X, const float *tau, const float *alpha, const f
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 nT = n*T; X[2*nT] = b*gamma[n]*X[2*nT]; X[2*nT+1] = b*gamma[n]*X[2*nT+1];
@@ -528,11 +528,11 @@ int grossberg_inplace_c (float *X, const float *tau, const float *alpha, const f
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 nT = n*T; X[2*nT] = b*gamma[n]*X[2*nT]; X[2*nT+1] = b*gamma[n]*X[2*nT+1];
@@ -545,7 +545,7 @@ int grossberg_inplace_c (float *X, const float *tau, const float *alpha, const f
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = expf(-1.0f/(fs*tau[n])); b = 1.0f - a; a -= b*alpha[n];
                 X[2*n] = b*gamma[n]*X[2*n]; X[2*n+1] = b*gamma[n]*X[2*n+1];
@@ -576,7 +576,7 @@ int grossberg_inplace_z (double *X, const double *tau, const double *alpha, cons
     size_t nT;
     double a, b;
 
-    if (N==1)
+    if (N==1u)
     {
         a = exp(-1.0/(fs*tau[0])); b = 1.0 - a; a -= b*alpha[0];
         X[0] = b*gamma[0]*X[0]; X[1] = b*gamma[0]*X[1];
@@ -586,11 +586,11 @@ int grossberg_inplace_z (double *X, const double *tau, const double *alpha, cons
             X[2*t+1] = a*X[2*(t-1)+1] + b*(gamma[0]-beta[0]*X[2*(t-1)+1])*X[2*t+1];
         }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 X[2*n] = b*gamma[n]*X[2*n]; X[2*n+1] = b*gamma[n]*X[2*n+1];
@@ -603,7 +603,7 @@ int grossberg_inplace_z (double *X, const double *tau, const double *alpha, cons
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 nT = n*T; X[2*nT] = b*gamma[n]*X[2*nT]; X[2*nT+1] = b*gamma[n]*X[2*nT+1];
@@ -615,11 +615,11 @@ int grossberg_inplace_z (double *X, const double *tau, const double *alpha, cons
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 nT = n*T; X[2*nT] = b*gamma[n]*X[2*nT]; X[2*nT+1] = b*gamma[n]*X[2*nT+1];
@@ -632,7 +632,7 @@ int grossberg_inplace_z (double *X, const double *tau, const double *alpha, cons
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 a = exp(-1.0/(fs*tau[n])); b = 1.0 - a; a -= b*alpha[n];
                 X[2*n] = b*gamma[n]*X[2*n]; X[2*n+1] = b*gamma[n]*X[2*n+1];

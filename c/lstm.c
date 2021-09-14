@@ -68,11 +68,11 @@ int lstm_s (float *Y, const float *X, const float *Uc, const float *Ui, const fl
     if (!(O=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_s: problem with malloc. "); perror("malloc"); return 1; }
     if (!(H=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_s: problem with malloc. "); perror("malloc"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 H[n] = tanhf(X[n]) / (1.0f+expf(-X[N+n]));
                 Y[n] = tanhf(H[n]) / (1.0f+expf(-X[N3+n]));
@@ -86,7 +86,7 @@ int lstm_s (float *Y, const float *X, const float *Uc, const float *Ui, const fl
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,&Y[tN-N],1,o,I,1);
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&Y[tN-N],1,o,F,1);
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,&Y[tN-N],1,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanhf(C[n])/(1.0f+expf(-I[n])) + H[n]/(1.0f+expf(-F[n]));
                     Y[tN+n] = tanhf(H[n]) / (1.0f+expf(-O[n]));
@@ -95,7 +95,7 @@ int lstm_s (float *Y, const float *X, const float *Uc, const float *Ui, const fl
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 H[n] = tanhf(X[nT]) / (1.0f+expf(-X[NT+nT]));
@@ -109,7 +109,7 @@ int lstm_s (float *Y, const float *X, const float *Uc, const float *Ui, const fl
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,&Y[t-1],(int)T,o,I,1);
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&Y[t-1],(int)T,o,F,1);
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,&Y[t-1],(int)T,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanhf(C[n])/(1.0f+expf(-I[n])) + H[n]/(1.0f+expf(-F[n]));
                     Y[t+n*T] = tanhf(H[n]) / (1.0f+expf(-O[n]));
@@ -117,11 +117,11 @@ int lstm_s (float *Y, const float *X, const float *Uc, const float *Ui, const fl
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 H[n] = tanhf(X[nT]) / (1.0f+expf(-X[NT+nT]));
@@ -135,7 +135,7 @@ int lstm_s (float *Y, const float *X, const float *Uc, const float *Ui, const fl
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,&Y[t-1],(int)T,o,I,1);
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&Y[t-1],(int)T,o,F,1);
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,&Y[t-1],(int)T,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanhf(C[n])/(1.0f+expf(-I[n])) + H[n]/(1.0f+expf(-F[n]));
                     Y[t+n*T] = tanhf(H[n]) / (1.0f+expf(-O[n]));
@@ -144,7 +144,7 @@ int lstm_s (float *Y, const float *X, const float *Uc, const float *Ui, const fl
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 H[n] = tanhf(X[n]) / (1.0f+expf(-X[N+n]));
                 Y[n] = tanhf(H[n]) / (1.0f+expf(-X[N3+n]));
@@ -158,7 +158,7 @@ int lstm_s (float *Y, const float *X, const float *Uc, const float *Ui, const fl
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,&Y[tN-N],1,o,I,1);
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&Y[tN-N],1,o,F,1);
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,&Y[tN-N],1,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanhf(C[n])/(1.0f+expf(-I[n])) + H[n]/(1.0f+expf(-F[n]));
                     Y[tN+n] = tanhf(H[n]) / (1.0f+expf(-O[n]));
@@ -188,11 +188,11 @@ int lstm_d (double *Y, const double *X, const double *Uc, const double *Ui, cons
     if (!(O=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_d: problem with malloc. "); perror("malloc"); return 1; }
     if (!(H=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_d: problem with malloc. "); perror("malloc"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 H[n] = tanh(X[n]) / (1.0+exp(-X[N+n]));
                 Y[n] = tanh(H[n]) / (1.0+exp(-X[N3+n]));
@@ -206,7 +206,7 @@ int lstm_d (double *Y, const double *X, const double *Uc, const double *Ui, cons
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,&Y[tN-N],1,o,I,1);
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&Y[tN-N],1,o,F,1);
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,&Y[tN-N],1,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanh(C[n])/(1.0+exp(-I[n])) + H[n]/(1.0+exp(-F[n]));
                     Y[tN+n] = tanh(H[n]) / (1.0+exp(-O[n]));
@@ -215,7 +215,7 @@ int lstm_d (double *Y, const double *X, const double *Uc, const double *Ui, cons
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 H[n] = tanh(X[nT]) / (1.0+exp(-X[NT+nT]));
@@ -229,7 +229,7 @@ int lstm_d (double *Y, const double *X, const double *Uc, const double *Ui, cons
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,&Y[t-1],(int)T,o,I,1);
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&Y[t-1],(int)T,o,F,1);
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,&Y[t-1],(int)T,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanh(C[n])/(1.0+exp(-I[n])) + H[n]/(1.0+exp(-F[n]));
                     Y[t+n*T] = tanh(H[n]) / (1.0+exp(-O[n]));
@@ -237,11 +237,11 @@ int lstm_d (double *Y, const double *X, const double *Uc, const double *Ui, cons
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 H[n] = tanh(X[nT]) / (1.0+exp(-X[NT+nT]));
@@ -255,7 +255,7 @@ int lstm_d (double *Y, const double *X, const double *Uc, const double *Ui, cons
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,&Y[t-1],(int)T,o,I,1);
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&Y[t-1],(int)T,o,F,1);
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,&Y[t-1],(int)T,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanh(C[n])/(1.0+exp(-I[n])) + H[n]/(1.0+exp(-F[n]));
                     Y[t+n*T] = tanh(H[n]) / (1.0+exp(-O[n]));
@@ -264,7 +264,7 @@ int lstm_d (double *Y, const double *X, const double *Uc, const double *Ui, cons
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 H[n] = tanh(X[n]) / (1.0+exp(-X[N+n]));
                 Y[n] = tanh(H[n]) / (1.0+exp(-X[N3+n]));
@@ -278,7 +278,7 @@ int lstm_d (double *Y, const double *X, const double *Uc, const double *Ui, cons
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,&Y[tN-N],1,o,I,1);
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&Y[tN-N],1,o,F,1);
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,&Y[tN-N],1,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanh(C[n])/(1.0+exp(-I[n])) + H[n]/(1.0+exp(-F[n]));
                     Y[tN+n] = tanh(H[n]) / (1.0+exp(-O[n]));
@@ -309,11 +309,11 @@ int lstm_inplace_s (float *X, const float *Uc, const float *Ui, const float *Uf,
     if (!(O=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
     if (!(H=(float *)malloc(N*sizeof(float)))) { fprintf(stderr,"error in lstm_inplace_s: problem with malloc. "); perror("malloc"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 H[n] = tanhf(X[n]) / (1.0f+expf(-X[N+n]));
                 X[n] = tanhf(H[n]) / (1.0f+expf(-X[N3+n]));
@@ -327,7 +327,7 @@ int lstm_inplace_s (float *X, const float *Uc, const float *Ui, const float *Uf,
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,&X[tN4-N4],1,o,I,1);
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&X[tN4-N4],1,o,F,1);
                 cblas_sgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,&X[tN4-N4],1,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanhf(C[n])/(1.0f+expf(-I[n])) + H[n]/(1.0f+expf(-F[n]));
                     X[tN4+n] = tanhf(H[n]) / (1.0f+expf(-O[n]));
@@ -336,7 +336,7 @@ int lstm_inplace_s (float *X, const float *Uc, const float *Ui, const float *Uf,
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 H[n] = tanhf(X[nT]) / (1.0f+expf(-X[NT+nT]));
@@ -350,7 +350,7 @@ int lstm_inplace_s (float *X, const float *Uc, const float *Ui, const float *Uf,
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,&X[t-1],(int)T,o,I,1);
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&X[t-1],(int)T,o,F,1);
                 cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,&X[t-1],(int)T,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanhf(C[n])/(1.0f+expf(-I[n])) + H[n]/(1.0f+expf(-F[n]));
                     X[t+n*T] = tanhf(H[n]) / (1.0f+expf(-O[n]));
@@ -358,11 +358,11 @@ int lstm_inplace_s (float *X, const float *Uc, const float *Ui, const float *Uf,
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 H[n] = tanhf(X[nT]) / (1.0f+expf(-X[NT+nT]));
@@ -376,7 +376,7 @@ int lstm_inplace_s (float *X, const float *Uc, const float *Ui, const float *Uf,
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,&X[t-1],(int)T,o,I,1);
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&X[t-1],(int)T,o,F,1);
                 cblas_sgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,&X[t-1],(int)T,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanhf(C[n])/(1.0f+expf(-I[n])) + H[n]/(1.0f+expf(-F[n]));
                     X[t+n*T] = tanhf(H[n]) / (1.0f+expf(-O[n]));
@@ -385,7 +385,7 @@ int lstm_inplace_s (float *X, const float *Uc, const float *Ui, const float *Uf,
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 H[n] = tanhf(X[n]) / (1.0f+expf(-X[N+n]));
                 X[n] = tanhf(H[n]) / (1.0f+expf(-X[N3+n]));
@@ -399,7 +399,7 @@ int lstm_inplace_s (float *X, const float *Uc, const float *Ui, const float *Uf,
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,&X[tN4-N4],1,o,I,1);
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&X[tN4-N4],1,o,F,1);
                 cblas_sgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,&X[tN4-N4],1,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanhf(C[n])/(1.0f+expf(-I[n])) + H[n]/(1.0f+expf(-F[n]));
                     X[tN4+n] = tanhf(H[n]) / (1.0f+expf(-O[n]));
@@ -429,11 +429,11 @@ int lstm_inplace_d (double *X, const double *Uc, const double *Ui, const double 
     if (!(O=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
     if (!(H=(double *)malloc(N*sizeof(double)))) { fprintf(stderr,"error in lstm_inplace_d: problem with malloc. "); perror("malloc"); return 1; }
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 H[n] = tanh(X[n]) / (1.0+exp(-X[N+n]));
                 X[n] = tanh(H[n]) / (1.0+exp(-X[N3+n]));
@@ -447,7 +447,7 @@ int lstm_inplace_d (double *X, const double *Uc, const double *Ui, const double 
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,&X[tN4-N4],1,o,I,1);
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&X[tN4-N4],1,o,F,1);
                 cblas_dgemv(CblasColMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,&X[tN4-N4],1,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanh(C[n])/(1.0+exp(-I[n])) + H[n]/(1.0+exp(-F[n]));
                     X[tN4+n] = tanh(H[n]) / (1.0+exp(-O[n]));
@@ -456,7 +456,7 @@ int lstm_inplace_d (double *X, const double *Uc, const double *Ui, const double 
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 H[n] = tanh(X[nT]) / (1.0+exp(-X[NT+nT]));
@@ -470,7 +470,7 @@ int lstm_inplace_d (double *X, const double *Uc, const double *Ui, const double 
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Ui,(int)N,&X[t-1],(int)T,o,I,1);
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uf,(int)N,&X[t-1],(int)T,o,F,1);
                 cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)N,(int)N,o,Uo,(int)N,&X[t-1],(int)T,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanh(C[n])/(1.0+exp(-I[n])) + H[n]/(1.0+exp(-F[n]));
                     X[t+n*T] = tanh(H[n]) / (1.0+exp(-O[n]));
@@ -478,11 +478,11 @@ int lstm_inplace_d (double *X, const double *Uc, const double *Ui, const double 
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
                 H[n] = tanh(X[nT]) / (1.0+exp(-X[NT+nT]));
@@ -496,7 +496,7 @@ int lstm_inplace_d (double *X, const double *Uc, const double *Ui, const double 
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,&X[t-1],(int)T,o,I,1);
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&X[t-1],(int)T,o,F,1);
                 cblas_dgemv(CblasColMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,&X[t-1],(int)T,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanh(C[n])/(1.0+exp(-I[n])) + H[n]/(1.0+exp(-F[n]));
                     X[t+n*T] = tanh(H[n]) / (1.0+exp(-O[n]));
@@ -505,7 +505,7 @@ int lstm_inplace_d (double *X, const double *Uc, const double *Ui, const double 
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 H[n] = tanh(X[n]) / (1.0+exp(-X[N+n]));
                 X[n] = tanh(H[n]) / (1.0+exp(-X[N3+n]));
@@ -519,7 +519,7 @@ int lstm_inplace_d (double *X, const double *Uc, const double *Ui, const double 
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Ui,(int)N,&X[tN4-N4],1,o,I,1);
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uf,(int)N,&X[tN4-N4],1,o,F,1);
                 cblas_dgemv(CblasRowMajor,CblasTrans,(int)N,(int)N,o,Uo,(int)N,&X[tN4-N4],1,o,O,1);
-                for (size_t n=0; n<N; ++n)
+                for (size_t n=0u; n<N; ++n)
                 {
                     H[n] = tanh(C[n])/(1.0+exp(-I[n])) + H[n]/(1.0+exp(-F[n]));
                     X[tN4+n] = tanh(H[n]) / (1.0+exp(-O[n]));

@@ -10,8 +10,8 @@
 //For dim==1, T>N and not in_pace, col-major is ~10% faster here and with C++.
 //For dim==1, T>N and in_place, col-major makes much more sense and is ~10% faster here and ~1.5x faster with C++.
 
-//The in_place version is definitely faster for dim==0 and row-major or dim==1 and col-major,
-//but actually a bit slower for dim==1 and row-major dim==0 and col-major.
+//The in_place version is definitely faster for dim==0u and row-major or dim==1u and col-major,
+//but actually a bit slower for dim==1u and row-major dim==0u and col-major.
 
 #include <stdio.h>
 
@@ -32,41 +32,41 @@ int fukushima_s (float *Y, const float *X, const size_t N, const size_t T, const
     const size_t NT = N*T;
     size_t nT, tN;
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Y[tN+n] = (1.0f+X[2*tN+n])/(1.0f+X[2*tN+N+n]) - 1.0f; }
+                for (size_t n=0u; n<N; ++n) { Y[tN+n] = (1.0f+X[2*tN+n])/(1.0f+X[2*tN+N+n]) - 1.0f; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Y[nT+t] = (1.0f+X[nT+t])/(1.0f+X[nT+NT+t]) - 1.0f; }
+                for (size_t t=0u; t<T; ++t) { Y[nT+t] = (1.0f+X[nT+t])/(1.0f+X[nT+NT+t]) - 1.0f; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Y[nT+t] = (1.0f+X[nT+t])/(1.0f+X[nT+NT+t]) - 1.0f; }
+                for (size_t t=0u; t<T; ++t) { Y[nT+t] = (1.0f+X[nT+t])/(1.0f+X[nT+NT+t]) - 1.0f; }
             }
         }
         else
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Y[tN+n] = (1.0f+X[2*tN+n])/(1.0f+X[2*tN+N+n]) - 1.0f; }
+                for (size_t n=0u; n<N; ++n) { Y[tN+n] = (1.0f+X[2*tN+n])/(1.0f+X[2*tN+N+n]) - 1.0f; }
             }
         }
     }
@@ -84,41 +84,41 @@ int fukushima_d (double *Y, const double *X, const size_t N, const size_t T, con
     const size_t NT = N*T;
     size_t nT, tN;
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Y[tN+n] = (1.0+X[2*tN+n])/(1.0+X[2*tN+N+n]) - 1.0; }
+                for (size_t n=0u; n<N; ++n) { Y[tN+n] = (1.0+X[2*tN+n])/(1.0+X[2*tN+N+n]) - 1.0; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Y[nT+t] = (1.0+X[nT+t])/(1.0+X[nT+NT+t]) - 1.0; }
+                for (size_t t=0u; t<T; ++t) { Y[nT+t] = (1.0+X[nT+t])/(1.0+X[nT+NT+t]) - 1.0; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Y[nT+t] = (1.0+X[nT+t])/(1.0+X[nT+NT+t]) - 1.0; }
+                for (size_t t=0u; t<T; ++t) { Y[nT+t] = (1.0+X[nT+t])/(1.0+X[nT+NT+t]) - 1.0; }
             }
         }
         else
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Y[tN+n] = (1.0+X[2*tN+n])/(1.0+X[2*tN+N+n]) - 1.0; }
+                for (size_t n=0u; n<N; ++n) { Y[tN+n] = (1.0+X[2*tN+n])/(1.0+X[2*tN+N+n]) - 1.0; }
             }
         }
     }
@@ -136,41 +136,41 @@ int fukushima_inplace_s (float *X, const size_t N, const size_t T, const char is
     const size_t NT = N*T;
     size_t nT, tN2;
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN2 = 2*t*N;
-                for (size_t n=0; n<N; ++n) { X[tN2+n] = (1.0f+X[tN2+n])/(1.0f+X[tN2+N+n]) - 1.0f; }
+                for (size_t n=0u; n<N; ++n) { X[tN2+n] = (1.0f+X[tN2+n])/(1.0f+X[tN2+N+n]) - 1.0f; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { X[nT+t] = (1.0f+X[nT+t])/(1.0f+X[nT+NT+t]) - 1.0f; }
+                for (size_t t=0u; t<T; ++t) { X[nT+t] = (1.0f+X[nT+t])/(1.0f+X[nT+NT+t]) - 1.0f; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { X[nT+t] = (1.0f+X[nT+t])/(1.0f+X[nT+NT+t]) - 1.0f; }
+                for (size_t t=0u; t<T; ++t) { X[nT+t] = (1.0f+X[nT+t])/(1.0f+X[nT+NT+t]) - 1.0f; }
             }
         }
         else
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN2 = 2*t*N;
-                for (size_t n=0; n<N; ++n) { X[tN2+n] = (1.0f+X[tN2+n])/(1.0f+X[tN2+N+n]) - 1.0f; }
+                for (size_t n=0u; n<N; ++n) { X[tN2+n] = (1.0f+X[tN2+n])/(1.0f+X[tN2+N+n]) - 1.0f; }
             }
         }
     }
@@ -188,41 +188,41 @@ int fukushima_inplace_d (double *X, const size_t N, const size_t T, const char i
     const size_t NT = N*T;
     size_t nT, tN2;
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN2 = 2*t*N;
-                for (size_t n=0; n<N; ++n) { X[tN2+n] = (1.0+X[tN2+n])/(1.0+X[tN2+N+n]) - 1.0; }
+                for (size_t n=0u; n<N; ++n) { X[tN2+n] = (1.0+X[tN2+n])/(1.0+X[tN2+N+n]) - 1.0; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { X[nT+t] = (1.0+X[nT+t])/(1.0+X[nT+NT+t]) - 1.0; }
+                for (size_t t=0u; t<T; ++t) { X[nT+t] = (1.0+X[nT+t])/(1.0+X[nT+NT+t]) - 1.0; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { X[nT+t] = (1.0+X[nT+t])/(1.0+X[nT+NT+t]) - 1.0; }
+                for (size_t t=0u; t<T; ++t) { X[nT+t] = (1.0+X[nT+t])/(1.0+X[nT+NT+t]) - 1.0; }
             }
         }
         else
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN2 = 2*t*N;
-                for (size_t n=0; n<N; ++n) { X[tN2+n] = (1.0+X[tN2+n])/(1.0+X[tN2+N+n]) - 1.0; }
+                for (size_t n=0u; n<N; ++n) { X[tN2+n] = (1.0+X[tN2+n])/(1.0+X[tN2+N+n]) - 1.0; }
             }
         }
     }

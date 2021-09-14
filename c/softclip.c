@@ -22,7 +22,7 @@ int softclip_s (float *Y, const float *X, const size_t N, const float p)
     const float ip = 1.0f/p;
     float x;
 
-    for (size_t n=0; n<N; ++n, ++X, ++Y)
+    for (size_t n=N; n>0u; --n, ++X, ++Y)
     {
         x = p * *X;
         if (x>88.72f) { *Y = 1.0f; }
@@ -40,7 +40,7 @@ int softclip_d (double *Y, const double *X, const size_t N, const double p)
     const double ip = 1.0/p;
     double x;
 
-    for (size_t n=0; n<N; ++n, ++X, ++Y)
+    for (size_t n=N; n>0u; --n, ++X, ++Y)
     {
         x = p * *X;
         if (x>709.77) { *Y = 1.0; }
@@ -58,7 +58,7 @@ int softclip_inplace_s (float *X, const size_t N, const float p)
     const float ip = 1.0f/p;
     float x;
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         x = p * *X;
         if (x>88.72f) { *X = 1.0f; }
@@ -76,7 +76,7 @@ int softclip_inplace_d (double *X, const size_t N, const double p)
     const double ip = 1.0/p;
     double x;
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         x = p * *X;
         if (x>709.77) { *X = 1.0; }

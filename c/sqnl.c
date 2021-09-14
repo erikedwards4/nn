@@ -19,7 +19,7 @@ int sqnl_s (float *Y, const float *X, const size_t N)
 {
 
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         if (*X>0.0f)
         {
@@ -41,7 +41,7 @@ int sqnl_d (double *Y, const double *X, const size_t N)
 {
 
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         if (*X>0.0)
         {
@@ -63,7 +63,7 @@ int sqnl_inplace_s (float *X, const size_t N)
 {
 
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         if (*X>0.0f)
         {
@@ -85,7 +85,7 @@ int sqnl_inplace_d (double *X, const size_t N)
 {
 
 
-    for (size_t n=0; n<N; ++n, ++X)
+    for (size_t n=N; n>0u; --n, ++X)
     {
         if (*X>0.0)
         {

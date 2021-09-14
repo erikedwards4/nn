@@ -22,41 +22,41 @@ int fukushima2_s (float *Y, const float *Xe, const float *Xi, const size_t N, co
 {
     size_t nT, tN;
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Y[tN+n] = (1.0f+Xe[tN+n])/(1.0f+Xi[tN+n]) - 1.0f; }
+                for (size_t n=0u; n<N; ++n) { Y[tN+n] = (1.0f+Xe[tN+n])/(1.0f+Xi[tN+n]) - 1.0f; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Y[nT+t] = (1.0f+Xe[nT+t])/(1.0f+Xi[nT+t]) - 1.0f; }
+                for (size_t t=0u; t<T; ++t) { Y[nT+t] = (1.0f+Xe[nT+t])/(1.0f+Xi[nT+t]) - 1.0f; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Y[nT+t] = (1.0f+Xe[nT+t])/(1.0f+Xi[nT+t]) - 1.0f; }
+                for (size_t t=0u; t<T; ++t) { Y[nT+t] = (1.0f+Xe[nT+t])/(1.0f+Xi[nT+t]) - 1.0f; }
             }
         }
         else
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Y[tN+n] = (1.0f+Xe[tN+n])/(1.0f+Xi[tN+n]) - 1.0f; }
+                for (size_t n=0u; n<N; ++n) { Y[tN+n] = (1.0f+Xe[tN+n])/(1.0f+Xi[tN+n]) - 1.0f; }
             }
         }
     }
@@ -73,41 +73,41 @@ int fukushima2_d (double *Y, const double *Xe, const double *Xi, const size_t N,
 {
     size_t nT, tN;
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Y[tN+n] = (1.0+Xe[tN+n])/(1.0+Xi[tN+n]) - 1.0; }
+                for (size_t n=0u; n<N; ++n) { Y[tN+n] = (1.0+Xe[tN+n])/(1.0+Xi[tN+n]) - 1.0; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Y[nT+t] = (1.0+Xe[nT+t])/(1.0+Xi[nT+t]) - 1.0; }
+                for (size_t t=0u; t<T; ++t) { Y[nT+t] = (1.0+Xe[nT+t])/(1.0+Xi[nT+t]) - 1.0; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Y[nT+t] = (1.0+Xe[nT+t])/(1.0+Xi[nT+t]) - 1.0; }
+                for (size_t t=0u; t<T; ++t) { Y[nT+t] = (1.0+Xe[nT+t])/(1.0+Xi[nT+t]) - 1.0; }
             }
         }
         else
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Y[tN+n] = (1.0+Xe[tN+n])/(1.0+Xi[tN+n]) - 1.0; }
+                for (size_t n=0u; n<N; ++n) { Y[tN+n] = (1.0+Xe[tN+n])/(1.0+Xi[tN+n]) - 1.0; }
             }
         }
     }
@@ -124,41 +124,41 @@ int fukushima2_inplace_s (float *Xe, const float *Xi, const size_t N, const size
 {
     size_t nT, tN;
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Xe[tN+n] = (1.0f+Xe[tN+n])/(1.0f+Xi[tN+n]) - 1.0f; }
+                for (size_t n=0u; n<N; ++n) { Xe[tN+n] = (1.0f+Xe[tN+n])/(1.0f+Xi[tN+n]) - 1.0f; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Xe[nT+t] = (1.0f+Xe[nT+t])/(1.0f+Xi[nT+t]) - 1.0f; }
+                for (size_t t=0u; t<T; ++t) { Xe[nT+t] = (1.0f+Xe[nT+t])/(1.0f+Xi[nT+t]) - 1.0f; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Xe[nT+t] = (1.0f+Xe[nT+t])/(1.0f+Xi[nT+t]) - 1.0f; }
+                for (size_t t=0u; t<T; ++t) { Xe[nT+t] = (1.0f+Xe[nT+t])/(1.0f+Xi[nT+t]) - 1.0f; }
             }
         }
         else
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Xe[tN+n] = (1.0f+Xe[tN+n])/(1.0f+Xi[tN+n]) - 1.0f; }
+                for (size_t n=0u; n<N; ++n) { Xe[tN+n] = (1.0f+Xe[tN+n])/(1.0f+Xi[tN+n]) - 1.0f; }
             }
         }
     }
@@ -175,41 +175,41 @@ int fukushima2_inplace_d (double *Xe, const double *Xi, const size_t N, const si
 {
     size_t nT, tN;
 
-    if (dim==0)
+    if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Xe[tN+n] = (1.0+Xe[tN+n])/(1.0+Xi[tN+n]) - 1.0; }
+                for (size_t n=0u; n<N; ++n) { Xe[tN+n] = (1.0+Xe[tN+n])/(1.0+Xi[tN+n]) - 1.0; }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Xe[nT+t] = (1.0+Xe[nT+t])/(1.0+Xi[nT+t]) - 1.0; }
+                for (size_t t=0u; t<T; ++t) { Xe[nT+t] = (1.0+Xe[nT+t])/(1.0+Xi[nT+t]) - 1.0; }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
                 nT = n*T;
-                for (size_t t=0; t<T; ++t) { Xe[nT+t] = (1.0+Xe[nT+t])/(1.0+Xi[nT+t]) - 1.0; }
+                for (size_t t=0u; t<T; ++t) { Xe[nT+t] = (1.0+Xe[nT+t])/(1.0+Xi[nT+t]) - 1.0; }
             }
         }
         else
         {
-            for (size_t t=0; t<T; ++t)
+            for (size_t t=0u; t<T; ++t)
             {
                 tN = t*N;
-                for (size_t n=0; n<N; ++n) { Xe[tN+n] = (1.0+Xe[tN+n])/(1.0+Xi[tN+n]) - 1.0; }
+                for (size_t n=0u; n<N; ++n) { Xe[tN+n] = (1.0+Xe[tN+n])/(1.0+Xi[tN+n]) - 1.0; }
             }
         }
     }

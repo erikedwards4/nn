@@ -22,7 +22,7 @@ int erf_inplace_d (double *X, const size_t N);
 
 int erf_s (float *Y, const float *X, const size_t N)
 {
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = erff(*X); }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = erff(*X); }
 
     return 0;
 }
@@ -30,7 +30,7 @@ int erf_s (float *Y, const float *X, const size_t N)
 
 int erf_d (double *Y, const double *X, const size_t N)
 {
-    for (size_t n=0; n<N; ++n, ++X, ++Y) { *Y = erf(*X); }
+    for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = erf(*X); }
     
     return 0;
 }
@@ -38,7 +38,7 @@ int erf_d (double *Y, const double *X, const size_t N)
 
 int erf_inplace_s (float *X, const size_t N)
 {
-    for (size_t n=0; n<N; ++n, ++X) { *X = erff(*X); }
+    for (size_t n=N; n>0u; --n, ++X) { *X = erff(*X); }
 
     return 0;
 }
@@ -46,7 +46,7 @@ int erf_inplace_s (float *X, const size_t N)
 
 int erf_inplace_d (double *X, const size_t N)
 {
-    for (size_t n=0; n<N; ++n, ++X) { *X = erf(*X); }
+    for (size_t n=N; n>0u; --n, ++X) { *X = erf(*X); }
     
     return 0;
 }

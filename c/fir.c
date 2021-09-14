@@ -26,41 +26,41 @@ int fir_s (float *Y, const float *X, const float *B, const size_t N, const size_
     //Initialize Y to 0
     cblas_scopy((int)(N*T),&z,0,Y,1);
 
-    if (N==1)
+    if (N==1u)
     {
-        for (size_t l=0; l<L; l++) { cblas_saxpy((int)(T-l),B[l],&X[0],1,&Y[l],1); }
+        for (size_t l=0u; l<L; l++) { cblas_saxpy((int)(T-l),B[l],&X[0],1,&Y[l],1); }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_saxpy((int)(T-l),B[n+l*N],&X[n],(int)N,&Y[n+l*N],(int)N); }
+                for (size_t l=0u; l<L; l++) { cblas_saxpy((int)(T-l),B[n+l*N],&X[n],(int)N,&Y[n+l*N],(int)N); }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_saxpy((int)(T-l),B[n*L+l],&X[n*T],1,&Y[n*T+l],1); }
+                for (size_t l=0u; l<L; l++) { cblas_saxpy((int)(T-l),B[n*L+l],&X[n*T],1,&Y[n*T+l],1); }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_saxpy((int)(T-l),B[n*L+l],&X[n*T],1,&Y[n*T+l],1); }
+                for (size_t l=0u; l<L; l++) { cblas_saxpy((int)(T-l),B[n*L+l],&X[n*T],1,&Y[n*T+l],1); }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_saxpy((int)(T-l),B[n+l*N],&X[n],(int)N,&Y[n+l*N],(int)N); }
+                for (size_t l=0u; l<L; l++) { cblas_saxpy((int)(T-l),B[n+l*N],&X[n],(int)N,&Y[n+l*N],(int)N); }
             }
         }
     }
@@ -80,41 +80,41 @@ int fir_d (double *Y, const double *X, const double *B, const size_t N, const si
     //Initialize Y to 0
     cblas_dcopy((int)(N*T),&z,0,Y,1);
 
-    if (N==1)
+    if (N==1u)
     {
-        for (size_t l=0; l<L; l++) { cblas_daxpy((int)(T-l),B[l],&X[0],1,&Y[l],1); }
+        for (size_t l=0u; l<L; l++) { cblas_daxpy((int)(T-l),B[l],&X[0],1,&Y[l],1); }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_daxpy((int)(T-l),B[n+l*N],&X[n],(int)N,&Y[n+l*N],(int)N); }
+                for (size_t l=0u; l<L; l++) { cblas_daxpy((int)(T-l),B[n+l*N],&X[n],(int)N,&Y[n+l*N],(int)N); }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_daxpy((int)(T-l),B[n*L+l],&X[n*T],1,&Y[n*T+l],1); }
+                for (size_t l=0u; l<L; l++) { cblas_daxpy((int)(T-l),B[n*L+l],&X[n*T],1,&Y[n*T+l],1); }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_daxpy((int)(T-l),B[n*L+l],&X[n*T],1,&Y[n*T+l],1); }
+                for (size_t l=0u; l<L; l++) { cblas_daxpy((int)(T-l),B[n*L+l],&X[n*T],1,&Y[n*T+l],1); }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_daxpy((int)(T-l),B[n+l*N],&X[n],(int)N,&Y[n+l*N],(int)N); }
+                for (size_t l=0u; l<L; l++) { cblas_daxpy((int)(T-l),B[n+l*N],&X[n],(int)N,&Y[n+l*N],(int)N); }
             }
         }
     }
@@ -134,41 +134,41 @@ int fir_c (float *Y, const float *X, const float *B, const size_t N, const size_
     //Initialize Y to 0
     cblas_ccopy((int)(N*T),z,0,Y,1);
 
-    if (N==1)
+    if (N==1u)
     {
-        for (size_t l=0; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*l],&X[0],1,&Y[2*l],1); }
+        for (size_t l=0u; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*l],&X[0],1,&Y[2*l],1); }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*(n+l*N)],&X[2*n],(int)N,&Y[2*(n+l*N)],(int)N); }
+                for (size_t l=0u; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*(n+l*N)],&X[2*n],(int)N,&Y[2*(n+l*N)],(int)N); }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*(n*L+l)],&X[2*n*T],1,&Y[2*(n*T+l)],1); }
+                for (size_t l=0u; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*(n*L+l)],&X[2*n*T],1,&Y[2*(n*T+l)],1); }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*(n*L+l)],&X[2*n*T],1,&Y[2*(n*T+l)],1); }
+                for (size_t l=0u; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*(n*L+l)],&X[2*n*T],1,&Y[2*(n*T+l)],1); }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*(n+l*N)],&X[2*n],(int)N,&Y[2*(n+l*N)],(int)N); }
+                for (size_t l=0u; l<L; l++) { cblas_caxpy((int)(T-l),&B[2*(n+l*N)],&X[2*n],(int)N,&Y[2*(n+l*N)],(int)N); }
             }
         }
     }
@@ -188,41 +188,41 @@ int fir_z (double *Y, const double *X, const double *B, const size_t N, const si
     //Initialize Y to 0
     cblas_zcopy((int)(N*T),z,0,Y,1);
 
-    if (N==1)
+    if (N==1u)
     {
-        for (size_t l=0; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*l],&X[0],1,&Y[2*l],1); }
+        for (size_t l=0u; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*l],&X[0],1,&Y[2*l],1); }
     }
-    else if (dim==0)
+    else if (dim==0u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*(n+l*N)],&X[2*n],(int)N,&Y[2*(n+l*N)],(int)N); }
+                for (size_t l=0u; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*(n+l*N)],&X[2*n],(int)N,&Y[2*(n+l*N)],(int)N); }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*(n*L+l)],&X[2*n*T],1,&Y[2*(n*T+l)],1); }
+                for (size_t l=0u; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*(n*L+l)],&X[2*n*T],1,&Y[2*(n*T+l)],1); }
             }
         }
     }
-    else if (dim==1)
+    else if (dim==1u)
     {
         if (iscolmajor)
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*(n*L+l)],&X[2*n*T],1,&Y[2*(n*T+l)],1); }
+                for (size_t l=0u; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*(n*L+l)],&X[2*n*T],1,&Y[2*(n*T+l)],1); }
             }
         }
         else
         {
-            for (size_t n=0; n<N; ++n)
+            for (size_t n=0u; n<N; ++n)
             {
-                for (size_t l=0; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*(n+l*N)],&X[2*n],(int)N,&Y[2*(n+l*N)],(int)N); }
+                for (size_t l=0u; l<L; l++) { cblas_zaxpy((int)(T-l),&B[2*(n+l*N)],&X[2*n],(int)N,&Y[2*(n+l*N)],(int)N); }
             }
         }
     }
