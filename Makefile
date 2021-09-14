@@ -20,7 +20,8 @@
 
 SHELL=/bin/bash
 ss=../util/bin/srci2src
-CC=clang++
+CC=g++
+CCC=g++-7
 
 ifeq ($(CC),clang++)
 	STD=-std=c++11
@@ -31,7 +32,8 @@ else
 endif
 
 INCLS=-Ic -I../util
-CFLAGS=$(WFLAG) $(STD) -O2 -ffast-math -march=native $(INCLS)
+CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse $(INCLS)
+CCFLAGS=-Wall -Wextra -std=gnu++14 -O3 -ffast-math -march=native -mfpmath=sse $(INCLS)
 #LIBS=-largtable2 -lopenblas -llapacke -llapack -lfftw3f -lfftw3 -lm
 
 
@@ -44,18 +46,56 @@ Dirs:
 
 
 #IN: input side of neurons (~dendrites)
-#For now, I only implement the usual weights (linear) and weights+biases (affine).
-#The great majority of neuron models use this.
-#Later, this can include biologically-motivated dendrites and synapses.
-IN: Linear Conv
+#The great majority of neuron models use weights+biases (affine) or convolution.
+#Later, this could include biologically-motivated dendrites and synapses.
+IN: Transform Conv Pool
 
-Linear: linear affine
+#Transform
+Transform: linear linear.cblas affine affine.cblas bilinear #bilinear.cblas
 linear: srci/linear.cpp c/linear.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+linear.cblas: srci/linear.cblas.cpp c/linear.cblas.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 affine: srci/affine.cpp c/affine.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+affine.cblas: srci/affine.cblas.cpp c/affine.cblas.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+bilinear: srci/bilinear.cpp c/bilinear.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+bilinear.cblas: srci/bilinear.cblas.cpp c/bilinear.cblas.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CCC) -c src/$@.cpp -oobj/$@.o $(CCFLAGS); $(CCC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
-Conv: #conv conv_fft maxpool avgpool
+#Conv: convolution
+#conv1 and conv1.cblas do not have dilation; conv1d and conv1d.cblas do.
+Conv: conv1 conv1.cblas conv1d conv1d.cblas
+conv1: srci/conv1.cpp c/conv1.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv1.cblas: srci/conv1.cblas.cpp c/conv1.cblas.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+conv1d: srci/conv1d.cpp c/conv1d.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv1d.cblas: srci/conv1d.cblas.cpp c/conv1d.cblas.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CCC) -c src/$@.cpp -oobj/$@.o $(CCFLAGS); $(CCC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+
+#Pool: pooling
+#maxpool1 and avgpool1 do not have dilation; maxpool1d and avgpool1d do.
+Pool: maxpool1 maxpool1d maxipool1 maxipool1d avgpool1 avgpool1d lppool1 lppool1d
+maxpool1: srci/maxpool1.cpp c/maxpool1.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+maxpool1d: srci/maxpool1d.cpp c/maxpool1d.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+maxipool1: srci/maxpool1.cpp c/maxpool1.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+maxipool1d: srci/maxpool1d.cpp c/maxpool1d.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+avgpool1: srci/avgpool1.cpp c/avgpool1.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+avgpool1d: srci/avgpool1d.cpp c/avgpool1d.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+lppool1: srci/lppool1.cpp c/lppool1.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+lppool1d: srci/lppool1d.cpp c/lppool1d.c
+	$(ss) -tvd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 
 #CELL: middle part of neurons (~soma)
@@ -113,7 +153,7 @@ OUT: Static_Act Other_Act #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply without modification to single neurons or to layers of neurons.
-Static_Act: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish sin
+Static_Act: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu prelu elu selu softclip softplus softsign plu silu swish sin
 step: srci/step.cpp c/step.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 signum: srci/signum.cpp c/signum.c
@@ -139,6 +179,8 @@ isrlu: srci/isrlu.cpp c/isrlu.c
 erf: srci/erf.cpp c/erf.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 gelu: srci/gelu.cpp c/gelu.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+gelu_new: srci/gelu_new.cpp c/gelu_new.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 relu: srci/relu.cpp c/relu.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2

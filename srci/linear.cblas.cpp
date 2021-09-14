@@ -1,5 +1,5 @@
 //Includes
-#include "linear.c"
+#include "linear.cblas.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
@@ -31,9 +31,9 @@ descr += "Note that W is transposed (non-conjugate), \n";
 descr += "such that vecs of length Ni are contiguous in memory.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ linear X W -o Y \n";
-descr += "$ linear X W > Y \n";
-descr += "$ cat X | linear - W > Y \n";
+descr += "$ linear.cblas X W -o Y \n";
+descr += "$ linear.cblas X W > Y \n";
+descr += "$ cat X | linear.cblas - W > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,W)");
@@ -81,7 +81,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-    if (codee::linear_s(Y,X,W,Ni,No,L))
+    if (codee::linear_cblas_s(Y,X,W,Ni,No,L))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -103,7 +103,7 @@ else if (i1.T==101u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-    if (codee::linear_c(Y,X,W,Ni,No,L))
+    if (codee::linear_cblas_c(Y,X,W,Ni,No,L))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

@@ -3,6 +3,7 @@
 //@license BSD 3-clause
 
 
+#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -22,6 +23,7 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
+    timespec tic, toc;
 
 
     //Declarations
@@ -34,29 +36,32 @@ int main(int argc, char *argv[])
     ifstream ifs1, ifs2; ofstream ofs1;
     int8_t stdi1, stdi2, stdo1, wo1;
     ioinfo i1, i2, o1;
-    size_t dim, Ni, No;
+    size_t Ni, No, L;
 
 
     //Description
     string descr;
     descr += "IN method.\n";
-    descr += "Linear transformation of each vec in X using matrix W.\n";
-    descr += "Thus, a vec2vec operation upon input 1 (X).\n";
-    descr += "X can be a tensor up to 4D, with vecs along any dimension.\n";
+    descr += "Linear transformation (weights only) of Ni inputs to No outputs.\n";
     descr += "\n";
-    descr += "Use -d (--dim) to specify the axis of the vectors in X.\n";
-    descr += "This is the dimension of length Ni, \n";
-    descr += "where Ni is the number of inputs to the layer.\n";
-    descr += "The default is 0 (along cols) unless X is a vector.\n";
+    descr += "Input X has Ni neurons and output Y has No neurons.\n";
     descr += "\n";
-    descr += "Y has same size as X, except along dim it has length No, \n";
-    descr += "where No is the number of outputs from the linear transformation,\n";
-    descr += "i.e. the number of neurons in the ensuing layer.\n";
+    descr += "The Ni or No neurons are always contiguous in memory, such that:\n";
     descr += "\n";
-    descr += "This assumes that W has leading dimension Ni! \n";
-    descr += "If colmajor, then W has size Ni x No. \n";
-    descr += "If rowmajor, then W has size No x Ni. \n";
-    descr += "This is for performance reasons; transpose if necessary!\n";
+    descr += "If col-major: Y[:,l] = W' * X[:,l] \n";
+    descr += "where:\n";
+    descr += "X has size Ni x L \n";
+    descr += "Y has size No x L \n";
+    descr += "W has size Ni x No \n";
+    descr += "\n";
+    descr += "If row-major: Y[l,L] = X[l,:] * W' \n";
+    descr += "where:\n";
+    descr += "X has size L x Ni \n";
+    descr += "Y has size L x No \n";
+    descr += "W has size No x Ni \n";
+    descr += "\n";
+    descr += "Note that W is transposed (non-conjugate), \n";
+    descr += "such that vecs of length Ni are contiguous in memory.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ linear X W -o Y \n";
@@ -67,11 +72,10 @@ int main(int argc, char *argv[])
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,W)");
-    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension [default=0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_d, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -84,14 +88,14 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
-    stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0 || strcmp(a_fi->filename[1],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
+    stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0u || strcmp(a_fi->filename[1],"-")==0);
     if (stdi1+stdi2>1) { cerr << progstr+": " << __LINE__ << errstr << "can only use stdin for one input" << endl; return 1; }
     if (stdi1+stdi2>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -116,33 +120,31 @@ int main(int argc, char *argv[])
 
     //Get options
 
-    //Get dim
-    if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
-    else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = size_t(a_d->ival[0]); }
-    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
-
 
     //Checks
     if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
     if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (W) found to be empty" << endl; return 1; }
+    if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) must be a matrix" << endl; return 1; }
     if (!i2.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (W) must be a matrix" << endl; return 1; }
-    if (!major_compat(i1,i2)) { cerr << progstr+": " << __LINE__ << errstr << "inputs 1 and 2 must have the same row/col major format" << endl; return 1; }
-    Ni = (i1.iscolmajor()) ? i2.R : i2.C;
-    No = (i1.iscolmajor()) ? i2.C : i2.R;
-    if (dim==0u && i1.R!=Ni) { cerr << progstr+": " << __LINE__ << errstr << "length of vecs in input 1 (X) must equal Ni of input 2 (W)" << endl; return 1; }
-    if (dim==1u && i1.C!=Ni) { cerr << progstr+": " << __LINE__ << errstr << "length of vecs in input 1 (X) must equal Ni of input 2 (W)" << endl; return 1; }
-    if (dim==2u && i1.S!=Ni) { cerr << progstr+": " << __LINE__ << errstr << "length of vecs in input 1 (X) must equal Ni of input 2 (W)" << endl; return 1; }
-    if (dim==3u && i1.H!=Ni) { cerr << progstr+": " << __LINE__ << errstr << "length of vecs in input 1 (X) must equal Ni of input 2 (W)" << endl; return 1; }
+    L = i1.iscolmajor() ? i1.C : i1.R;
+    Ni = i2.iscolmajor() ? i2.R : i2.C;
+    No = i2.iscolmajor() ? i2.C : i2.R;
+    if (i1.iscolmajor())
+    {
+        if (i1.R!=Ni) { cerr << progstr+": " << __LINE__ << errstr << "Input 1 (X) must have size Ni x L for col-major" << endl; return 1; }
+    }
+    else
+    {
+        if (i1.C!=Ni) { cerr << progstr+": " << __LINE__ << errstr << "Input 1 (X) must have size L x Ni for row-major" << endl; return 1; }
+    }
 
 
     //Set output header info
     o1.F = i1.F; o1.T = i1.T;
-    o1.R = (dim==0u) ? No : i1.R;
-    o1.C = (dim==1u) ? No : i1.C;
-    o1.S = (dim==2u) ? No : i1.S;
-    o1.H = (dim==3u) ? No : i1.H;
+    o1.R = i1.iscolmajor() ? No : i1.R;
+    o1.C = i1.isrowmajor() ? No : i1.C;
+    o1.S = i1.S; o1.H = i1.H;
 
 
     //Open output
@@ -161,6 +163,7 @@ int main(int argc, char *argv[])
 
 
     //Process
+    clock_gettime(CLOCK_REALTIME,&tic);
     if (i1.T==1u)
     {
         float *X, *W, *Y;
@@ -174,7 +177,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-        if (codee::linear_s(Y,X,W,i1.R,i1.C,i1.S,i1.H,No,o1.iscolmajor(),dim))
+        if (codee::linear_s(Y,X,W,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -183,7 +186,7 @@ int main(int argc, char *argv[])
         }
         delete[] X; delete[] W; delete[] Y;
     }
-    else if (i1.T==2)
+    else if (i1.T==2u)
     {
         double *X, *W, *Y;
         try { X = new double[i1.N()]; }
@@ -196,7 +199,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-        if (codee::linear_d(Y,X,W,i1.R,i1.C,i1.S,i1.H,No,o1.iscolmajor(),dim))
+        if (codee::linear_d(Y,X,W,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -218,7 +221,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-        if (codee::linear_c(Y,X,W,i1.R,i1.C,i1.S,i1.H,No,o1.iscolmajor(),dim))
+        if (codee::linear_c(Y,X,W,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -240,7 +243,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-        if (codee::linear_z(Y,X,W,i1.R,i1.C,i1.S,i1.H,No,o1.iscolmajor(),dim))
+        if (codee::linear_z(Y,X,W,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -253,9 +256,10 @@ int main(int argc, char *argv[])
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
+    clock_gettime(CLOCK_REALTIME,&toc);
+    cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
 
     //Exit
     return ret;
 }
-

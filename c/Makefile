@@ -29,7 +29,7 @@ else
 	WFLAG=-Wall -Wextra
 endif
 
-CFLAGS=$(WFLAG) $(STD) -O3 -march=native -fPIC
+CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse -fPIC
 
 
 All: all
@@ -40,21 +40,36 @@ Dirs:
 
 
 #IN: input side of neurons/layers
-IN: Linear Conv
+IN: Transform Conv Pool
 
-#linear applies weights only; affine applies weights and biases.
-Linear: linear affine
+#Transform: linear (weights), affine (weights+biases) and bilinear
+Transform: linear linear.cblas affine affine.cblas bilinear #bilinear.cblas
 linear: linear.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+linear.cblas: linear.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 affine: affine.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+affine.cblas: affine.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+bilinear: bilinear.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+bilinear.cblas: bilinear.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Conv: convolution
-Conv: #conv1d conv2d conv1d_fft conv2d_fft maxpool avgpool
+#conv1d and conv1d.cblas have dilation; conv1 and conv1.cblas do not.
+Conv: conv1 conv1.cblas conv1d conv1d.cblas
+conv1: conv1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv1.cblas: conv1.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv1d: conv1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-conv2d: conv2d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-conv1d_fft: conv1d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-conv2d_fft: conv2d_fft.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-maxpool: maxpool.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
-avgpool: avgpool.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv1d.cblas: conv1d.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+
+#Pool: pooling
+#maxpool1d and avgpool1d have dilation; maxpool1 and avgpool1 do not.
+Pool: maxpool1 maxpool1d maxipool1 maxipool1d avgpool1 avgpool1d lppool1 lppool1d
+maxpool1: maxpool1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+maxpool1d: maxpool1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+maxipool1: maxipool1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+maxipool1d: maxipool1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+avgpool1: avgpool1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+avgpool1d: avgpool1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+lppool1: lppool1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+lppool1d: lppool1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #CELL: middle part (~soma) of neurons/layers
@@ -91,7 +106,7 @@ OUT: Output_Act Other_Act
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
-Output_Act: signum step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu silu swish softclip softplus softsign plu sin
+Output_Act: signum step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu prelu elu selu silu swish softclip softplus softsign plu sin
 signum: signum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 step: step.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 smoothstep: smoothstep.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -105,6 +120,7 @@ isru: isru.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 isrlu: isrlu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 erf: erf.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 gelu: gelu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+gelu_new: gelu_new.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 relu: relu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 prelu: prelu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 elu: elu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

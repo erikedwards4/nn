@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "affine.c"
+#include "linear.cblas.c"
 
 #ifdef I
 #undef I
@@ -32,49 +32,46 @@ int main(int argc, char *argv[])
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
     const valarray<size_t> oktypes = {1u,2u,101u,102u};
-    const size_t I = 3u, O = 1u;
-    ifstream ifs1, ifs2, ifs3; ofstream ofs1;
-    int8_t stdi1, stdi2, stdi3, stdo1, wo1;
-    ioinfo i1, i2, i3, o1;
+    const size_t I = 2u, O = 1u;
+    ifstream ifs1, ifs2; ofstream ofs1;
+    int8_t stdi1, stdi2, stdo1, wo1;
+    ioinfo i1, i2, o1;
     size_t Ni, No, L;
 
 
     //Description
     string descr;
     descr += "IN method.\n";
-    descr += "Affine transformation (weights and biases) of Ni inputs to No outputs.\n";
+    descr += "Linear transformation (weights only) of Ni inputs to No outputs.\n";
     descr += "\n";
     descr += "Input X has Ni neurons and output Y has No neurons.\n";
-    descr += "Each output neuron has a bias term, so B is a vector of length No.\n";
     descr += "\n";
     descr += "The Ni or No neurons are always contiguous in memory, such that:\n";
     descr += "\n";
-    descr += "If col-major: Y[:,l] = W' * X[:,l] + B \n";
+    descr += "If col-major: Y[:,l] = W' * X[:,l] \n";
     descr += "where:\n";
     descr += "X has size Ni x L \n";
     descr += "Y has size No x L \n";
     descr += "W has size Ni x No \n";
-    descr += "B has size No x 1 \n";
     descr += "\n";
-    descr += "If row-major: Y[l,L] = X[l,:] * W' + B \n";
+    descr += "If row-major: Y[l,L] = X[l,:] * W' \n";
     descr += "where:\n";
     descr += "X has size L x Ni \n";
     descr += "Y has size L x No \n";
     descr += "W has size No x Ni \n";
-    descr += "B has size 1 x No \n";
     descr += "\n";
     descr += "Note that W is transposed (non-conjugate), \n";
     descr += "such that vecs of length Ni are contiguous in memory.\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ affine X W B -o Y \n";
-    descr += "$ affine X W B > Y \n";
-    descr += "$ cat X | affine - W B > Y \n";
+    descr += "$ linear.cblas X W -o Y \n";
+    descr += "$ linear.cblas X W > Y \n";
+    descr += "$ cat X | linear.cblas - W > Y \n";
 
 
     //Argtable
     int nerrs;
-    struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,W,B)");
+    struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,W)");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
@@ -93,9 +90,8 @@ int main(int argc, char *argv[])
     //Check stdin
     stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
     stdi2 = (a_fi->count<=1 || strlen(a_fi->filename[1])==0u || strcmp(a_fi->filename[1],"-")==0);
-    stdi3 = (a_fi->count<=2 || strlen(a_fi->filename[2])==0u || strcmp(a_fi->filename[2],"-")==0);
-    if (stdi1+stdi2+stdi3>1) { cerr << progstr+": " << __LINE__ << errstr << "can only use stdin for one input" << endl; return 1; }
-    if (stdi1+stdi2+stdi3>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
+    if (stdi1+stdi2>1) { cerr << progstr+": " << __LINE__ << errstr << "can only use stdin for one input" << endl; return 1; }
+    if (stdi1+stdi2>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
@@ -109,15 +105,12 @@ int main(int argc, char *argv[])
     if (!ifs1) { cerr << progstr+": " << __LINE__ << errstr << "problem opening input file 1" << endl; return 1; }
     if (stdi2) { ifs2.copyfmt(cin); ifs2.basic_ios<char>::rdbuf(cin.rdbuf()); } else { ifs2.open(a_fi->filename[1]); }
     if (!ifs2) { cerr << progstr+": " << __LINE__ << errstr << "problem opening input file 2" << endl; return 1; }
-    if (stdi3) { ifs3.copyfmt(cin); ifs3.basic_ios<char>::rdbuf(cin.rdbuf()); } else { ifs3.open(a_fi->filename[2]); }
-    if (!ifs3) { cerr << progstr+": " << __LINE__ << errstr << "problem opening input file 3" << endl; return 1; }
 
 
     //Read input headers
     if (!read_input_header(ifs1,i1)) { cerr << progstr+": " << __LINE__ << errstr << "problem reading header for input file 1" << endl; return 1; }
     if (!read_input_header(ifs2,i2)) { cerr << progstr+": " << __LINE__ << errstr << "problem reading header for input file 2" << endl; return 1; }
-    if (!read_input_header(ifs3,i3)) { cerr << progstr+": " << __LINE__ << errstr << "problem reading header for input file 3" << endl; return 1; }
-    if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0 || (i3.T==oktypes).sum()==0)
+    if ((i1.T==oktypes).sum()==0 || (i2.T==oktypes).sum()==0)
     {
         cerr << progstr+": " << __LINE__ << errstr << "input data type must be in " << "{";
         for (auto o : oktypes) { cerr << int(o) << ((o==oktypes[oktypes.size()-1u]) ? "}" : ","); }
@@ -129,17 +122,14 @@ int main(int argc, char *argv[])
 
 
     //Checks
-    if (i1.T!=i2.T || i1.T!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
+    if (i1.T!=i2.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
     if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (W) found to be empty" << endl; return 1; }
-    if (i3.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (B) found to be empty" << endl; return 1; }
     if (!i1.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) must be a matrix" << endl; return 1; }
     if (!i2.ismat()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (W) must be a matrix" << endl; return 1; }
-    if (!i3.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (B) must be a vector" << endl; return 1; }
     L = i1.iscolmajor() ? i1.C : i1.R;
     Ni = i2.iscolmajor() ? i2.R : i2.C;
     No = i2.iscolmajor() ? i2.C : i2.R;
-    if (i3.N()!=No) { cerr << progstr+": " << __LINE__ << errstr << "length of input 3 (B) must equal No (num output neurons)" << endl; return 1; }
     if (i1.iscolmajor())
     {
         if (i1.R!=Ni) { cerr << progstr+": " << __LINE__ << errstr << "Input 1 (X) must have size Ni x L for col-major" << endl; return 1; }
@@ -176,109 +166,91 @@ int main(int argc, char *argv[])
     clock_gettime(CLOCK_REALTIME,&tic);
     if (i1.T==1u)
     {
-        float *X, *W, *B, *Y;
+        float *X, *W, *Y;
         try { X = new float[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { W = new float[i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (W)" << endl; return 1; }
-        try { B = new float[i3.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 3 (B)" << endl; return 1; }
         try { Y = new float[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-        try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::affine_s(Y,X,W,B,Ni,No,L))
-        //if (codee::affine_omp_s(Y,X,W,B,Ni,No,L))
+        if (codee::linear_cblas_s(Y,X,W,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] W; delete[] B; delete[] Y;
+        delete[] X; delete[] W; delete[] Y;
     }
     else if (i1.T==2u)
     {
-        double *X, *W, *B, *Y;
+        double *X, *W, *Y;
         try { X = new double[i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { W = new double[i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (W)" << endl; return 1; }
-        try { B = new double[i3.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 3 (B)" << endl; return 1; }
         try { Y = new double[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-        try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::affine_d(Y,X,W,B,Ni,No,L))
-        //if (codee::affine_omp_d(Y,X,W,B,Ni,No,L))
+        if (codee::linear_cblas_d(Y,X,W,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] W; delete[] B; delete[] Y;
+        delete[] X; delete[] W; delete[] Y;
     }
     else if (i1.T==101u)
     {
-        float *X, *W, *B, *Y;
+        float *X, *W, *Y;
         try { X = new float[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { W = new float[2u*i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (W)" << endl; return 1; }
-        try { B = new float[2u*i3.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 3 (B)" << endl; return 1; }
         try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-        try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::affine_c(Y,X,W,B,Ni,No,L))
+        if (codee::linear_cblas_c(Y,X,W,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] W; delete[] B; delete[] Y;
+        delete[] X; delete[] W; delete[] Y;
     }
     else if (i1.T==102u)
     {
-        double *X, *W, *B, *Y;
+        double *X, *W, *Y;
         try { X = new double[2u*i1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { W = new double[2u*i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (W)" << endl; return 1; }
-        try { B = new double[2u*i3.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 3 (B)" << endl; return 1; }
         try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(W),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
-        try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::affine_z(Y,X,W,B,Ni,No,L))
+        if (codee::linear_cblas_z(Y,X,W,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
             try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
             catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
         }
-        delete[] X; delete[] W; delete[] B; delete[] Y;
+        delete[] X; delete[] W; delete[] Y;
     }
     else
     {

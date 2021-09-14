@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "affine.c"
+#include "affine.cblas.c"
 
 #ifdef I
 #undef I
@@ -191,8 +191,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::affine_s(Y,X,W,B,Ni,No,L))
-        //if (codee::affine_omp_s(Y,X,W,B,Ni,No,L))
+        if (codee::affine_cblas_s(Y,X,W,B,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -218,8 +217,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::affine_d(Y,X,W,B,Ni,No,L))
-        //if (codee::affine_omp_d(Y,X,W,B,Ni,No,L))
+        if (codee::affine_cblas_d(Y,X,W,B,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -245,7 +243,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::affine_c(Y,X,W,B,Ni,No,L))
+        if (codee::affine_cblas_c(Y,X,W,B,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -271,7 +269,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (W)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::affine_z(Y,X,W,B,Ni,No,L))
+        if (codee::affine_cblas_z(Y,X,W,B,Ni,No,L))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
