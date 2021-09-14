@@ -1,4 +1,5 @@
-//This is just like conv1d, but doesn't allow dilation.
+//This is just like conv1d, but doesn't allow dilation,
+//and doesn't allow non-zero padding greater than Li (signal length).
 //This allows shorter and more efficient code.
 
 //X is the input of size Ni x Li,
@@ -27,13 +28,12 @@
 //No:           size_t  num output neurons (leading dim of Y)
 //Li:           size_t  length of input time-series (other dim of X)
 //Lk:           size_t  length of kernel in time (num cols of K)
-//pad:          int     padding length (pad>0 means add extra samps)
+//pad:          int     padding length in [1-Li Li] (pad>0 means add extra samps)
 //str:          size_t  stride length (step-size) in samps
 //ceil_mode:    bool    calculate Lo with ceil (see above)
 //pad_mode:     int     padding mode (0=zeros, 1=replicate, 2=reflect, 3=circular)
 
 #include <stdio.h>
-#include <string.h>
 #include <cblas.h>
 
 #ifdef __cplusplus
@@ -54,6 +54,8 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
     if (Lk<1u) { fprintf(stderr,"error in conv1_blas_s: Lk (kernel_size) must be positive\n"); return 1; }
     if (Ni<1u) { fprintf(stderr,"error in conv1_blas_s: Ni (num input neurons) must be positive\n"); return 1; }
     if (No<1u) { fprintf(stderr,"error in conv1_blas_s: No (num output neurons) must be positive\n"); return 1; }
+    if (pad<=-(int)Li) { fprintf(stderr,"error in conv1_blas_s: pad length must be > -Li\n"); return 1; }
+    if (pad_mode && pad>(int)Li) { fprintf(stderr,"error in conv1_blas_s: Li (length of input vecs) must be >= pad length\n"); return 1; }
     if (pad_mode<0 || pad_mode>3) { fprintf(stderr,"error in conv1_blas_s: pad_mode must be an int in {0,1,2,3}\n"); return 1; }
 
     const int Ti = (int)Li + 2*pad;     //total length of vecs in X including padding
@@ -67,7 +69,7 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
     size_t w=0u;                        //current window (frame)
     float sm;                           //intermediate sum
     int ss=-pad, es=ss+(int)Lk-1;       //current start-samp, end-samp
-    int n = 0, prev_n = 0;              //non-negative samps during extrapolation (padding)
+    int t = 0, prev_t = 0;              //non-negative samps during extrapolation (padding)
 
     //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
@@ -94,27 +96,25 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    n = -s - 1;         //this ensures reflected extrapolation to any length
-                    while (n<0 || n>=(int)Li) { n = (n<0) ? -n-1 : (n<(int)Li) ? n : 2*(int)Li-1-n; }
-                    X += (n-prev_n) * (int)Ni;
+                    t = -s - 1;
+                    X += (t-prev_t) * (int)Ni;
                     sm += cblas_sdot((int)Ni,X,1,K,1);
-                    K += Ni; prev_n = n;
+                    K += Ni; prev_t = t;
                 }
-                X -= prev_n * (int)Ni;
-                prev_n = 0;
+                X -= prev_t * (int)Ni;
+                prev_t = 0;
             }
             else                    //circular
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    n = (int)Li + s;    //this ensures circular extrapolation to any length
-                    while (n<0) { n += (int)Li; }
-                    X += (n-prev_n) * (int)Ni;
+                    t = (int)Li + s;
+                    X += (t-prev_t) * (int)Ni;
                     sm += cblas_sdot((int)Ni,X,1,K,1);
-                    K += Ni; prev_n = n;
+                    K += Ni; prev_t = t;
                 }
-                X -= prev_n * (int)Ni;
-                prev_n = 0;
+                X -= prev_t * (int)Ni;
+                prev_t = 0;
             }
 
             //Non-negative samps
@@ -148,24 +148,24 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
     while (w<Lo)
     {
         //Get num valid samps
-        int v = (int)Li - ss;
+        int V = (int)Li - ss;
 
         for (size_t o=No; o>0u; --o, ++B, ++Y)
         {
             sm = *B;
 
             //Valid samps
-            if (v>0)
+            if (V>0)
             {
-                sm += cblas_sdot(v*(int)Ni,X,1,K,1);
-                X += v*(int)Ni; K += v*(int)Ni;
+                sm += cblas_sdot(V*(int)Ni,X,1,K,1);
+                X += V*(int)Ni; K += V*(int)Ni;
             }
             else { X += ((int)Li-ss) * (int)Ni; }
 
             //Non-valid samps
             if (pad_mode==0)        //zeros
             {
-                K += (v>0) ? Ni*(Lk-(size_t)v) : Ni*Lk;
+                K += (V>0) ? Ni*(Lk-(size_t)V) : Ni*Lk;
             }
             else if (pad_mode==1)   //repeat
             {
@@ -178,29 +178,27 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
             }
             else if (pad_mode==2)   //reflect
             {
-                prev_n = (int)Li;
+                prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    n = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
-                    while (n<0 || n>=(int)Li) { n = (n<0) ? -n-1 : (n<(int)Li) ? n : 2*(int)Li-1-n; }
-                    X += (n-prev_n) * (int)Ni;
+                    t = 2*(int)Li-1-s;
+                    X += (t-prev_t) * (int)Ni;
                     sm += cblas_sdot((int)Ni,X,1,K,1);
-                    K += Ni; prev_n = n;
+                    K += Ni; prev_t = t;
                 }
-                X += ((int)Li-prev_n) * (int)Ni;
+                X += ((int)Li-prev_t) * (int)Ni;
             }
             else                    //circular
             {
-                prev_n = (int)Li;
+                prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    n = s - (int)Li;    //this ensures circular extrapolation to any length
-                    while (n>=(int)Li) { n -= (int)Li; }
-                    X += (n-prev_n) * (int)Ni;
+                    t = s - (int)Li;
+                    X += (t-prev_t) * (int)Ni;
                     sm += cblas_sdot((int)Ni,X,1,K,1);
-                    K += Ni; prev_n = n;
+                    K += Ni; prev_t = t;
                 }
-                X += ((int)Li-prev_n) * (int)Ni;
+                X += ((int)Li-prev_t) * (int)Ni;
             }
             X += (ss-(int)Li) * (int)Ni;
 
@@ -224,6 +222,9 @@ int conv1_cblas_d (double *Y, const double *X, const double *K, const double *B,
     if (Lk<1u) { fprintf(stderr,"error in conv1_cblas_d: Lk (kernel_size) must be positive\n"); return 1; }
     if (Ni<1u) { fprintf(stderr,"error in conv1_cblas_d: Ni (num input neurons) must be positive\n"); return 1; }
     if (No<1u) { fprintf(stderr,"error in conv1_cblas_d: No (num output neurons) must be positive\n"); return 1; }
+    if (pad<=-(int)Li) { fprintf(stderr,"error in conv1_blas_d: pad length must be > -Li\n"); return 1; }
+    if (pad_mode && pad>(int)Li) { fprintf(stderr,"error in conv1_blas_d: Li (length of input vecs) must be >= pad length\n"); return 1; }
+    if (pad_mode<0 || pad_mode>3) { fprintf(stderr,"error in conv1_blas_d: pad_mode must be an int in {0,1,2,3}\n"); return 1; }
 
     const int Ti = (int)Li + 2*pad;     //total length of vecs in X including padding
     if (Lk>Li) { fprintf(stderr,"error in conv1_cblas_d: Li (length of input vecs) must be >= Lk\n"); return 1; }
@@ -236,7 +237,7 @@ int conv1_cblas_d (double *Y, const double *X, const double *K, const double *B,
     size_t w=0u;                        //current window (frame)
     double sm;                          //intermediate sum
     int ss=-pad, es=ss+(int)Lk-1;       //current start-samp, end-samp
-    int n = 0, prev_n = 0;              //non-negative samps during extrapolation (padding)
+    int t = 0, prev_t = 0;              //non-negative samps during extrapolation (padding)
 
     //K before or overlapping first samp of X
     while (ss<0 && w<Lo)
@@ -261,27 +262,25 @@ int conv1_cblas_d (double *Y, const double *X, const double *K, const double *B,
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    n = -s - 1;         //this ensures reflected extrapolation to any length
-                    while (n<0 || n>=(int)Li) { n = (n<0) ? -n-1 : (n<(int)Li) ? n : 2*(int)Li-1-n; }
-                    X += (n-prev_n) * (int)Ni;
+                    t = -s - 1;
+                    X += (t-prev_t) * (int)Ni;
                     sm += cblas_ddot((int)Ni,X,1,K,1);
-                    K += Ni; prev_n = n;
+                    K += Ni; prev_t = t;
                 }
-                X -= prev_n * (int)Ni;
-                prev_n = 0;
+                X -= prev_t * (int)Ni;
+                prev_t = 0;
             }
             else                    //circular
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    n = (int)Li + s;    //this ensures circular extrapolation to any length
-                    while (n<0) { n += (int)Li; }
-                    X += (n-prev_n) * (int)Ni;
+                    t = (int)Li + s;
+                    X += (t-prev_t) * (int)Ni;
                     sm += cblas_ddot((int)Ni,X,1,K,1);
-                    K += Ni; prev_n = n;
+                    K += Ni; prev_t = t;
                 }
-                X -= prev_n * (int)Ni;
-                prev_n = 0;
+                X -= prev_t * (int)Ni;
+                prev_t = 0;
             }
 
             //Non-negative samps
@@ -315,24 +314,24 @@ int conv1_cblas_d (double *Y, const double *X, const double *K, const double *B,
     while (w<Lo)
     {
         //Get num valid samps
-        int v = (int)Li - ss;
+        int V = (int)Li - ss;
 
         for (size_t o=No; o>0u; --o, ++B, ++Y)
         {
             sm = *B;
 
             //Valid samps
-            if (v>0)
+            if (V>0)
             {
-                sm += cblas_ddot(v*(int)Ni,X,1,K,1);
-                X += v*(int)Ni; K += v*(int)Ni;
+                sm += cblas_ddot(V*(int)Ni,X,1,K,1);
+                X += V*(int)Ni; K += V*(int)Ni;
             }
             else { X += ((int)Li-ss) * (int)Ni; }
 
             //Non-valid samps
             if (pad_mode==0)        //zeros
             {
-                K += (v>0) ? Ni*(Lk-(size_t)v) : Ni*Lk;
+                K += (V>0) ? Ni*(Lk-(size_t)V) : Ni*Lk;
             }
             else if (pad_mode==1)   //repeat
             {
@@ -345,29 +344,27 @@ int conv1_cblas_d (double *Y, const double *X, const double *K, const double *B,
             }
             else if (pad_mode==2)   //reflect
             {
-                prev_n = (int)Li;
+                prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    n = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
-                    while (n<0 || n>=(int)Li) { n = (n<0) ? -n-1 : (n<(int)Li) ? n : 2*(int)Li-1-n; }
-                    X += (n-prev_n) * (int)Ni;
+                    t = 2*(int)Li-1-s;
+                    X += (t-prev_t) * (int)Ni;
                     sm += cblas_ddot((int)Ni,X,1,K,1);
-                    K += Ni; prev_n = n;
+                    K += Ni; prev_t = t;
                 }
-                X += ((int)Li-prev_n) * (int)Ni;
+                X += ((int)Li-prev_t) * (int)Ni;
             }
             else                    //circular
             {
-                prev_n = (int)Li;
+                prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    n = s - (int)Li;    //this ensures circular extrapolation to any length
-                    while (n>=(int)Li) { n -= (int)Li; }
-                    X += (n-prev_n) * (int)Ni;
+                    t = s - (int)Li;
+                    X += (t-prev_t) * (int)Ni;
                     sm += cblas_ddot((int)Ni,X,1,K,1);
-                    K += Ni; prev_n = n;
+                    K += Ni; prev_t = t;
                 }
-                X += ((int)Li-prev_n) * (int)Ni;
+                X += ((int)Li-prev_t) * (int)Ni;
             }
             X += (ss-(int)Li) * (int)Ni;
 
@@ -388,6 +385,9 @@ int conv1_cblas_c (float *Y, const float *X, const float *K, const float *B, con
     if (Lk<1u) { fprintf(stderr,"error in conv1_cblas_c: Lk (kernel_size) must be positive\n"); return 1; }
     if (Ni<1u) { fprintf(stderr,"error in conv1_cblas_c: Ni (num input neurons) must be positive\n"); return 1; }
     if (No<1u) { fprintf(stderr,"error in conv1_cblas_c: No (num output neurons) must be positive\n"); return 1; }
+    if (pad<=-(int)Li) { fprintf(stderr,"error in conv1_blas_c: pad length must be > -Li\n"); return 1; }
+    if (pad_mode && pad>(int)Li) { fprintf(stderr,"error in conv1_blas_c: Li (length of input vecs) must be >= pad length\n"); return 1; }
+    if (pad_mode<0 || pad_mode>3) { fprintf(stderr,"error in conv1_blas_c: pad_mode must be an int in {0,1,2,3}\n"); return 1; }
 
     const int Ti = (int)Li + 2*pad;     //total length of vecs in X including padding
     if (Lk>Li) { fprintf(stderr,"error in conv1_cblas_c: Li (length of input vecs) must be >= Lk\n"); return 1; }
@@ -401,7 +401,7 @@ int conv1_cblas_c (float *Y, const float *X, const float *K, const float *B, con
     size_t w=0u;                        //current window (frame)
     float sm[2], smr, smi;              //intermediate sums
     int ss=-pad, es=ss+(int)Lk-1;       //current start-samp, end-samp
-    int n = 0, prev_n = 0;              //non-negative samps during extrapolation (padding)
+    int t = 0, prev_t = 0;              //non-negative samps during extrapolation (padding)
 
     //K before or overlapping first samp of X
     while (ss<0 && w<Lo)
@@ -428,31 +428,29 @@ int conv1_cblas_c (float *Y, const float *X, const float *K, const float *B, con
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    n = -s - 1;         //this ensures reflected extrapolation to any length
-                    while (n<0 || n>=(int)Li) { n = (n<0) ? -n-1 : (n<(int)Li) ? n : 2*(int)Li-1-n; }
-                    X += 2 * (n-prev_n) * (int)Ni;
+                    t = -s - 1;
+                    X += 2 * (t-prev_t) * (int)Ni;
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
-                X -= 2 * prev_n * (int)Ni;
-                prev_n = 0;
+                X -= 2 * prev_t * (int)Ni;
+                prev_t = 0;
             }
             else                    //circular
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    n = (int)Li + s;    //this ensures circular extrapolation to any length
-                    while (n<0) { n += (int)Li; }
-                    X += 2 * (n-prev_n) * (int)Ni;
+                    t = (int)Li + s;
+                    X += 2 * (t-prev_t) * (int)Ni;
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
-                X -= 2 * prev_n * (int)Ni;
-                prev_n = 0;
+                X -= 2 * prev_t * (int)Ni;
+                prev_t = 0;
             }
 
             //Non-negative samps
@@ -488,25 +486,25 @@ int conv1_cblas_c (float *Y, const float *X, const float *K, const float *B, con
     while (w<Lo)
     {
         //Get num valid samps
-        int v = (int)Li - ss;
+        int V = (int)Li - ss;
 
         for (size_t o=No; o>0u; --o)
         {
             smr = *B++; smi = *B++;
 
             //Valid samps
-            if (v>0)
+            if (V>0)
             {
-                cblas_cdotu_sub(v*(int)Ni,X,1,K,1,sm);
+                cblas_cdotu_sub(V*(int)Ni,X,1,K,1,sm);
                 smr += sm[0]; smi += sm[1];
-                X += 2*v*(int)Ni; K += 2*v*(int)Ni;
+                X += 2*V*(int)Ni; K += 2*V*(int)Ni;
             }
             else { X += 2*((int)Li-ss)*(int)Ni; }
 
             //Non-valid samps
             if (pad_mode==0)        //zeros
             {
-                K += (v>0) ? 2u*Ni*(Lk-(size_t)v) : 2u*Ni*Lk;
+                K += (V>0) ? 2u*Ni*(Lk-(size_t)V) : 2u*Ni*Lk;
             }
             else if (pad_mode==1)   //repeat
             {
@@ -516,39 +514,37 @@ int conv1_cblas_c (float *Y, const float *X, const float *K, const float *B, con
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
                 X += 2u*Ni;
             }
             else if (pad_mode==2)   //reflect
             {
-                prev_n = (int)Li;
+                prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    n = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
-                    while (n<0 || n>=(int)Li) { n = (n<0) ? -n-1 : (n<(int)Li) ? n : 2*(int)Li-1-n; }
-                    X += 2 * (n-prev_n) * (int)Ni;
+                    t = 2*(int)Li-1-s;
+                    X += 2 * (t-prev_t) * (int)Ni;
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
-                X += 2 * ((int)Li-prev_n) * (int)Ni;
+                X += 2 * ((int)Li-prev_t) * (int)Ni;
             }
             else                    //circular
             {
-                prev_n = (int)Li;
+                prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    n = s - (int)Li;    //this ensures circular extrapolation to any length
-                    while (n>=(int)Li) { n -= (int)Li; }
-                    X += 2 * (n-prev_n) * (int)Ni;
+                    t = s - (int)Li;
+                    X += 2 * (t-prev_t) * (int)Ni;
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
-                X += 2 * ((int)Li-prev_n) * (int)Ni;
+                X += 2 * ((int)Li-prev_t) * (int)Ni;
             }
             X += 2 * (ss-(int)Li) * (int)Ni;
 
@@ -569,6 +565,9 @@ int conv1_cblas_z (double *Y, const double *X, const double *K, const double *B,
     if (Lk<1u) { fprintf(stderr,"error in conv1_cblas_z: Lk (kernel_size) must be positive\n"); return 1; }
     if (Ni<1u) { fprintf(stderr,"error in conv1_cblas_z: Ni (num input neurons) must be positive\n"); return 1; }
     if (No<1u) { fprintf(stderr,"error in conv1_cblas_z: No (num output neurons) must be positive\n"); return 1; }
+    if (pad<=-(int)Li) { fprintf(stderr,"error in conv1_blas_z: pad length must be > -Li\n"); return 1; }
+    if (pad_mode && pad>(int)Li) { fprintf(stderr,"error in conv1_blas_z: Li (length of input vecs) must be >= pad length\n"); return 1; }
+    if (pad_mode<0 || pad_mode>3) { fprintf(stderr,"error in conv1_blas_z: pad_mode must be an int in {0,1,2,3}\n"); return 1; }
 
     const int Ti = (int)Li + 2*pad;     //total length of vecs in X including padding
     if (Lk>Li) { fprintf(stderr,"error in conv1_cblas_z: Li (length of input vecs) must be >= Lk\n"); return 1; }
@@ -582,7 +581,7 @@ int conv1_cblas_z (double *Y, const double *X, const double *K, const double *B,
     size_t w=0u;                        //current window (frame)
     double sm[2], smr, smi;             //intermediate sums
     int ss=-pad, es=ss+(int)Lk-1;       //current start-samp, end-samp
-    int n = 0, prev_n = 0;              //non-negative samps during extrapolation (padding)
+    int t = 0, prev_t = 0;              //non-negative samps during extrapolation (padding)
 
     //K before or overlapping first samp of X
     while (ss<0 && w<Lo)
@@ -609,31 +608,29 @@ int conv1_cblas_z (double *Y, const double *X, const double *K, const double *B,
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    n = -s - 1;         //this ensures reflected extrapolation to any length
-                    while (n<0 || n>=(int)Li) { n = (n<0) ? -n-1 : (n<(int)Li) ? n : 2*(int)Li-1-n; }
-                    X += 2 * (n-prev_n) * (int)Ni;
+                    t = -s - 1;
+                    X += 2 * (t-prev_t) * (int)Ni;
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
-                X -= 2 * prev_n * (int)Ni;
-                prev_n = 0;
+                X -= 2 * prev_t * (int)Ni;
+                prev_t = 0;
             }
             else                    //circular
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    n = (int)Li + s;    //this ensures circular extrapolation to any length
-                    while (n<0) { n += (int)Li; }
-                    X += 2 * (n-prev_n) * (int)Ni;
+                    t = (int)Li + s;
+                    X += 2 * (t-prev_t) * (int)Ni;
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
-                X -= 2 * prev_n * (int)Ni;
-                prev_n = 0;
+                X -= 2 * prev_t * (int)Ni;
+                prev_t = 0;
             }
 
             //Non-negative samps
@@ -669,25 +666,25 @@ int conv1_cblas_z (double *Y, const double *X, const double *K, const double *B,
     while (w<Lo)
     {
         //Get num valid samps
-        int v = (int)Li - ss;
+        int V = (int)Li - ss;
 
         for (size_t o=No; o>0u; --o)
         {
             smr = *B++; smi = *B++;
 
             //Valid samps
-            if (v>0)
+            if (V>0)
             {
-                cblas_zdotu_sub(v*(int)Ni,X,1,K,1,sm);
+                cblas_zdotu_sub(V*(int)Ni,X,1,K,1,sm);
                 smr += sm[0]; smi += sm[1];
-                X += 2*v*(int)Ni; K += 2*v*(int)Ni;
+                X += 2*V*(int)Ni; K += 2*V*(int)Ni;
             }
             else { X += 2*((int)Li-ss)*(int)Ni; }
 
             //Non-valid samps
             if (pad_mode==0)        //zeros
             {
-                K += (v>0) ? 2u*Ni*(Lk-(size_t)v) : 2u*Ni*Lk;
+                K += (V>0) ? 2u*Ni*(Lk-(size_t)V) : 2u*Ni*Lk;
             }
             else if (pad_mode==1)   //repeat
             {
@@ -697,39 +694,37 @@ int conv1_cblas_z (double *Y, const double *X, const double *K, const double *B,
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
                 X += 2u*Ni;
             }
             else if (pad_mode==2)   //reflect
             {
-                prev_n = (int)Li;
+                prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    n = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
-                    while (n<0 || n>=(int)Li) { n = (n<0) ? -n-1 : (n<(int)Li) ? n : 2*(int)Li-1-n; }
-                    X += 2 * (n-prev_n) * (int)Ni;
+                    t = 2*(int)Li-1-s;
+                    X += 2 * (t-prev_t) * (int)Ni;
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
-                X += 2 * ((int)Li-prev_n) * (int)Ni;
+                X += 2 * ((int)Li-prev_t) * (int)Ni;
             }
             else                    //circular
             {
-                prev_n = (int)Li;
+                prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    n = s - (int)Li;    //this ensures circular extrapolation to any length
-                    while (n>=(int)Li) { n -= (int)Li; }
-                    X += 2 * (n-prev_n) * (int)Ni;
+                    t = s - (int)Li;
+                    X += 2 * (t-prev_t) * (int)Ni;
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
                     K += 2u*Ni;
-                    prev_n = n;
+                    prev_t = t;
                 }
-                X += 2 * ((int)Li-prev_n) * (int)Ni;
+                X += 2 * ((int)Li-prev_t) * (int)Ni;
             }
             X += 2 * (ss-(int)Li) * (int)Ni;
 

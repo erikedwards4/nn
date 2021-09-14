@@ -112,6 +112,7 @@ if (!i3.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (B) mu
 if (i3.N()!=No) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (B) must have length No (num output neurons)" << endl; return 1; }
 if (Tk>(int)Li) { cerr << progstr+": " << __LINE__ << errstr << "Li (length of input vecs) must be >= dil*(Lk-1)" << endl; return 1; }
 if (Ti<Tk) { cerr << progstr+": " << __LINE__ << errstr << "Li+2*pad must be >= dil*(Lk-1)" << endl; return 1; }
+if (pad<=-(int)Li) { cerr << progstr+": " << __LINE__ << errstr << "pad length must be > -Li" << endl; return 1; }
 
 //Set output header info
 Lo = 1u + size_t(Ti-Tk)/str + size_t(ceil_mode && size_t(Ti-Tk)%str);
