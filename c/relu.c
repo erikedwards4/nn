@@ -1,7 +1,6 @@
 //This gets ReLU activation function for each element of X.
 
 #include <stdio.h>
-//#include <math.h>
 //#include <time.h>
 
 #ifdef __cplusplus
