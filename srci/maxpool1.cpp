@@ -9,7 +9,8 @@ int pad, Ti, ceil_mode;
 
 //Description
 string descr;
-descr += "1d max-pooling, same as maxpool1d, but no dilation.\n";
+descr += "1d max-pooling, same as maxpool1d, but has no dilation,\n";
+descr += "and no padding modes (outside samps are taken as -Inf).\n";
 descr += "\n";
 descr += "This is an input (IN) component for a layer of neurons.\n";
 descr += "There are N neurons in the layer,\n";

@@ -1,4 +1,5 @@
-//This is just like maxpool1d, but doesn't allow dilation.
+//This is just like maxpool1d, but doesn't allow dilation,
+//and has no padding mode (non-valid samps are taken as -Inf).
 //This allows shorter and more efficient code.
 
 //X is the input of size N x Li,
