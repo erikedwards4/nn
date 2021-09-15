@@ -1,5 +1,5 @@
 //Includes
-#include "mish.c"
+#include "tanhshrink.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
@@ -8,13 +8,13 @@ const size_t I = 1u, O = 1u;
 //Description
 string descr;
 descr += "Activation function.\n";
-descr += "Gets Mish [Misra 2019] for each element of X.\n";
-descr += "For each element: y = x*tanh(softplus(x)) = x*tanh(ln(1+exp(x))).\n";
+descr += "Gets Tanhshrink of each element of X.\n";
+descr += "For each element: y = x - tanh(x).\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ mish X -o Y \n";
-descr += "$ mish X > Y \n";
-descr += "$ cat X | mish > Y \n";
+descr += "$ tanhshrink X -o Y \n";
+descr += "$ tanhshrink X > Y \n";
+descr += "$ cat X | tanhshrink > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
@@ -36,10 +36,10 @@ if (i1.T==1u)
 {
     float *X;
     try { X = new float[i1.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    if (codee::mish_inplace_s(X,i1.N()))
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+    if (codee::tanhshrink_inplace_s(X,i1.N()))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
