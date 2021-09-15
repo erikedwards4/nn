@@ -99,7 +99,7 @@ if (i1.T==1u)
 {
     float *X, *Uc, *Ui, *Uf, *Uo;// *Y;
     try { X = new float[i1.N()]; }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
     try { Uc = new float[i2.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (Uc)" << endl; return 1; }
     try { Ui = new float[i3.N()]; }
@@ -111,7 +111,7 @@ if (i1.T==1u)
     //try { Y = new float[o1.N()]; }
     //catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+    catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
     try { ifs2.read(reinterpret_cast<char*>(Uc),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (Uc)" << endl; return 1; }
     try { ifs3.read(reinterpret_cast<char*>(Ui),i3.nbytes()); }

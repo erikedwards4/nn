@@ -1,45 +1,37 @@
 //Includes
-#include "smoothstep.c"
+#include "hardshrink.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
 const size_t I = 1u, O = 1u;
-int n;
+double lambda;
 
 //Description
 string descr;
 descr += "Activation function.\n";
-descr += "Gets smoothstep function of each element of X.\n";
-descr += "This implementation only allows n=0 and n=1.\n";
+descr += "Gets the HardShrink function of each element of X.\n";
+descr += "For each element: y = x,  if x<-lambda \n";
+descr += "                  y = x,  if x>lambda \n";
+descr += "                  y = 0,  otherwise. \n";
 descr += "\n";
-descr += "If n=0, then this is the clamp function:\n";
-descr += "For each element: y = 0,  if x<0   \n";
-descr += "                  y = x,  if 0<x<1 \n";
-descr += "                  y = 1,  if x>1   \n";
-descr += "\n";
-descr += "If n=1, then this has a sigmoid shape.\n";
-descr += "This is cubic Hermite interpolation after clamping.\n";
-descr += "For each element: y = 0,             if x<0  \n";
-descr += "                  y = 3*x^2 - 2*x^3, if 0<x<1\n";
-descr += "                  y = 1,             if x>1  \n";
-descr += "\n";
-descr += "Use -n (--n) to specify the n param [default=0].\n";
+descr += "Use -l (--lambda) to specify lambda [default=0.5].\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ smoothstep X -n1 -o Y \n";
-descr += "$ smoothstep X -n1 > Y \n";
-descr += "$ cat X | smoothstep -n1 > Y \n";
+descr += "$ hardshrink X -o Y \n";
+descr += "$ hardshrink X > Y \n";
+descr += "$ cat X | hardshrink > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-struct arg_int    *a_n = arg_intn("n","n","<uint>",0,1,"n param (0 or 1) [default=0]");
+struct arg_dbl    *a_l = arg_dbln("l","lambda","<dbl>",0,1,"lambda param [default=0.5]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
 
-//Get n
-n = (a_n->count==0) ? 0 : a_n->ival[0];
-if (n!=0 && n!=1) { cerr << progstr+": " << __LINE__ << errstr << "n param must be 0 or 1" << endl; return 1; }
+//Get lambda
+lambda = (a_l->count==0) ? 0.5 : a_l->dval[0];
+if (lambda<0.0) { cerr << progstr+": " << __LINE__ << errstr << "lambda must be non-negative" << endl; return 1; }
+
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
@@ -58,7 +50,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::smoothstep_inplace_s(X,i1.N(),n))
+    if (codee::hardshrink_inplace_s(X,i1.N(),float(lambda)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
