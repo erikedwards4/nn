@@ -153,7 +153,7 @@ OUT: Static_Act Other_Act #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply without modification to single neurons or to layers of neurons.
-Static_Act: step smoothstep logistic tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu elu selu softclip softplus softsign plu silu swish hardswish mish sin
+Static_Act: step smoothstep logistic tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu elu celu selu softclip softplus softsign plu silu swish hardswish mish sin
 step: srci/step.cpp c/step.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 signum: srci/signum.cpp c/signum.c
@@ -195,6 +195,8 @@ prelu: srci/prelu.cpp c/prelu.c
 leaky_relu: srci/leaky_relu.cpp c/leaky_relu.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 elu: srci/elu.cpp c/elu.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+celu: srci/celu.cpp c/celu.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 selu: srci/selu.cpp c/selu.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm

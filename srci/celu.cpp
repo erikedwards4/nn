@@ -1,5 +1,5 @@
 //Includes
-#include "prelu.c"
+#include "celu.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
@@ -9,31 +9,26 @@ double alpha;
 //Description
 string descr;
 descr += "Activation function.\n";
-descr += "Gets parametric ReLU (PReLU) of each element of X.\n";
-descr += "For each element: y = alpha*x,  if x<0. \n";
-descr += "                  y = x,        if x>=0. \n";
+descr += "Gets CELU of each element of X.\n";
+descr += "This is from Continuously Differentiable Exponential Linear Units [Barron 2017].\n";
+descr += "For each element: y = max(0,x) + min(0,alpha*(exp(x/alpha)−1)). \n";
 descr += "\n";
-descr += "For alpha=0, this is the usual ReLU.\n";
-descr += "For alpha=0.01, this is the leaky ReLU.\n";
-descr += "For alpha random from uniform distribution in [0 1), this the Randomized ReLU (RReLU).\n";
-descr += "\n";
-descr += "Use -a (--alpha) to specify alpha [default=0.01].\n";
+descr += "Use -a (--alpha) to specify alpha [default=1.0].\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ prelu X -o Y \n";
-descr += "$ prelu X > Y \n";
-descr += "$ cat X | prelu > Y \n";
+descr += "$ celu X -o Y \n";
+descr += "$ celu -a2.0 X > Y \n";
+descr += "$ cat X | celu -a0.5  > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=0.01]");
+struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=1.0]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
 
 //Get alpha
-alpha = (a_a->count==0) ? 0.01 : a_a->dval[0];
-//if (a_a->dval[0]<0.0) { cerr << progstr+": " << __LINE__ << warstr << "alpha param usually nonnegative" << endl; }
+alpha = (a_a->count==0) ? 1.0 : a_a->dval[0];
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
@@ -52,7 +47,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    if (codee::prelu_inplace_s(X,i1.N(),float(alpha)))
+    if (codee::celu_inplace_s(X,i1.N(),float(alpha)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
