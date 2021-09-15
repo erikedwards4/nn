@@ -106,7 +106,7 @@ OUT: Output_Act Other_Act
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
-Output_Act: signum step smoothstep logistic logsigmoid hardsigmoid hardshrink tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu elu celu selu silu swish hardswish mish softclip softplus softsign plu sin
+Output_Act: signum step smoothstep logistic logsigmoid hardsigmoid hardshrink tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu rrelu elu celu selu silu swish hardswish mish softclip softplus softsign plu sin threshold
 signum: signum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 step: step.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 smoothstep: smoothstep.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -129,6 +129,7 @@ gelu_new: gelu_new.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 relu: relu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 relu6: relu6.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 prelu: prelu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+rrelu: rrelu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 leaky_relu: leaky_relu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 elu: elu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 celu: celu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -142,12 +143,15 @@ softplus: softplus.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softsign: softsign.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 plu: plu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 sin: sin.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+threshold: threshold.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Activation functions applied layer-wise
 #(Above Output_Acts can be applied without modification to layers, so are not repeated here)
-Other_Act: maxout softmax betamax
+Other_Act: maxout softmax softmin log_softmax betamax
 maxout: maxout.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softmax: softmax.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+softmin: softmin.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+log_softmax: log_softmax.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 betamax: betamax.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #CN_Neurons: output side of various neurons from history of computational neuroscience

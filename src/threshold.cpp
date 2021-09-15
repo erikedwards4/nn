@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "softmax.c"
+#include "threshold.c"
 
 #ifdef I
 #undef I
@@ -34,37 +34,36 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
-    size_t dim;
+    double thresh, val;
 
 
     //Description
     string descr;
-    descr += "Layer activation function.\n";
-    descr += "Gets softmax function for each vector in X.\n";
-    descr += "The output Y has the same size as X.\n";
+    descr += "Static nonlinear function.\n";
+    descr += "Gets threshold function for each element of X.\n";
+    descr += "For each element: y = x,    if x>thresh \n";
+    descr += "                  y = val,  otherwise.  \n";
     descr += "\n";
-    descr += "For each vector x in X and y in Y:\n";
-    descr += "y[n] = exp(x[n]) / sum(exp(x[:])) \n";
+    descr += "For val=0 and thresh=0, this is the usual ReLU.\n";
     descr += "\n";
-    descr += "Use -d (--dim) to specify the axis of the vectors in X.\n";
-    descr += "This is the dimension of length No, \n";
-    descr += "where No is the number of outputs from the layer.\n";
-    descr += "The default is 0 (along cols) unless X is a vector.\n";
+    descr += "Use -t (--thresh) to specify the threshold [default=0.0].\n";
+    descr += "Use -v (--val) to specify the value [default=thresh].\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ softmax X -o Y \n";
-    descr += "$ softmax X > Y \n";
-    descr += "$ cat X | softmax > Y \n";
+    descr += "$ threshold -t1 X -o Y \n";
+    descr += "$ threshold -t1 -v0 X > Y \n";
+    descr += "$ cat X | threshold -t-1.5 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension (0 or 1) [default=0]");
+    struct arg_dbl   *a_th = arg_dbln("t","thresh","<dbl>",0,1,"threshold [default=0.0]");
+    struct arg_dbl    *a_v = arg_dbln("v","val","<dbl>",0,1,"value [default=thresh]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_d, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_th, a_v, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -104,11 +103,11 @@ int main(int argc, char *argv[])
 
     //Get options
 
-    //Get dim
-    if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
-    else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = size_t(a_d->ival[0]); }
-    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+    //Get thresh
+    thresh = (a_th->count==0) ? 0.0 : a_th->dval[0];
+
+    //Get val
+    val = (a_v->count==0) ? thresh : a_v->dval[0];
 
 
     //Checks
@@ -143,7 +142,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::softmax_inplace_s(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+        if (codee::threshold_inplace_s(X,i1.N(),float(thresh),float(val)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -159,7 +158,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::softmax_inplace_d(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+        if (codee::threshold_inplace_d(X,i1.N(),double(thresh),double(val)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

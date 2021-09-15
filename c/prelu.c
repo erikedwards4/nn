@@ -29,7 +29,6 @@ int prelu_s (float *Y, const float *X, const size_t N, const float alpha)
     {
         for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0f) ? alpha**X : *X; }
     }
-    
 
     return 0;
 }

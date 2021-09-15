@@ -1,5 +1,5 @@
 //Includes
-#include "softmax.c"
+#include "log_softmax.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
@@ -9,7 +9,7 @@ size_t dim;
 //Description
 string descr;
 descr += "Layer activation function.\n";
-descr += "Gets softmax function for each vector in X.\n";
+descr += "Gets log_softmax function for each vector in X.\n";
 descr += "The output Y has the same size as X.\n";
 descr += "\n";
 descr += "For each vector x in X and y in Y:\n";
@@ -21,9 +21,9 @@ descr += "where No is the number of outputs from the layer.\n";
 descr += "The default is 0 (along cols) unless X is a vector.\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ softmax X -o Y \n";
-descr += "$ softmax X > Y \n";
-descr += "$ cat X | softmax > Y \n";
+descr += "$ log_softmax X -o Y \n";
+descr += "$ log_softmax X > Y \n";
+descr += "$ cat X | log_softmax > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
@@ -55,7 +55,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::softmax_inplace_s(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+    if (codee::log_softmax_inplace_s(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

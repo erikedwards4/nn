@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "softmax.c"
+#include "rrelu.c"
 
 #ifdef I
 #undef I
@@ -34,37 +34,37 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
-    size_t dim;
+    double lower, upper;
 
 
     //Description
     string descr;
-    descr += "Layer activation function.\n";
-    descr += "Gets softmax function for each vector in X.\n";
-    descr += "The output Y has the same size as X.\n";
+    descr += "Activation function.\n";
+    descr += "Gets randomized ReLU (RReLU) of each element of X [Xu et al. 2015].\n";
+    descr += "For each element: y = alpha*x,  if x<0. \n";
+    descr += "                  y = x,        if x>=0. \n";
     descr += "\n";
-    descr += "For each vector x in X and y in Y:\n";
-    descr += "y[n] = exp(x[n]) / sum(exp(x[:])) \n";
+    descr += "where alpha is drawn from a uniform distribution in [lower upper],\n";
+    descr += "and 0 <= lower < upper < 1.\n\n";
     descr += "\n";
-    descr += "Use -d (--dim) to specify the axis of the vectors in X.\n";
-    descr += "This is the dimension of length No, \n";
-    descr += "where No is the number of outputs from the layer.\n";
-    descr += "The default is 0 (along cols) unless X is a vector.\n";
+    descr += "Use -l (--lower) to specify the lower end of the range for alpha [default=0.125].\n";
+    descr += "Use -u (--upper) to specify the upper end of the range for alpha [default=1/3].\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ softmax X -o Y \n";
-    descr += "$ softmax X > Y \n";
-    descr += "$ cat X | softmax > Y \n";
+    descr += "$ rrelu X -o Y \n";
+    descr += "$ rrelu -l0.1 -u0.5 X > Y \n";
+    descr += "$ cat X | rrelu -u0.25 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-    struct arg_int    *a_d = arg_intn("d","dim","<uint>",0,1,"dimension (0 or 1) [default=0]");
+    struct arg_dbl    *a_l = arg_dbln("l","lower","<dbl>",0,1,"lower end of range [default=0.125]");
+    struct arg_dbl    *a_u = arg_dbln("u","upper","<dbl>",0,1,"upper end of range [default=1/3]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_d, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_l, a_u, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -104,11 +104,14 @@ int main(int argc, char *argv[])
 
     //Get options
 
-    //Get dim
-    if (a_d->count==0) { dim = i1.isvec() ? i1.nonsingleton1() : 0u; }
-    else if (a_d->ival[0]<0) { cerr << progstr+": " << __LINE__ << errstr << "dim must be nonnegative" << endl; return 1; }
-    else { dim = size_t(a_d->ival[0]); }
-    if (dim>3u) { cerr << progstr+": " << __LINE__ << errstr << "dim must be in {0,1,2,3}" << endl; return 1; }
+    //Get lower
+    lower = (a_l->count==0) ? 0.125 : a_l->dval[0];
+    if (lower<0.0 || lower>=1.0) { cerr << progstr+": " << __LINE__ << errstr << "lower must be in [0 1)" << endl; return 1; }
+
+    //Get val
+    upper = (a_u->count==0) ? 1.0/3.0 : a_u->dval[0];
+    if (upper<0.0 || upper>=1.0) { cerr << progstr+": " << __LINE__ << errstr << "upper must be in [0 1)" << endl; return 1; }
+    if (upper<=lower) { cerr << progstr+": " << __LINE__ << errstr << "upper must be > lower" << endl; return 1; }
 
 
     //Checks
@@ -143,7 +146,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::softmax_inplace_s(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+        if (codee::rrelu_inplace_s(X,i1.N(),float(lower),float(upper)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -159,7 +162,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::softmax_inplace_d(X,i1.R,i1.C,i1.S,i1.H,i1.iscolmajor(),dim))
+        if (codee::rrelu_inplace_d(X,i1.N(),double(lower),double(upper)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
