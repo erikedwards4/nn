@@ -106,12 +106,13 @@ OUT: Output_Act Other_Act
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
-Output_Act: signum step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu elu selu silu swish softclip softplus softsign plu sin
+Output_Act: signum step smoothstep logistic tanh hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu elu selu silu swish hardswish mish softclip softplus softsign plu sin
 signum: signum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 step: step.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 smoothstep: smoothstep.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 logistic: logistic.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 tanh: tanh.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+hardtanh: hardtanh.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 atan: atan.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 asinh: asinh.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 gudermann: gudermann.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -129,6 +130,8 @@ elu: elu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 selu: selu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 silu: silu.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 swish: swish.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+hardswish: hardswish.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+mish: mish.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softclip: softclip.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softplus: softplus.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 softsign: softsign.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

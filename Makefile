@@ -153,7 +153,7 @@ OUT: Static_Act Other_Act #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply without modification to single neurons or to layers of neurons.
-Static_Act: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu elu selu softclip softplus softsign plu silu swish sin
+Static_Act: step smoothstep logistic tanh hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu elu selu softclip softplus softsign plu silu swish hardswish mish sin
 step: srci/step.cpp c/step.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 signum: srci/signum.cpp c/signum.c
@@ -164,6 +164,8 @@ logistic: srci/logistic.cpp c/logistic.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 tanh: srci/tanh.cpp c/tanh.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+hardtanh: srci/hardtanh.cpp c/hardtanh.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 atan: srci/atan.cpp c/atan.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 asinh: srci/asinh.cpp c/asinh.c
@@ -205,6 +207,10 @@ plu: srci/plu.cpp c/plu.c
 silu: srci/silu.cpp c/silu.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 swish: srci/swish.cpp c/swish.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
+hardswish: srci/hardswish.cpp c/hardswish.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+mish: srci/mish.cpp c/mish.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
 sin: srci/sin.cpp c/sin.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
