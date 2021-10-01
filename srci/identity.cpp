@@ -7,7 +7,11 @@ const size_t I = 1u, O = 1u;
 
 //Description
 string descr;
-descr += "Outputs X unchanged.\n";
+descr += "Stream operation (or linear).\n";
+descr += "Output Y is identical to input X.\n";
+descr += "\n";
+descr += "Use -t (--type) to specify the data type of X [default=1].\n";
+descr += "This can be 1 (single float) or 2 (double).\n";
 descr += "\n";
 descr += "Examples:\n";
 descr += "$ identity X -o Y \n";
@@ -16,6 +20,7 @@ descr += "$ cat X | identity > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
+struct arg_int  *a_typ = arg_intn("t","type","<uint>",0,1,"data type [default=1 -> float]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
