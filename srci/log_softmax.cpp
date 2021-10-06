@@ -12,8 +12,9 @@ descr += "Layer activation function.\n";
 descr += "Gets log_softmax function for each vector in X.\n";
 descr += "The output Y has the same size as X.\n";
 descr += "\n";
+descr += "This is just log(softmax(X)).\n";
 descr += "For each vector x in X and y in Y:\n";
-descr += "y[n] = exp(x[n]) / sum(exp(x[:])) \n";
+descr += "y[n] = x[n] - log(sum(exp(x[:]))) \n";
 descr += "\n";
 descr += "Use -d (--dim) to specify the axis of the vectors in X.\n";
 descr += "This is the dimension of length No, \n";
@@ -23,7 +24,7 @@ descr += "\n";
 descr += "Examples:\n";
 descr += "$ log_softmax X -o Y \n";
 descr += "$ log_softmax X > Y \n";
-descr += "$ cat X | log_softmax > Y \n";
+descr += "$ cat X | log_softmax -d1 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");

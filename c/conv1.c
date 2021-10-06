@@ -91,7 +91,8 @@ int conv1_s (float *Y, const float *X, const float *K, const float *B, const siz
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    t = -s - 1;
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
                     X += (t-prev_t) * (int)Ni;
                     for (size_t i=Ni; i>0u; --i, ++X, ++K) { sm += *X * *K; }
                     prev_t = t + 1;
@@ -173,10 +174,11 @@ int conv1_s (float *Y, const float *X, const float *K, const float *B, const siz
             }
             else if (pad_mode==2)   //reflect
             {
-                prev_t = (int)Li;
+                prev_t = (int)Li; 
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    t = 2*(int)Li - 1 - s;
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
                     X += (t-prev_t) * (int)Ni;
                     for (size_t i=Ni; i>0u; --i, ++X, ++K) { sm += *X * *K; }
                     prev_t = t + 1;
@@ -257,7 +259,8 @@ int conv1_d (double *Y, const double *X, const double *K, const double *B, const
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    t = -s - 1;
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
                     X += (t-prev_t) * (int)Ni;
                     for (size_t i=Ni; i>0u; --i, ++X, ++K) { sm += *X * *K; }
                     prev_t = t + 1;
@@ -342,7 +345,8 @@ int conv1_d (double *Y, const double *X, const double *K, const double *B, const
                 prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    t = 2*(int)Li - 1 - s;
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
                     X += (t-prev_t) * (int)Ni;
                     for (size_t i=Ni; i>0u; --i, ++X, ++K) { sm += *X * *K; }
                     prev_t = t + 1;
@@ -425,7 +429,8 @@ int conv1_c (float *Y, const float *X, const float *K, const float *B, const siz
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    t = -s - 1;
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
                     X += 2 * (t-prev_t) * (int)Ni;
                     for (size_t i=Ni; i>0u; --i, X+=2, K+=2)
                     {
@@ -534,7 +539,8 @@ int conv1_c (float *Y, const float *X, const float *K, const float *B, const siz
                 prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    t = 2*(int)Li - 1 - s;
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
                     X += 2 * (t-prev_t) * (int)Ni;
                     for (size_t i=Ni; i>0u; --i, X+=2, K+=2)
                     {
@@ -625,7 +631,8 @@ int conv1_z (double *Y, const double *X, const double *K, const double *B, const
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    t = -s - 1;
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
                     X += 2 * (t-prev_t) * (int)Ni;
                     for (size_t i=Ni; i>0u; --i, X+=2, K+=2)
                     {
@@ -734,7 +741,8 @@ int conv1_z (double *Y, const double *X, const double *K, const double *B, const
                 prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    t = 2*(int)Li - 1 - s;
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
                     X += 2 * (t-prev_t) * (int)Ni;
                     for (size_t i=Ni; i>0u; --i, X+=2, K+=2)
                     {

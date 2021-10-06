@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
-#include "gelu.c"
+#include "softshrink.c"
 
 #ifdef I
 #undef I
@@ -34,27 +34,33 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
+    double lambda;
 
 
     //Description
     string descr;
     descr += "Activation function.\n";
-    descr += "Gets the Gaussian Error Linear Unit (GELU) [Hendrycks & Gimpel 2018] of each element of X.\n";
-    descr += "For each element: y = 0.5 * x * (1+erf(x/sqrt(2))).\n";
+    descr += "Gets the SoftShrink function of each element of X.\n";
+    descr += "For each element: y = x-lambda,  if x>lambda  \n";
+    descr += "                  y = x+lambda,  if x<-lambda \n";
+    descr += "                  y = 0,         otherwise.   \n";
+    descr += "\n";
+    descr += "Use -l (--lambda) to specify lambda [default=0.5].\n";
     descr += "\n";
     descr += "Examples:\n";
-    descr += "$ gelu X -o Y \n";
-    descr += "$ gelu X > Y \n";
-    descr += "$ cat X | gelu > Y \n";
+    descr += "$ softshrink X -o Y \n";
+    descr += "$ softshrink X > Y \n";
+    descr += "$ cat X | softshrink -l0.4 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
+    struct arg_dbl    *a_l = arg_dbln("l","lambda","<dbl>",0,1,"lambda param [default=0.5]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_l, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -94,6 +100,10 @@ int main(int argc, char *argv[])
 
     //Get options
 
+    //Get lambda
+    lambda = (a_l->count==0) ? 0.5 : a_l->dval[0];
+    if (lambda<0.0) { cerr << progstr+": " << __LINE__ << errstr << "lambda must be non-negative" << endl; return 1; }
+
 
     //Checks
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
@@ -127,7 +137,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::gelu_inplace_s(X,i1.N()))
+        if (codee::softshrink_inplace_s(X,i1.N(),float(lambda)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -143,7 +153,7 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-        if (codee::gelu_inplace_d(X,i1.N()))
+        if (codee::softshrink_inplace_d(X,i1.N(),double(lambda)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

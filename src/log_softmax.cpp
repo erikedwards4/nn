@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     descr += "Examples:\n";
     descr += "$ log_softmax X -o Y \n";
     descr += "$ log_softmax X > Y \n";
-    descr += "$ cat X | log_softmax > Y \n";
+    descr += "$ cat X | log_softmax -d1 > Y \n";
 
 
     //Argtable

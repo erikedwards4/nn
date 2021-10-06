@@ -31,9 +31,9 @@ int log_softmax_s (float *Y, const float *X, const size_t R, const size_t C, con
     }
     else if (L==N)
     {
-        for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; sm += expf(*Y); }
+        for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; sm += expf(*X); }
         sm = logf(sm);
-        for (size_t l=L; l>0u; --l) { *--Y /= sm; }
+        for (size_t l=L; l>0u; --l) { *--Y -= sm; }
     }
     else
     {
@@ -46,9 +46,9 @@ int log_softmax_s (float *Y, const float *X, const size_t R, const size_t C, con
             for (size_t v=V; v>0u; --v)
             {
                 sm = 0.0f;
-                for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; sm += expf(*Y); }
+                for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; sm += expf(*X); }
                 Y -= L; sm = logf(sm);
-                for (size_t l=L; l>0u; --l, ++Y) { *Y /= sm; }
+                for (size_t l=L; l>0u; --l, ++Y) { *Y -= sm; }
             }
         }
         else
@@ -58,9 +58,9 @@ int log_softmax_s (float *Y, const float *X, const size_t R, const size_t C, con
                 for (size_t b=B; b>0u; --b, X-=K*L-1u, ++Y)
                 {
                     sm = 0.0f;
-                    for (size_t l=L; l>0u; --l, X+=K, Y+=K) { *Y = *X; sm += expf(*Y); }
+                    for (size_t l=L; l>0u; --l, X+=K, Y+=K) { *Y = *X; sm += expf(*X); }
                     sm = logf(sm);
-                    for (size_t l=L; l>0u; --l) { Y-=K; *Y /= sm; }
+                    for (size_t l=L; l>0u; --l) { Y-=K; *Y -= sm; }
                 }
             }
         }
@@ -85,9 +85,9 @@ int log_softmax_d (double *Y, const double *X, const size_t R, const size_t C, c
     }
     else if (L==N)
     {
-        for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; sm += exp(*Y); }
+        for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; sm += exp(*X); }
         sm = log(sm);
-        for (size_t l=L; l>0u; --l) { *--Y /= sm; }
+        for (size_t l=L; l>0u; --l) { *--Y -= sm; }
     }
     else
     {
@@ -100,9 +100,9 @@ int log_softmax_d (double *Y, const double *X, const size_t R, const size_t C, c
             for (size_t v=V; v>0u; --v)
             {
                 sm = 0.0;
-                for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; sm += exp(*Y); }
+                for (size_t l=L; l>0u; --l, ++X, ++Y) { *Y = *X; sm += exp(*X); }
                 Y -= L; sm = log(sm);
-                for (size_t l=L; l>0u; --l, ++Y) { *Y /= sm; }
+                for (size_t l=L; l>0u; --l, ++Y) { *Y -= sm; }
             }
         }
         else
@@ -112,9 +112,9 @@ int log_softmax_d (double *Y, const double *X, const size_t R, const size_t C, c
                 for (size_t b=B; b>0u; --b, X-=K*L-1u, ++Y)
                 {
                     sm = 0.0;
-                    for (size_t l=L; l>0u; --l, X+=K, Y+=K) { *Y = *X; sm += exp(*Y); }
+                    for (size_t l=L; l>0u; --l, X+=K, Y+=K) { *Y = *X; sm += exp(*X); }
                     sm = log(sm);
-                    for (size_t l=L; l>0u; --l) { Y-=K; *Y /= sm; }
+                    for (size_t l=L; l>0u; --l) { Y-=K; *Y -= sm; }
                 }
             }
         }
@@ -141,7 +141,7 @@ int log_softmax_inplace_s (float *X, const size_t R, const size_t C, const size_
     {
         for (size_t l=L; l>0u; --l, ++X) { sm += expf(*X); }
         sm = logf(sm);
-        for (size_t l=L; l>0u; --l) { *--X /= sm; }
+        for (size_t l=L; l>0u; --l) { *--X -= sm; }
     }
     else
     {
@@ -156,7 +156,7 @@ int log_softmax_inplace_s (float *X, const size_t R, const size_t C, const size_
                 sm = 0.0f;
                 for (size_t l=L; l>0u; --l, ++X) { sm += expf(*X); }
                 X -= L; sm = logf(sm);
-                for (size_t l=L; l>0u; --l, ++X) { *X /= sm; }
+                for (size_t l=L; l>0u; --l, ++X) { *X -= sm; }
             }
         }
         else
@@ -168,7 +168,7 @@ int log_softmax_inplace_s (float *X, const size_t R, const size_t C, const size_
                     sm = 0.0f;
                     for (size_t l=L; l>0u; --l, X+=K) { sm += expf(*X); }
                     sm = logf(sm);
-                    for (size_t l=L; l>0u; --l) { X-=K; *X /= sm; }
+                    for (size_t l=L; l>0u; --l) { X-=K; *X -= sm; }
                 }
             }
         }
@@ -195,7 +195,7 @@ int log_softmax_inplace_d (double *X, const size_t R, const size_t C, const size
     {
         for (size_t l=L; l>0u; --l, ++X) { sm += exp(*X); }
         sm = log(sm);
-        for (size_t l=L; l>0u; --l) { *--X /= sm; }
+        for (size_t l=L; l>0u; --l) { *--X -= sm; }
     }
     else
     {
@@ -210,7 +210,7 @@ int log_softmax_inplace_d (double *X, const size_t R, const size_t C, const size
                 sm = 0.0;
                 for (size_t l=L; l>0u; --l, ++X) { sm += exp(*X); }
                 X -= L; sm = log(sm);
-                for (size_t l=L; l>0u; --l, ++X) { *X /= sm; }
+                for (size_t l=L; l>0u; --l, ++X) { *X -= sm; }
             }
         }
         else
@@ -222,7 +222,7 @@ int log_softmax_inplace_d (double *X, const size_t R, const size_t C, const size
                     sm = 0.0;
                     for (size_t l=L; l>0u; --l, X+=K) { sm += exp(*X); }
                     sm = log(sm);
-                    for (size_t l=L; l>0u; --l) { X-=K; *X /= sm; }
+                    for (size_t l=L; l>0u; --l) { X-=K; *X -= sm; }
                 }
             }
         }

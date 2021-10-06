@@ -1,4 +1,5 @@
 //This gets sigmoid-weighted linear unit (SiLU) [Elfwing et al. 2017] for each element of X.
+//For each element: y = x * logistic_sigmoid(x);
 
 #include <stdio.h>
 #include <math.h>

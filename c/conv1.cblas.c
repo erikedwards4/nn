@@ -96,7 +96,8 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    t = -s - 1;
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
                     X += (t-prev_t) * (int)Ni;
                     sm += cblas_sdot((int)Ni,X,1,K,1);
                     K += Ni; prev_t = t;
@@ -181,7 +182,8 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
                 prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    t = 2*(int)Li-1-s;
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
                     X += (t-prev_t) * (int)Ni;
                     sm += cblas_sdot((int)Ni,X,1,K,1);
                     K += Ni; prev_t = t;
@@ -262,7 +264,8 @@ int conv1_cblas_d (double *Y, const double *X, const double *K, const double *B,
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    t = -s - 1;
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
                     X += (t-prev_t) * (int)Ni;
                     sm += cblas_ddot((int)Ni,X,1,K,1);
                     K += Ni; prev_t = t;
@@ -347,7 +350,8 @@ int conv1_cblas_d (double *Y, const double *X, const double *K, const double *B,
                 prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    t = 2*(int)Li-1-s;
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
                     X += (t-prev_t) * (int)Ni;
                     sm += cblas_ddot((int)Ni,X,1,K,1);
                     K += Ni; prev_t = t;
@@ -428,7 +432,8 @@ int conv1_cblas_c (float *Y, const float *X, const float *K, const float *B, con
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    t = -s - 1;
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
                     X += 2 * (t-prev_t) * (int)Ni;
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
@@ -523,7 +528,8 @@ int conv1_cblas_c (float *Y, const float *X, const float *K, const float *B, con
                 prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    t = 2*(int)Li-1-s;
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
                     X += 2 * (t-prev_t) * (int)Ni;
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
@@ -608,7 +614,8 @@ int conv1_cblas_z (double *Y, const double *X, const double *K, const double *B,
             {
                 for (int s=ss; s<0 && s<=es; ++s)
                 {
-                    t = -s - 1;
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
                     X += 2 * (t-prev_t) * (int)Ni;
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];
@@ -703,7 +710,8 @@ int conv1_cblas_z (double *Y, const double *X, const double *K, const double *B,
                 prev_t = (int)Li;
                 for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s)
                 {
-                    t = 2*(int)Li-1-s;
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
                     X += 2 * (t-prev_t) * (int)Ni;
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);
                     smr += sm[0]; smi += sm[1];

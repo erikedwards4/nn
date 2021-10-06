@@ -102,7 +102,9 @@ int conv1d_cblas_s (float *Y, const float *X, const float *K, const float *B, co
             {
                 for (int s=ss; s<0 && s<=es; s+=dil)
                 {
-                    t = -s - 1;         //this ensures reflected extrapolation to any length
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
+                    //this ensures reflected extrapolation to any length
                     while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                     X += (t-prev_t) * (int)Ni;
                     sm += cblas_sdot((int)Ni,X,1,K,1);
@@ -195,7 +197,9 @@ int conv1d_cblas_s (float *Y, const float *X, const float *K, const float *B, co
             {
                 for (int s=ss+V*(int)dil; s<=es; s+=dil)
                 {
-                    t = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
+                    //this ensures reflected extrapolation to any length
                     while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                     X += (t-prev_t) * (int)Ni;
                     sm += cblas_sdot((int)Ni,X,1,K,1);
@@ -273,7 +277,9 @@ int conv1d_cblas_d (double *Y, const double *X, const double *K, const double *B
             {
                 for (int s=ss; s<0 && s<=es; s+=dil)
                 {
-                    t = -s - 1;         //this ensures reflected extrapolation to any length
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
+                    //this ensures reflected extrapolation to any length
                     while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                     X += (t-prev_t) * (int)Ni;
                     sm += cblas_ddot((int)Ni,X,1,K,1);
@@ -366,7 +372,9 @@ int conv1d_cblas_d (double *Y, const double *X, const double *K, const double *B
             {
                 for (int s=ss+V*(int)dil; s<=es; s+=dil)
                 {
-                    t = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
+                    //this ensures reflected extrapolation to any length
                     while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                     X += (t-prev_t) * (int)Ni;
                     sm += cblas_ddot((int)Ni,X,1,K,1);
@@ -446,7 +454,9 @@ int conv1d_cblas_c (float *Y, const float *X, const float *K, const float *B, co
             {
                 for (int s=ss; s<0 && s<=es; s+=dil)
                 {
-                    t = -s - 1;         //this ensures reflected extrapolation to any length
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
+                    //this ensures reflected extrapolation to any length
                     while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                     X += 2*(t-prev_t)*(int)Ni;
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
@@ -545,7 +555,9 @@ int conv1d_cblas_c (float *Y, const float *X, const float *K, const float *B, co
             {
                 for (int s=ss+V*(int)dil; s<=es; s+=dil)
                 {
-                    t = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
+                    //this ensures reflected extrapolation to any length
                     while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                     X += 2*(t-prev_t)*(int)Ni;
                     cblas_cdotu_sub((int)Ni,X,1,K,1,sm);
@@ -627,7 +639,9 @@ int conv1d_cblas_z (double *Y, const double *X, const double *K, const double *B
             {
                 for (int s=ss; s<0 && s<=es; s+=dil)
                 {
-                    t = -s - 1;         //this ensures reflected extrapolation to any length
+                    t = -s;         //PyTorch-style
+                    //t = -s - 1;   //Kaldi-style
+                    //this ensures reflected extrapolation to any length
                     while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                     X += 2*(t-prev_t)*(int)Ni;
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);
@@ -726,7 +740,9 @@ int conv1d_cblas_z (double *Y, const double *X, const double *K, const double *B
             {
                 for (int s=ss+V*(int)dil; s<=es; s+=dil)
                 {
-                    t = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
+                    t = 2*(int)Li - 2 - s;      //PyTorch-style
+                    //t = 2*(int)Li - 1 - s;    //Kaldi-style
+                    //this ensures reflected extrapolation to any length
                     while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                     X += 2*(t-prev_t)*(int)Ni;
                     cblas_zdotu_sub((int)Ni,X,1,K,1,sm);

@@ -25,11 +25,11 @@ int elu_s (float *Y, const float *X, const size_t N, const float alpha)
     }
     else if (alpha==1.0f)
     {
-        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0f) ? expf(*X-1.0f) : *X; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0f) ? expf(*X)-1.0f : *X; }
     }
     else
     {
-        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0f) ? alpha*expf(*X-1.0f) : *X; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0f) ? alpha*(expf(*X)-1.0f) : *X; }
     }
     
 
@@ -47,11 +47,11 @@ int elu_d (double *Y, const double *X, const size_t N, const double alpha)
     }
     else if (alpha==1.0)
     {
-        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0) ? exp(*X-1.0) : *X; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0) ? exp(*X)-1.0 : *X; }
     }
     else
     {
-        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0) ? alpha*exp(*X-1.0) : *X; }
+        for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y = (*X<0.0) ? alpha*(exp(*X)-1.0) : *X; }
     }
     
     return 0;
@@ -68,11 +68,11 @@ int elu_inplace_s (float *X, const size_t N, const float alpha)
     }
     else if (alpha==1.0f)
     {
-        for (size_t n=N; n>0u; --n, ++X) { if (*X<0.0f) { *X = expf(*X-1.0f); } }
+        for (size_t n=N; n>0u; --n, ++X) { if (*X<0.0f) { *X = expf(*X)-1.0f; } }
     }
     else
     {
-        for (size_t n=N; n>0u; --n, ++X) { if (*X<0.0f) { *X = alpha*expf(*X-1.0f); } }
+        for (size_t n=N; n>0u; --n, ++X) { if (*X<0.0f) { *X = alpha*(expf(*X)-1.0f); } }
     }
 
     return 0;
@@ -89,11 +89,11 @@ int elu_inplace_d (double *X, const size_t N, const double alpha)
     }
     else if (alpha==1.0)
     {
-        for (size_t n=N; n>0u; --n, ++X) { if (*X<0.0) { *X = exp(*X-1.0); } }
+        for (size_t n=N; n>0u; --n, ++X) { if (*X<0.0) { *X = exp(*X)-1.0; } }
     }
     else
     {
-        for (size_t n=N; n>0u; --n, ++X) { if (*X<0.0) { *X = alpha*exp(*X-1.0); } }
+        for (size_t n=N; n>0u; --n, ++X) { if (*X<0.0) { *X = alpha*(exp(*X)-1.0); } }
     }
     
     return 0;

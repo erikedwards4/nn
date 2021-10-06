@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <argtable2.h>
 #include "../util/cmli.hpp"
+#include <float.h>
 #include "softplus.c"
 
 #ifdef I
@@ -34,27 +35,32 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
+    double beta, thresh;
 
 
     //Description
     string descr;
     descr += "Activation function.\n";
     descr += "Gets softplus function (derivative of logistic) for each element of X.\n";
-    descr += "For each element: y = ln(1+exp(x)).\n";
+    descr += "For each element: y = ln(1+exp(x*beta))/beta.\n";
+    descr += "\n";
+    descr += "For numerical stability, y = x when x*beta > thresh, \n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ softplus X -o Y \n";
     descr += "$ softplus X > Y \n";
-    descr += "$ cat X | softplus > Y \n";
+    descr += "$ cat X | softplus -b0.5 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
+    struct arg_dbl    *a_b = arg_dbln("b","beta","<dbl>",0,1,"beta param [default=1.0]");
+    struct arg_dbl   *a_th = arg_dbln("t","thresh","<dbl>",0,1,"threshold [default=20.0]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_b, a_th, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -67,12 +73,12 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
     if (stdi1>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -93,6 +99,13 @@ int main(int argc, char *argv[])
 
 
     //Get options
+
+    //Get beta
+    beta = (a_b->count==0) ? 1.0 : a_b->dval[0];
+    if (beta<FLT_EPSILON && beta>-FLT_EPSILON) { cerr << progstr+": " << __LINE__ << errstr << "beta must be non-zero" << endl; return 1; }
+
+    //Get thresh
+    thresh = (a_th->count==0) ? 20.0 : a_th->dval[0];
 
 
     //Checks
@@ -124,10 +137,10 @@ int main(int argc, char *argv[])
     {
         float *X;
         try { X = new float[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::softplus_inplace_s(X,i1.N()))
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        if (codee::softplus_inplace_s(X,i1.N(),float(beta),float(thresh)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -136,14 +149,14 @@ int main(int argc, char *argv[])
         }
         delete[] X;
     }
-    else if (i1.T==2)
+    else if (i1.T==2u)
     {
         double *X;
         try { X = new double[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::softplus_inplace_d(X,i1.N()))
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        if (codee::softplus_inplace_d(X,i1.N(),double(beta),double(thresh)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -161,4 +174,3 @@ int main(int argc, char *argv[])
     //Exit
     return ret;
 }
-

@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     descr += "K has size No x Lk x Ni for row-major.\n";
     descr += "where Lk is the kernel length (kernel_size, or time width).\n";
     descr += "\n";
-    descr += "/Each output neuron has a fixed bias, so B is a vector of length No.\n";
+    descr += "B is a vector of length No (each output neuron has a fixed bias).\n";
     descr += "\n";
     descr += "Y has size No x Lo for col-major.\n";
     descr += "Y has size Lo x No for row-major.\n";
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     {
         float *X1, *X2, *X3, *Y;
         try { X1 = new float[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { X2 = new float[i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
         try { X3 = new float[i3.N()]; }
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
         try { Y = new float[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
     {
         double *X1, *X2, *X3, *Y;
         try { X1 = new double[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { X2 = new double[i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
         try { X3 = new double[i3.N()]; }
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
         try { Y = new double[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
     {
         float *X1, *X2, *X3, *Y;
         try { X1 = new float[2u*i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { X2 = new float[2u*i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
         try { X3 = new float[2u*i3.N()]; }
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
         try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
     {
         double *X1, *X2, *X3, *Y;
         try { X1 = new double[2u*i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { X2 = new double[2u*i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
         try { X3 = new double[2u*i3.N()]; }
@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
         try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }

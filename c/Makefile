@@ -106,7 +106,7 @@ OUT: Output_Act Other_Act
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply to neurons or layers
-Output_Act: signum step smoothstep logistic logsigmoid hardsigmoid hardshrink tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu rrelu elu celu selu silu swish hardswish mish softclip softplus softsign plu sin threshold
+Output_Act: signum step smoothstep logistic logsigmoid hardsigmoid hardshrink softshrink tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu rrelu elu celu selu silu swish hardswish mish softclip softplus softsign plu sin threshold
 signum: signum.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 step: step.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 smoothstep: smoothstep.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
@@ -114,6 +114,7 @@ logistic: logistic.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 logsigmoid: logsigmoid.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 hardsigmoid: hardsigmoid.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 hardshrink: hardshrink.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+softshrink: softshrink.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 tanh: tanh.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 tanhshrink: tanhshrink.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 hardtanh: hardtanh.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)

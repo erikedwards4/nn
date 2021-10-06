@@ -23,7 +23,7 @@ descr += "\n";
 descr += "Examples:\n";
 descr += "$ softmax X -o Y \n";
 descr += "$ softmax X > Y \n";
-descr += "$ cat X | softmax > Y \n";
+descr += "$ cat X | softmax -d1 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");

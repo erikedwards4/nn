@@ -1,38 +1,37 @@
 //Includes
-#include "elu.c"
+#include "softshrink.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
 const size_t I = 1u, O = 1u;
-double alpha;
+double lambda;
 
 //Description
 string descr;
 descr += "Activation function.\n";
-descr += "Gets exponential linear unit (ELU) [Clevert et al. 2015] of each element of X.\n";
-descr += "For each element: y = alpha*(exp(x)-1),  if x<0.\n";
-descr += "                  y = x,                 if x>=0.\n";
+descr += "Gets the SoftShrink function of each element of X.\n";
+descr += "For each element: y = x-lambda,  if x>lambda  \n";
+descr += "                  y = x+lambda,  if x<-lambda \n";
+descr += "                  y = 0,         otherwise.   \n";
 descr += "\n";
-descr += "For alpha=0, this is the usual ReLU.\n";
-descr += "\n";
-descr += "Use -a (--alpha) to specify alpha [default=0.01].\n";
+descr += "Use -l (--lambda) to specify lambda [default=0.5].\n";
 descr += "\n";
 descr += "Examples:\n";
-descr += "$ elu X -o Y \n";
-descr += "$ elu -a0.02 X > Y \n";
-descr += "$ cat X | elu -a0.1 > Y \n";
+descr += "$ softshrink X -o Y \n";
+descr += "$ softshrink X > Y \n";
+descr += "$ cat X | softshrink -l0.4 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=0.01]");
+struct arg_dbl    *a_l = arg_dbln("l","lambda","<dbl>",0,1,"lambda param [default=0.5]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
 
-//Get alpha
-if (a_a->count==0) { alpha = 0.01; }
-else if (a_a->dval[0]<0.0) { cerr << progstr+": " << __LINE__ << errstr << "alpha param must be nonnegative" << endl; return 1; }
-else { alpha = a_a->dval[0]; }
+//Get lambda
+lambda = (a_l->count==0) ? 0.5 : a_l->dval[0];
+if (lambda<0.0) { cerr << progstr+": " << __LINE__ << errstr << "lambda must be non-negative" << endl; return 1; }
+
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
@@ -51,7 +50,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::elu_inplace_s(X,i1.N(),float(alpha)))
+    if (codee::softshrink_inplace_s(X,i1.N(),float(lambda)))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

@@ -25,7 +25,7 @@ descr += "\n";
 descr += "Examples:\n";
 descr += "$ softmin X -o Y \n";
 descr += "$ softmin X > Y \n";
-descr += "$ cat X | softmin > Y \n";
+descr += "$ cat X | softmin -d1 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");

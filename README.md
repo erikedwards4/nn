@@ -75,7 +75,7 @@ Each C function can also be compiled and used separately; see c subdirectory Mak
 See each resulting command-line tool for help (use -h or --help option).  
 For example:  
 ```
-/opt/codee/math/bin/log2 --help
+/opt/codee/nn/bin/relu --help
 ```
 
 
@@ -94,10 +94,6 @@ RNN: elman jordan gru_min gru_min2 gru gru3 lstm lstm4 lstm_peephole lstm_peepho
 OUT: Static_Act Other_Act  
 Static_Act: step smoothstep logistic tanh atan asinh gudermann sqnl isru isrlu erf gelu relu prelu elu selu softclip softplus softsign plu silu swish sin  
 Other_Act: maxout softmax betamax  
-
-
-## Contributing
-This is currently only to view the project in progress.
 
 
 ## License

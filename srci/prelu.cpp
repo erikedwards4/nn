@@ -14,25 +14,25 @@ descr += "For each element: y = alpha*x,  if x<0. \n";
 descr += "                  y = x,        if x>=0. \n";
 descr += "\n";
 descr += "For alpha=0, this is the usual ReLU.\n";
-descr += "For alpha=0.01, this is the leaky ReLU.\n";
+descr += "For alpha=0.01, this is the usual leaky ReLU.\n";
 descr += "For alpha random from uniform distribution in [0 1), this the Randomized ReLU (RReLU).\n";
 descr += "\n";
-descr += "Use -a (--alpha) to specify alpha [default=0.01].\n";
+descr += "Use -a (--alpha) to specify alpha [default=0.25].\n";
 descr += "\n";
 descr += "Examples:\n";
 descr += "$ prelu X -o Y \n";
 descr += "$ prelu X > Y \n";
-descr += "$ cat X | prelu > Y \n";
+descr += "$ cat X | prelu -a0.1 > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=0.01]");
+struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=0.25]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
 
 //Get alpha
-alpha = (a_a->count==0) ? 0.01 : a_a->dval[0];
+alpha = (a_a->count==0) ? 0.25 : a_a->dval[0];
 //if (a_a->dval[0]<0.0) { cerr << progstr+": " << __LINE__ << warstr << "alpha param usually nonnegative" << endl; }
 
 //Checks

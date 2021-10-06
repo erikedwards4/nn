@@ -1,5 +1,6 @@
 //This gets parametric ReLU activation function for each element of X.
-//For alpha=0.01, this is also called the leaky ReLU.
+//This is also called the leaky ReLU (where default alpha is 0.01).
+//For compatibility to PyTorch, this function is identical to leaky ReLU.
 
 #include <stdio.h>
 

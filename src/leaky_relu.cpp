@@ -34,30 +34,36 @@ int main(int argc, char *argv[])
     ifstream ifs1; ofstream ofs1;
     int8_t stdi1, stdo1, wo1;
     ioinfo i1, o1;
+    double alpha;
 
 
     //Description
     string descr;
     descr += "Activation function.\n";
     descr += "Gets leaky ReLU of each element of X.\n";
-    descr += "For each element: y = 0.01*x,  if x<0. \n";
-    descr += "                  y = x,       if x>=0. \n";
+    descr += "For each element: y = alpha*x,  if x<0. \n";
+    descr += "                  y = x,        if x>=0. \n";
     descr += "\n";
-    descr += "This is equal to the parametric ReLU with alpha=0.01.\n";
+    descr += "For alpha=0, this is the usual ReLU.\n";
+    descr += "For alpha=0.25, this is the usual parametric ReLU.\n";
+    descr += "For alpha random from uniform distribution in [0 1), this the Randomized ReLU (RReLU).\n";
+    descr += "\n";
+    descr += "Use -a (--alpha) to specify alpha [default=0.01].\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ leaky_relu X -o Y \n";
     descr += "$ leaky_relu X > Y \n";
-    descr += "$ cat X | leaky_relu > Y \n";
+    descr += "$ cat X | leaky_relu -a0.2 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
+    struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=0.01]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_a, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -97,6 +103,10 @@ int main(int argc, char *argv[])
 
     //Get options
 
+    //Get alpha
+    alpha = (a_a->count==0) ? 0.01 : a_a->dval[0];
+    //if (a_a->dval[0]<0.0) { cerr << progstr+": " << __LINE__ << warstr << "alpha param usually nonnegative" << endl; }
+
 
     //Checks
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
@@ -127,10 +137,10 @@ int main(int argc, char *argv[])
     {
         float *X;
         try { X = new float[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::leaky_relu_inplace_s(X,i1.N()))
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        if (codee::leaky_relu_inplace_s(X,i1.N(),float(alpha)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {
@@ -143,10 +153,10 @@ int main(int argc, char *argv[])
     {
         double *X;
         try { X = new double[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-        if (codee::leaky_relu_inplace_d(X,i1.N()))
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        if (codee::leaky_relu_inplace_d(X,i1.N(),double(alpha)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

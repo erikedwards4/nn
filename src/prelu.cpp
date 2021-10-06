@@ -45,21 +45,21 @@ int main(int argc, char *argv[])
     descr += "                  y = x,        if x>=0. \n";
     descr += "\n";
     descr += "For alpha=0, this is the usual ReLU.\n";
-    descr += "For alpha=0.01, this is the leaky ReLU.\n";
+    descr += "For alpha=0.01, this is the usual leaky ReLU.\n";
     descr += "For alpha random from uniform distribution in [0 1), this the Randomized ReLU (RReLU).\n";
     descr += "\n";
-    descr += "Use -a (--alpha) to specify alpha [default=0.01].\n";
+    descr += "Use -a (--alpha) to specify alpha [default=0.25].\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ prelu X -o Y \n";
     descr += "$ prelu X > Y \n";
-    descr += "$ cat X | prelu > Y \n";
+    descr += "$ cat X | prelu -a0.1 > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-    struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=1.0]");
+    struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=0.25]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
@@ -76,12 +76,12 @@ int main(int argc, char *argv[])
 
 
     //Check stdin
-    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0 || strcmp(a_fi->filename[0],"-")==0);
+    stdi1 = (a_fi->count==0 || strlen(a_fi->filename[0])==0u || strcmp(a_fi->filename[0],"-")==0);
     if (stdi1>0 && isatty(fileno(stdin))) { cerr << progstr+": " << __LINE__ << errstr << "no stdin detected" << endl; return 1; }
 
 
     //Check stdout
-    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0 || strcmp(a_fo->filename[0],"-")==0); }
+    if (a_fo->count>0) { stdo1 = (strlen(a_fo->filename[0])==0u || strcmp(a_fo->filename[0],"-")==0); }
     else { stdo1 = (!isatty(fileno(stdout))); }
     wo1 = (stdo1 || a_fo->count>0);
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     //Get options
 
     //Get alpha
-    alpha = (a_a->count==0) ? 0.01 : a_a->dval[0];
+    alpha = (a_a->count==0) ? 0.25 : a_a->dval[0];
     //if (a_a->dval[0]<0.0) { cerr << progstr+": " << __LINE__ << warstr << "alpha param usually nonnegative" << endl; }
 
 
@@ -137,9 +137,9 @@ int main(int argc, char *argv[])
     {
         float *X;
         try { X = new float[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         if (codee::prelu_inplace_s(X,i1.N(),float(alpha)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
@@ -149,13 +149,13 @@ int main(int argc, char *argv[])
         }
         delete[] X;
     }
-    else if (i1.T==2)
+    else if (i1.T==2u)
     {
         double *X;
         try { X = new double[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         if (codee::prelu_inplace_d(X,i1.N(),double(alpha)))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
@@ -174,4 +174,3 @@ int main(int argc, char *argv[])
     //Exit
     return ret;
 }
-

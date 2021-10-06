@@ -9,7 +9,7 @@ double a, b;
 //Description
 string descr;
 descr += "Activation function.\n";
-descr += "Gets parametric ReLU (PReLU) of each element of X.\n";
+descr += "Gets hardtanh of each element of X.\n";
 descr += "For each element: y = min,  if x<min. \n";
 descr += "                  y = max,  if x>max. \n";
 descr += "                  y = x,    otherwise.\n";

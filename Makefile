@@ -35,6 +35,9 @@ INCLS=-Ic -I../util
 CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse $(INCLS)
 CCFLAGS=-Wall -Wextra -std=gnu++14 -O3 -ffast-math -march=native -mfpmath=sse $(INCLS)
 #LIBS=-largtable2 -lopenblas -llapacke -llapack -lfftw3f -lfftw3 -lm
+CFLAGS_TORCH=-Wall -O2 -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11
+INCLS_TORCH=-I../util -I/opt/libtorch/include -I/opt/libtorch/include/torch/csrc/api/include
+LIBS_TORCH=-largtable2 -Wl,-rpath /opt/libtorch/lib /opt/libtorch/lib/libtorch.so /opt/libtorch/lib/libc10.so
 
 
 All: all
@@ -153,7 +156,7 @@ OUT: Static_Act Other_Act #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply without modification to single neurons or to layers of neurons.
-Static_Act: step smoothstep logistic logsigmoid hardsigmoid hardshrink tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu rrelu elu celu selu softclip softplus softsign plu silu swish hardswish mish sin threshold
+Static_Act: step smoothstep logistic logsigmoid hardsigmoid hardshrink softshrink tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu rrelu elu celu selu softclip softplus softsign plu silu swish hardswish mish sin threshold
 step: srci/step.cpp c/step.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 signum: srci/signum.cpp c/signum.c
@@ -167,6 +170,8 @@ logsigmoid: srci/logsigmoid.cpp c/logsigmoid.c
 hardsigmoid: srci/hardsigmoid.cpp c/hardsigmoid.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 hardshrink: srci/hardshrink.cpp c/hardshrink.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+softshrink: srci/softshrink.cpp c/softshrink.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 tanh: srci/tanh.cpp c/tanh.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lm
