@@ -38,7 +38,7 @@ descr += "Use -i (--dilation) to give the dilation factor [default=1].\n";
 descr += "\n";
 descr += "Use -p (--padding) to give the padding length in samples [default=0]\n";
 descr += "\n";
-descr += "Use -m (--pad_mode) to give the padding mode as [default='zeros']\n";
+descr += "Use -m (--pad_mode) to give the padding mode as [default='n']\n";
 descr += "The pad_mode can be 'zeros', 'reflect', 'repeat' or 'circular'.\n";
 descr += "The pad_mode can also be entered as 'z', 'ref', 'rep' or 'c'.\n";
 descr += "Use pad_mode 'no_count_pad' or 'n' to emulate count_include_pad=False.\n";
@@ -55,7 +55,7 @@ struct arg_int   *a_lk = arg_intn("k","kernel_size","<uint>",0,1,"kernel length 
 struct arg_int  *a_str = arg_intn("s","step","<uint>",0,1,"step size in samps [default=1]");
 struct arg_int  *a_dil = arg_intn("i","dilation","<uint>",0,1,"dilation factor [default=1]");
 struct arg_int  *a_pad = arg_intn("p","padding","<int>",0,1,"padding [default=0]");
-struct arg_str   *a_pm = arg_strn("m","pad_mode","<str>",0,1,"padding mode [default='zeros']");
+struct arg_str   *a_pm = arg_strn("m","pad_mode","<str>",0,1,"padding mode [default='n']");
 struct arg_lit   *a_cm = arg_litn("c","ceil_mode",0,1,"include to use ceil_mode [default=false]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
@@ -84,7 +84,7 @@ if (a_pad->count==0) { pad = 0; }
 else { pad = a_pad->ival[0]; }
 
 //Get pad_mode and pm
-if (a_pm->count==0) { pad_mode = "zeros"; }
+if (a_pm->count==0) { pad_mode = "n"; }
 else
 {
 	try { pad_mode = string(a_pm->sval[0]); }

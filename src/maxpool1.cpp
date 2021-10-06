@@ -3,7 +3,6 @@
 //@license BSD 3-clause
 
 
-#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -23,7 +22,6 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
-    timespec tic, toc;
 
 
     //Declarations
@@ -42,7 +40,8 @@ int main(int argc, char *argv[])
 
     //Description
     string descr;
-    descr += "1d max-pooling, same as maxpool1d, but no dilation.\n";
+    descr += "1d max-pooling, same as maxpool1d, but has no dilation,\n";
+    descr += "and no padding modes (outside samps are taken as -Inf).\n";
     descr += "\n";
     descr += "This is an input (IN) component for a layer of neurons.\n";
     descr += "There are N neurons in the layer,\n";
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Lk is the kernel length (kernel_size, or time width).\n";
     descr += "There is no explicit kernel; this is by analogy to conv1.\n";
-    descr += "Thus, Lk is the num samps included in each average.\n";
+    descr += "Thus, Lk is the num samps included in each max calculation.\n";
     descr += "\n";
     descr += "Y has size N x Lo for col-major.\n";
     descr += "Y has size Lo x N for row-major.\n";
@@ -67,6 +66,8 @@ int main(int argc, char *argv[])
     descr += "Use -s (--stride) to give the stride (step-size) in samples [default=1].\n";
     descr += "\n";
     descr += "Use -p (--padding) to give the padding length in samples [default=0]\n";
+    descr += "\n";
+    descr += "Use maxpool1d if need dilation or different padding modes.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ maxpool1 -k5 X -o Y \n";
@@ -176,7 +177,6 @@ int main(int argc, char *argv[])
 
 
     //Process
-    clock_gettime(CLOCK_REALTIME,&tic);
     if (i1.T==1u)
     {
         float *X, *Y;
@@ -253,8 +253,6 @@ int main(int argc, char *argv[])
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
-    clock_gettime(CLOCK_REALTIME,&toc);
-    cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
 
     //Exit

@@ -3,7 +3,6 @@
 //@license BSD 3-clause
 
 
-#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -23,7 +22,6 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
-    timespec tic, toc;
 
 
     //Declarations
@@ -71,7 +69,7 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Use -p (--padding) to give the padding length in samples [default=0]\n";
     descr += "\n";
-    descr += "Use -m (--pad_mode) to give the padding mode as [default='zeros']\n";
+    descr += "Use -m (--pad_mode) to give the padding mode as [default='n']\n";
     descr += "The pad_mode can be 'zeros', 'reflect', 'repeat' or 'circular'.\n";
     descr += "The pad_mode can also be entered as 'z', 'ref', 'rep' or 'c'.\n";
     descr += "Use pad_mode 'no_count_pad' or 'n' to emulate count_include_pad=False.\n";
@@ -90,7 +88,7 @@ int main(int argc, char *argv[])
     struct arg_int  *a_str = arg_intn("s","step","<uint>",0,1,"step size in samps [default=1]");
     struct arg_int  *a_dil = arg_intn("i","dilation","<uint>",0,1,"dilation factor [default=1]");
     struct arg_int  *a_pad = arg_intn("p","padding","<int>",0,1,"padding [default=0]");
-    struct arg_str   *a_pm = arg_strn("m","pad_mode","<str>",0,1,"padding mode [default='zeros']");
+    struct arg_str   *a_pm = arg_strn("m","pad_mode","<str>",0,1,"padding mode [default='n']");
     struct arg_lit   *a_cm = arg_litn("c","ceil_mode",0,1,"include to use ceil_mode [default=false]");
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
@@ -158,7 +156,7 @@ int main(int argc, char *argv[])
     else { pad = a_pad->ival[0]; }
 
     //Get pad_mode and pm
-    if (a_pm->count==0) { pad_mode = "zeros"; }
+    if (a_pm->count==0) { pad_mode = "n"; }
     else
     {
     	try { pad_mode = string(a_pm->sval[0]); }
@@ -214,7 +212,6 @@ int main(int argc, char *argv[])
 
 
     //Process
-    clock_gettime(CLOCK_REALTIME,&tic);
     if (i1.T==1u)
     {
         float *X, *Y;
@@ -291,8 +288,6 @@ int main(int argc, char *argv[])
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
-    clock_gettime(CLOCK_REALTIME,&toc);
-    cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
 
     //Exit

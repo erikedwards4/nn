@@ -89,7 +89,9 @@ int avgpool1d_s (float *Y, const float *X, const size_t N, const size_t Li, cons
         {
             for (int s=ss; s<0 && s<=es; s+=dil, Y-=N)
             {
-                t = -s - 1;         //this ensures reflected extrapolation to any length
+                t = -s;         //PyTorch-style
+                //t = -s - 1;   //Kaldi-style
+                //this ensures reflected extrapolation to any length
                 while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                 X += (t-prev_t) * (int)N;
                 for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += *X; }
@@ -186,7 +188,9 @@ int avgpool1d_s (float *Y, const float *X, const size_t N, const size_t Li, cons
         {
             for (int s=ss+V*(int)dil; s<=es; s+=dil, Y-=N)
             {
-                t = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
+                t = 2*(int)Li - 2 - s;      //PyTorch-style
+                //t = 2*(int)Li - 1 - s;    //Kaldi-style
+                //this ensures reflected extrapolation to any length
                 while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                 X += (t-prev_t) * (int)N;
                 for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += *X; }
@@ -265,7 +269,9 @@ int avgpool1d_d (double *Y, const double *X, const size_t N, const size_t Li, co
         {
             for (int s=ss; s<0 && s<=es; s+=dil, Y-=N)
             {
-                t = -s - 1;         //this ensures reflected extrapolation to any length
+                t = -s;         //PyTorch-style
+                //t = -s - 1;   //Kaldi-style
+                //this ensures reflected extrapolation to any length
                 while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                 X += (t-prev_t) * (int)N;
                 for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += *X; }
@@ -362,7 +368,9 @@ int avgpool1d_d (double *Y, const double *X, const size_t N, const size_t Li, co
         {
             for (int s=ss+V*(int)dil; s<=es; s+=dil, Y-=N)
             {
-                t = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
+                t = 2*(int)Li - 2 - s;      //PyTorch-style
+                //t = 2*(int)Li - 1 - s;    //Kaldi-style
+                //this ensures reflected extrapolation to any length
                 while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                 X += (t-prev_t) * (int)N;
                 for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += *X; }
@@ -442,7 +450,9 @@ int avgpool1d_c (float *Y, const float *X, const size_t N, const size_t Li, cons
         {
             for (int s=ss; s<0 && s<=es; s+=dil, Y-=N2)
             {
-                t = -s - 1;         //this ensures reflected extrapolation to any length
+                t = -s;         //PyTorch-style
+                //t = -s - 1;   //Kaldi-style
+                //this ensures reflected extrapolation to any length
                 while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                 X += (t-prev_t) * (int)N2;
                 for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += *X; }
@@ -539,7 +549,9 @@ int avgpool1d_c (float *Y, const float *X, const size_t N, const size_t Li, cons
         {
             for (int s=ss+V*(int)dil; s<=es; s+=dil, Y-=N2)
             {
-                t = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
+                t = 2*(int)Li - 2 - s;      //PyTorch-style
+                //t = 2*(int)Li - 1 - s;    //Kaldi-style
+                //this ensures reflected extrapolation to any length
                 while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                 X += (t-prev_t) * (int)N2;
                 for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += *X; }
@@ -619,7 +631,9 @@ int avgpool1d_z (double *Y, const double *X, const size_t N, const size_t Li, co
         {
             for (int s=ss; s<0 && s<=es; s+=dil, Y-=N2)
             {
-                t = -s - 1;         //this ensures reflected extrapolation to any length
+                t = -s;         //PyTorch-style
+                //t = -s - 1;   //Kaldi-style
+                //this ensures reflected extrapolation to any length
                 while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                 X += (t-prev_t) * (int)N2;
                 for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += *X; }
@@ -716,7 +730,9 @@ int avgpool1d_z (double *Y, const double *X, const size_t N, const size_t Li, co
         {
             for (int s=ss+V*(int)dil; s<=es; s+=dil, Y-=N2)
             {
-                t = 2*(int)Li-1-s;  //this ensures reflected extrapolation to any length
+                t = 2*(int)Li - 2 - s;      //PyTorch-style
+                //t = 2*(int)Li - 1 - s;    //Kaldi-style
+                //this ensures reflected extrapolation to any length
                 while (t<0 || t>=(int)Li) { t = (t<0) ? -t-1 : (t<(int)Li) ? t : 2*(int)Li-1-t; }
                 X += (t-prev_t) * (int)N2;
                 for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += *X; }

@@ -89,7 +89,8 @@ int lppool1_s (float *Y, const float *X, const size_t N, const size_t Li, const 
         {
             for (int s=ss; s<0 && s<=es; ++s, Y-=N)
             {
-                t = -s - 1;
+                t = -s;         //PyTorch-style
+                //t = -s - 1;   //Kaldi-style
                 X += (t-prev_t) * (int)N;
                 for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += powf(*X,pw); }
                 prev_t = t + 1;
@@ -182,7 +183,8 @@ int lppool1_s (float *Y, const float *X, const size_t N, const size_t Li, const 
             prev_t = (int)Li;
             for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s, Y-=N)
             {
-                t = 2*(int)Li - 1 - s;
+                t = 2*(int)Li - 2 - s;      //PyTorch-style
+                //t = 2*(int)Li - 1 - s;    //Kaldi-style
                 X += (t-prev_t) * (int)N;
                 for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += powf(*X,pw); }
                 prev_t = t + 1;
@@ -252,7 +254,8 @@ int lppool1_d (double *Y, const double *X, const size_t N, const size_t Li, cons
         {
             for (int s=ss; s<0 && s<=es; ++s, Y-=N)
             {
-                t = -s - 1;
+                t = -s;         //PyTorch-style
+                //t = -s - 1;   //Kaldi-style
                 X += (t-prev_t) * (int)N;
                 for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += pow(*X,pw); }
                 prev_t = t + 1;
@@ -345,7 +348,8 @@ int lppool1_d (double *Y, const double *X, const size_t N, const size_t Li, cons
             prev_t = (int)Li;
             for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s, Y-=N)
             {
-                t = 2*(int)Li - 1 - s;
+                t = 2*(int)Li - 2 - s;      //PyTorch-style
+                //t = 2*(int)Li - 1 - s;    //Kaldi-style
                 X += (t-prev_t) * (int)N;
                 for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += pow(*X,pw); }
                 prev_t = t + 1;
@@ -416,7 +420,8 @@ int lppool1_c (float *Y, const float *X, const size_t N, const size_t Li, const 
         {
             for (int s=ss; s<0 && s<=es; ++s, Y-=N2)
             {
-                t = -s - 1;
+                t = -s;         //PyTorch-style
+                //t = -s - 1;   //Kaldi-style
                 X += (t-prev_t) * N2;
                 for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += powf(*X,pw); }
                 prev_t = t + 1;
@@ -509,7 +514,8 @@ int lppool1_c (float *Y, const float *X, const size_t N, const size_t Li, const 
             prev_t = (int)Li;
             for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s, Y-=N2)
             {
-                t = 2*(int)Li - 1 - s;
+                t = 2*(int)Li - 2 - s;      //PyTorch-style
+                //t = 2*(int)Li - 1 - s;    //Kaldi-style
                 X += (t-prev_t) * (int)N2;
                 for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += powf(*X,pw); }
                 prev_t = t + 1;
@@ -580,7 +586,8 @@ int lppool1_z (double *Y, const double *X, const size_t N, const size_t Li, cons
         {
             for (int s=ss; s<0 && s<=es; ++s, Y-=N2)
             {
-                t = -s - 1;
+                t = -s;         //PyTorch-style
+                //t = -s - 1;   //Kaldi-style
                 X += (t-prev_t) * N2;
                 for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += pow(*X,pw); }
                 prev_t = t + 1;
@@ -673,7 +680,8 @@ int lppool1_z (double *Y, const double *X, const size_t N, const size_t Li, cons
             prev_t = (int)Li;
             for (int s=(ss>(int)Li)?ss:(int)Li; s<=es; ++s, Y-=N2)
             {
-                t = 2*(int)Li - 1 - s;
+                t = 2*(int)Li - 2 - s;      //PyTorch-style
+                //t = 2*(int)Li - 1 - s;    //Kaldi-style
                 X += (t-prev_t) * (int)N2;
                 for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += pow(*X,pw); }
                 prev_t = t + 1;

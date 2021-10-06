@@ -61,7 +61,7 @@ conv1d.cblas: conv1d.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Pool: pooling
 #maxpool1d and avgpool1d have dilation; maxpool1 and avgpool1 do not.
-Pool: maxpool1 maxpool1d maxipool1 maxipool1d avgpool1 avgpool1d lppool1 lppool1d
+Pool: maxpool1 maxpool1d avgpool1 avgpool1d lppool1 lppool1d #maxipool1 maxipool1d
 maxpool1: maxpool1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 maxpool1d: maxpool1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 maxipool1: maxipool1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
