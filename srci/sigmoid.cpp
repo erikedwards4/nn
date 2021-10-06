@@ -1,39 +1,26 @@
 //Includes
-#include "logistic.c"
+#include "sigmoid.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
 const size_t I = 1u, O = 1u;
-double alpha;
 
 //Description
 string descr;
 descr += "Activation function.\n";
-descr += "Gets logistic function (basic sigmoid) of each element of X.\n";
+descr += "Gets sigmoid (basic logistic function) of each element of X.\n";
 descr += "For each element: y = 1/(1+exp(-x)).\n";
 descr += "\n";
-descr += "A generalized logistic function can also be given by the alpha parameter.\n";
-descr += "For each element: y = 1/(1+exp(-x))^alpha.\n";
-descr += "\n";
-descr += "Use -a (--alpha) to specify alpha [default=1].\n";
-descr += "For alpha=1, this is identical to sigmoid.\n";
-descr += "\n";
 descr += "Examples:\n";
-descr += "$ logistic X -o Y \n";
-descr += "$ logistic X > Y \n";
-descr += "$ cat X | logistic -a0.9 > Y \n";
+descr += "$ sigmoid X -o Y \n";
+descr += "$ sigmoid X > Y \n";
+descr += "$ cat X | sigmoid > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
-struct arg_dbl    *a_a = arg_dbln("a","alpha","<dbl>",0,1,"alpha param [default=1.0]");
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
-
-//Get alpha
-if (a_a->count==0) { alpha = 1.0; }
-else if (a_a->dval[0]<=0.0) { cerr << progstr+": " << __LINE__ << errstr << "alpha param must be positive" << endl; return 1; }
-else { alpha = a_a->dval[0]; }
 
 //Checks
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input (X) found to be empty" << endl; return 1; }
@@ -52,7 +39,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
-    if (codee::logistic_inplace_s(X,i1.N(),float(alpha)))
+    if (codee::sigmoid_inplace_s(X,i1.N()))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
