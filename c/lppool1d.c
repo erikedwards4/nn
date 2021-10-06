@@ -141,14 +141,15 @@ int lppool1d_s (float *Y, const float *X, const size_t N, const size_t Li, const
         prev_t = 0;
 
         //Denominator
-        if (pad_mode==4 && es>=0)
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)(es+1),ipw); }
-        }
-        else
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
-        }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
+        // if (pad_mode==4 && es>=0)
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)(es+1),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -163,7 +164,8 @@ int lppool1d_s (float *Y, const float *X, const size_t N, const size_t Li, const
         {
             for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += powf(*X,pw); }
         }
-        for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        //for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
         X -= (int)N*((int)(Lk*dil)-(int)str);
         es+=str; ++w;
     }
@@ -223,14 +225,15 @@ int lppool1d_s (float *Y, const float *X, const size_t N, const size_t Li, const
         }
 
         //Denominator
-        if (pad_mode==4 && ss<(int)Li)
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)((int)Li-ss),ipw); }
-        }
-        else
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
-        }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
+        // if (pad_mode==4 && ss<(int)Li)
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)((int)Li-ss),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -322,14 +325,15 @@ int lppool1d_d (double *Y, const double *X, const size_t N, const size_t Li, con
         prev_t = 0;
 
         //Denominator
-        if (pad_mode==4 && es>=0)
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)(es+1),ipw); }
-        }
-        else
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
-        }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
+        // if (pad_mode==4 && es>=0)
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)(es+1),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -344,7 +348,8 @@ int lppool1d_d (double *Y, const double *X, const size_t N, const size_t Li, con
         {
             for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += pow(*X,pw); }
         }
-        for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        //for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
         X -= (int)N*((int)(Lk*dil)-(int)str);
         es+=str; ++w;
     }
@@ -404,14 +409,15 @@ int lppool1d_d (double *Y, const double *X, const size_t N, const size_t Li, con
         }
 
         //Denominator
-        if (pad_mode==4 && ss<(int)Li)
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)((int)Li-ss),ipw); }
-        }
-        else
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
-        }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
+        // if (pad_mode==4 && ss<(int)Li)
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)((int)Li-ss),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -504,14 +510,15 @@ int lppool1d_c (float *Y, const float *X, const size_t N, const size_t Li, const
         prev_t = 0;
 
         //Denominator
-        if (pad_mode==4 && es>=0)
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)(es+1),ipw); }
-        }
-        else
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
-        }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
+        // if (pad_mode==4 && es>=0)
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)(es+1),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -526,7 +533,8 @@ int lppool1d_c (float *Y, const float *X, const size_t N, const size_t Li, const
         {
             for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += powf(*X,pw); }
         }
-        for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,1.0f/pw); }
+        //for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,1.0f/pw); }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
         X -= (int)N2*((int)(Lk*dil)-(int)str);
         es+=str; ++w;
     }
@@ -586,14 +594,15 @@ int lppool1d_c (float *Y, const float *X, const size_t N, const size_t Li, const
         }
 
         //Denominator
-        if (pad_mode==4 && ss<(int)Li)
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)((int)Li-ss),ipw); }
-        }
-        else
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
-        }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
+        // if (pad_mode==4 && ss<(int)Li)
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)((int)Li-ss),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -686,14 +695,15 @@ int lppool1d_z (double *Y, const double *X, const size_t N, const size_t Li, con
         prev_t = 0;
 
         //Denominator
-        if (pad_mode==4 && es>=0)
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)(es+1),ipw); }
-        }
-        else
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
-        }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
+        // if (pad_mode==4 && es>=0)
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)(es+1),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -708,7 +718,8 @@ int lppool1d_z (double *Y, const double *X, const size_t N, const size_t Li, con
         {
             for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += pow(*X,pw); }
         }
-        for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        //for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
         X -= (int)N2*((int)(Lk*dil)-(int)str);
         es+=str; ++w;
     }
@@ -768,14 +779,15 @@ int lppool1d_z (double *Y, const double *X, const size_t N, const size_t Li, con
         }
 
         //Denominator
-        if (pad_mode==4 && ss<(int)Li)
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)((int)Li-ss),ipw); }
-        }
-        else
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
-        }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
+        // if (pad_mode==4 && ss<(int)Li)
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)((int)Li-ss),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }

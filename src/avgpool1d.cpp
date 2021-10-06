@@ -69,10 +69,11 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Use -p (--padding) to give the padding length in samples [default=0]\n";
     descr += "\n";
-    descr += "Use -m (--pad_mode) to give the padding mode as [default='zeros']\n";
-    descr += "The pad_mode can be 'zeros', 'reflect', 'repeat' or 'circular'.\n";
-    descr += "The pad_mode can also be entered as 'z', 'ref', 'rep' or 'c'.\n";
+    descr += "Use -m (--pad_mode) to give the padding mode as [default='n']\n";
+    descr += "The pad_mode can be 'zeros', 'reflect', 'repeat', 'circular' or 'no_count_pad'.\n";
+    descr += "The pad_mode can also be entered as 'z', 'ref', 'rep', 'c' or 'n'.\n";
     descr += "Use pad_mode 'no_count_pad' or 'n' to emulate count_include_pad=False.\n";
+    descr += "Use pad_mode 'no_count_pad' or 'n' to emulate usual AvgPool1d behavior.\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ avgpool1d -k5 X -o Y \n";
@@ -155,7 +156,7 @@ int main(int argc, char *argv[])
     else { pad = a_pad->ival[0]; }
 
     //Get pad_mode and pm
-    if (a_pm->count==0) { pad_mode = "zeros"; }
+    if (a_pm->count==0) { pad_mode = "n"; }
     else
     {
     	try { pad_mode = string(a_pm->sval[0]); }

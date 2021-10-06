@@ -122,14 +122,15 @@ int lppool1_s (float *Y, const float *X, const size_t N, const size_t Li, const 
         }
 
         //Denominator
-        if (pad_mode==4 && es>=0)
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)(es+1),ipw); }
-        }
-        else
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
-        }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
+        // if (pad_mode==4 && es>=0)
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)(es+1),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -144,7 +145,8 @@ int lppool1_s (float *Y, const float *X, const size_t N, const size_t Li, const 
         {
             for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += powf(*X,pw); }
         }
-        for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        //for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
         X += inc; es+=str; ++w;
     }
     ss = es - (int)Lk + 1;
@@ -203,6 +205,17 @@ int lppool1_s (float *Y, const float *X, const size_t N, const size_t Li, const 
             }
             X += ((int)Li-prev_t) * (int)N;
         }
+
+        //Denominator
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
+        // if (pad_mode==4 && ss<(int)Li)
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)((int)Li-ss),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        // }
 
         X += N*(str+(size_t)ss-Li);
         ss+=str; es+=str; ++w;
@@ -287,14 +300,15 @@ int lppool1_d (double *Y, const double *X, const size_t N, const size_t Li, cons
         }
 
         //Denominator
-        if (pad_mode==4 && es>=0)
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)(es+1),ipw); }
-        }
-        else
-        {
-            for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
-        }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
+        // if (pad_mode==4 && es>=0)
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)(es+1),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -309,7 +323,8 @@ int lppool1_d (double *Y, const double *X, const size_t N, const size_t Li, cons
         {
             for (size_t n=N; n>0u; --n, ++X, ++Y) { *Y += pow(*X,pw); }
         }
-        for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        //for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
         X += inc; es+=str; ++w;
     }
     ss = es - (int)Lk + 1;
@@ -368,6 +383,17 @@ int lppool1_d (double *Y, const double *X, const size_t N, const size_t Li, cons
             }
             X += ((int)Li-prev_t) * (int)N;
         }
+
+        //Denominator
+        for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
+        // if (pad_mode==4 && ss<(int)Li)
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)((int)Li-ss),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        // }
 
         X += N*(str+(size_t)ss-Li);
         ss+=str; es+=str; ++w;
@@ -453,14 +479,15 @@ int lppool1_c (float *Y, const float *X, const size_t N, const size_t Li, const 
         }
 
         //Denominator
-        if (pad_mode==4 && es>=0)
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)(es+1),ipw); }
-        }
-        else
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
-        }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
+        // if (pad_mode==4 && es>=0)
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)(es+1),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -475,7 +502,8 @@ int lppool1_c (float *Y, const float *X, const size_t N, const size_t Li, const 
         {
             for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += powf(*X,pw); }
         }
-        for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        //for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
         X += inc; es+=str; ++w;
     }
     ss = es - (int)Lk + 1;
@@ -534,6 +562,17 @@ int lppool1_c (float *Y, const float *X, const size_t N, const size_t Li, const 
             }
             X += ((int)Li-prev_t) * (int)N2;
         }
+
+        //Denominator
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y,ipw); }
+        // if (pad_mode==4 && ss<(int)Li)
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)((int)Li-ss),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = powf(*Y/(float)Lk,ipw); }
+        // }
 
         X += N2*(str+(size_t)ss-Li);
         ss+=str; es+=str; ++w;
@@ -619,14 +658,15 @@ int lppool1_z (double *Y, const double *X, const size_t N, const size_t Li, cons
         }
 
         //Denominator
-        if (pad_mode==4 && es>=0)
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)(es+1),ipw); }
-        }
-        else
-        {
-            for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
-        }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
+        // if (pad_mode==4 && es>=0)
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)(es+1),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        // }
 
         ss+=str; es+=str; ++w;
     }
@@ -641,7 +681,8 @@ int lppool1_z (double *Y, const double *X, const size_t N, const size_t Li, cons
         {
             for (size_t n=N2; n>0u; --n, ++X, ++Y) { *Y += pow(*X,pw); }
         }
-        for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        //for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
         X += inc; es+=str; ++w;
     }
     ss = es - (int)Lk + 1;
@@ -700,6 +741,17 @@ int lppool1_z (double *Y, const double *X, const size_t N, const size_t Li, cons
             }
             X += ((int)Li-prev_t) * (int)N2;
         }
+
+        //Denominator
+        for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y,ipw); }
+        // if (pad_mode==4 && ss<(int)Li)
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)((int)Li-ss),ipw); }
+        // }
+        // else
+        // {
+        //     for (size_t n=N2; n>0u; --n, ++Y) { *Y = pow(*Y/(double)Lk,ipw); }
+        // }
 
         X += N2*(str+(size_t)ss-Li);
         ss+=str; es+=str; ++w;
