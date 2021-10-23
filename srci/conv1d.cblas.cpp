@@ -4,35 +4,44 @@
 //Declarations
 const valarray<size_t> oktypes = {1u,2u,101u,102u};
 const size_t I = 3u, O = 1u;
-size_t Ni, No, Li, Lo, Lk, str, dil;
+size_t Nb, Ni, No, Li, Lo, Lk, str, dil;
 int pad, Ti, Tk, ceil_mode, pm;
 string pad_mode;
 
 //Description
 string descr;
-descr += "1d cross-correlation to mostly emulate PyTorch Conv1d.\n";
+descr += "1d convolution, same as conv1, but allows dilation.\n";
 descr += "This version uses CBLAS for dot products.\n";
 descr += "\n";
 descr += "This is an input (IN) component for a layer of neurons.\n";
 descr += "There are No (num output) neurons in the layer,\n";
 descr += "and the layer gets inputs from Ni (num input) neurons.\n";
 descr += "\n";
-descr += "X has size Ni x Li for col-major.\n";
-descr += "X has size Li x Ni for row-major.\n";
-descr += "where Li is the input length (usually the number of time points).\n";
+descr += "X has size Ni x Li x Nb for col-major.\n";
+descr += "X has size Nb x Li x Ni for row-major.\n";
+descr += "where:\n";
+descr += "Ni is the num input neurons (aka, C_in or in_channels).\n";
+descr += "Li is the input length (usually the number of time points).\n";
+descr += "Nb is the batch size (if 1, can use matrices, see below).\n";
 descr += "\n";
-descr += "K is the tensor of convolving kernels.\n";
+descr += "K is the convolving kernel (weights).\n";
 descr += "K has size Ni x Lk x No for col-major.\n";
 descr += "K has size No x Lk x Ni for row-major.\n";
-descr += "where Lk is the kernel length (kernel_size, or time width).\n";
+descr += "where:\n";
+descr += "No is the num output neurons (aka, C_out or out_channels).\n";
+descr += "Lk is the kernel length (kernel_size, or time width).\n";
 descr += "\n";
 descr += "B is a vector of length No (each output neuron has a fixed bias).\n";
 descr += "\n";
-descr += "Y has size No x Lo for col-major.\n";
-descr += "Y has size Lo x No for row-major.\n";
+descr += "Y has size No x Lo x Nb for col-major.\n";
+descr += "Y has size Nb x Lo x No for row-major.\n";
 descr += "where:\n";
-descr += "Lo =  ceil[1 + (Li + 2*pad - dil*(Lk-1) - 1)/stride], for ceil_mode true.\n";
-descr += "Lo = floor[1 + (Li + 2*pad - dil*(Lk-1) - 1)/stride], for ceil_mode false.\n";
+descr += "Lo =  ceil[1 + (Li + 2*pad - Lk)/stride], for ceil_mode true.\n";
+descr += "Lo = floor[1 + (Li + 2*pad - Lk)/stride], for ceil_mode false.\n";
+descr += "\n";
+descr += "If Nb==1:\n";
+descr += "X is a matrix with size Ni x Li (col-major) or Li x Ni (row-major);\n";
+descr += "Y is a matrix with size No x Lo (col-major) or Lo x No (row-major).\n";
 descr += "\n";
 descr += "Include -c (--ceil_mode) to use ceil for Lo calculation [default=false].\n";
 descr += "\n";
@@ -98,8 +107,18 @@ else
 ceil_mode = (a_cm->count>0);
 
 //Checks
-Ni = i1.iscolmajor() ? i1.R : i1.C;
-Li = i1.iscolmajor() ? i1.C : i1.R;
+if (i1.ismat())
+{
+    Ni = i1.iscolmajor() ? i1.R :i1.C;
+    Li = i1.iscolmajor() ? i1.C : i1.R;
+    Nb = 1u;
+}
+else
+{
+    Ni = i1.iscolmajor() ? i1.R : i1.S;
+    Li = i1.iscolmajor() ? i1.C : i1.C;
+    Nb = i1.iscolmajor() ? i1.S : i1.R;
+}
 No = i2.iscolmajor() ? i2.S : i2.R;
 Lk = i2.C;
 Ti = (int)Li + 2*pad;
@@ -108,6 +127,8 @@ if (i1.T!=i2.T || i1.T!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "i
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
 if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (K) found to be empty" << endl; return 1; }
 if (i3.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (B) found to be empty" << endl; return 1; }
+if (!i1.iscube()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) must be a cube (3D tensor)" << endl; return 1; }
+if (!i2.iscube()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (K) must be a cube (3D tensor)" << endl; return 1; }
 if (!i3.isvec()) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (B) must be a vector" << endl; return 1; }
 if (i3.N()!=No) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (B) must have length No (num output neurons)" << endl; return 1; }
 if (Tk>(int)Li) { cerr << progstr+": " << __LINE__ << errstr << "Li (length of input vecs) must be >= dil*(Lk-1)" << endl; return 1; }
@@ -117,64 +138,74 @@ if (pad<=-(int)Li) { cerr << progstr+": " << __LINE__ << errstr << "pad length m
 //Set output header info
 Lo = 1u + size_t(Ti-Tk)/str + size_t(ceil_mode && size_t(Ti-Tk)%str);
 o1.F = i1.F; o1.T = i1.T;
-o1.R = i1.iscolmajor() ? No : Lo;
-o1.C = i1.iscolmajor() ? Lo : No;
-o1.S = i1.S; o1.H = i1.H;
+if (i1.ismat())
+{
+    o1.R = i1.iscolmajor() ? No : Lo;
+    o1.C = i1.iscolmajor() ? Lo : No;
+    o1.S = i1.S;
+}
+else
+{
+    o1.R = i1.iscolmajor() ? No : Nb;
+    o1.C = i1.iscolmajor() ? Lo : Lo;
+    o1.S = i1.iscolmajor() ? Nb : No;
+}
+o1.H = i1.H;
 
 //Other prep
 
 //Process
 if (i1.T==1u)
 {
-    float *X1, *X2, *X3, *Y;
-    try { X1 = new float[i1.N()]; }
+    float *X, *K, *B, *Y;
+    try { X = new float[i1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-    try { X2 = new float[i2.N()]; }
+    try { K = new float[i2.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
-    try { X3 = new float[i3.N()]; }
+    try { B = new float[i3.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 3 (B)" << endl; return 1; }
     try { Y = new float[o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+    try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+    try { ifs2.read(reinterpret_cast<char*>(K),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
-    try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
+    try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-    if (codee::conv1d_cblas_s(Y,X1,X2,X3,Ni,No,Li,Lk,pad,str,dil,ceil_mode,pm))
+    if (codee::conv1d_cblas_s(Y,X,K,B,Ni,No,Nb,Li,Lk,pad,str,dil,ceil_mode,pm))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
     }
-    delete[] X1; delete[] X2; delete[] X3; delete[] Y;
+    delete[] X; delete[] K; delete[] B; delete[] Y;
 }
 else if (i1.T==101u)
 {
-    float *X1, *X2, *X3, *Y;
-    try { X1 = new float[2u*i1.N()]; }
+    float *X, *K, *B, *Y;
+    try { X = new float[2u*i1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
-    try { X2 = new float[2u*i2.N()]; }
+    try { K = new float[2u*i2.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
-    try { X3 = new float[2u*i3.N()]; }
+    try { B = new float[2u*i3.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 3 (B)" << endl; return 1; }
     try { Y = new float[2u*o1.N()]; }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
-    try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
+    try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
-    try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
+    try { ifs2.read(reinterpret_cast<char*>(K),i2.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
-    try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
+    try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-    if (codee::conv1d_cblas_c(Y,X1,X2,X3,Ni,No,Li,Lk,pad,str,dil,ceil_mode,pm))
+    if (codee::conv1d_cblas_c(Y,X,K,B,Ni,No,Nb,Li,Lk,pad,str,dil,ceil_mode,pm))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
     }
-    delete[] X1; delete[] X2; delete[] X3; delete[] Y;
+    delete[] X; delete[] K; delete[] B; delete[] Y;
 }
 
 //Finish

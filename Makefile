@@ -69,19 +69,30 @@ bilinear.cblas: srci/bilinear.cblas.cpp c/bilinear.cblas.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CCC) -c src/$@.cpp -oobj/$@.o $(CCFLAGS); $(CCC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 #Conv: convolution
-#conv1d and conv1d.cblas have dilation; conv1 and conv1.cblas do not.
-#The .torch versions use PyTorch conventions for shapes of inputs/outputs.
-Conv: conv1 conv1.cblas conv1d conv1d.cblas conv1.torch
+#conv1 versions have no groups and no dilation.
+#conv1g versions have groups but no dilation.
+#conv1d versions have groups and dilation.
+#The .cblas versions use CBLAS for dot products.
+#The .torch versions use PyTorch shape conventions for inputs/outputs.
+Conv: conv1 conv1g conv1d conv1.cblas conv1g.cblas conv1d.cblas conv1.torch conv1g.torch conv1d.torch
 conv1: srci/conv1.cpp c/conv1.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv1g: srci/conv1g.cpp c/conv1g.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv1d: srci/conv1d.cpp c/conv1d.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 conv1.cblas: srci/conv1.cblas.cpp c/conv1.cblas.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
-conv1d: srci/conv1d.cpp c/conv1d.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv1g.cblas: srci/conv1g.cblas.cpp c/conv1g.cblas.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CCC) -c src/$@.cpp -oobj/$@.o $(CCFLAGS); $(CCC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 conv1d.cblas: srci/conv1d.cblas.cpp c/conv1d.cblas.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CCC) -c src/$@.cpp -oobj/$@.o $(CCFLAGS); $(CCC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 conv1.torch: srci/conv1.torch.cpp c/conv1.torch.c
-	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv1g.torch: srci/conv1g.torch.cpp c/conv1g.torch.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
+conv1d.torch: srci/conv1d.torch.cpp c/conv1d.torch.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 
 #Pool: pooling
 #maxpool1 and avgpool1 do not have dilation; maxpool1d and avgpool1d do.

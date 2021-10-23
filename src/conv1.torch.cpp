@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "X has size Nb x Ni x Li,\n";
     descr += "where:\n";
-    descr += "Nb is the batch size (if Nb=1, X can be Ni x Li).\n";
+    descr += "Nb is the batch size.\n";
     descr += "Ni is the number of input neurons (C_in).\n";
     descr += "Li is the input length (usually the number of time points).\n";
     descr += "\n";
@@ -61,8 +61,11 @@ int main(int argc, char *argv[])
     descr += "\n";
     descr += "Y has size Nb x No x Lo,\n";
     descr += "where:\n";
-    descr += "Lo =  ceil[1 + (Li + 2*pad - Lk)/stride], for ceil_mode true.\n";
-    descr += "Lo = floor[1 + (Li + 2*pad - Lk)/stride], for ceil_mode false.\n";
+    descr += "Lo =  ceil[1 + (Li + 2*pad - Lk)/stride], if ceil_mode=true.\n";
+    descr += "Lo = floor[1 + (Li + 2*pad - Lk)/stride], if ceil_mode=false.\n";
+    descr += "\n";
+    descr += "If Nb==1, then X can be entered as a matrix with size Ni x Li,\n";
+    descr += "and then Y will be a matrix with size No x Lo.\n";
     descr += "\n";
     descr += "Include -c (--ceil_mode) to use ceil for Lo calculation [default=false].\n";
     descr += "\n";
@@ -193,9 +196,9 @@ int main(int argc, char *argv[])
     //Set output header info
     Lo = 1u + size_t(Ti-(int)Lk)/str + size_t(ceil_mode && size_t(Ti-(int)Lk)%str);
     o1.F = i1.F; o1.T = i1.T;
-    if (i1.ismat()) { o1.R = No; o1.C = Lo; }
+    if (i1.ismat()) { o1.R = No; o1.C = Lo; o1.S = 1u; }
     else { o1.R = Nb; o1.C = No; o1.S = Lo; }
-    o1.S = i1.S; o1.H = i1.H;
+    o1.H = 1u;
 
 
     //Open output

@@ -64,7 +64,7 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
     float sm;                           //intermediate accumulation
     int ss, es;                         //current start-samp, end-samp
     size_t l;                           //current samp within Y in [0 Lo-1]
-    
+int xcnt=0, ycnt=0;
     //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
     //Loop over batch members
@@ -77,10 +77,10 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
         while (ss<0 && l<Lo)
         {
             //Loop over output chans
-            for (size_t o=No; o>0u; --o, ++B, X-=Ni*Li, Y+=Lo)
+            for (size_t o=No; o>0u; --o, ++B, X-=Ni*Li, Y+=Lo, xcnt-=(int)(Ni*Li), ycnt+=(int)Lo)
             {
                 sm = *B;
-                for (size_t i=Ni; i>0u; --i, X+=(int)(Li-Lk)-ss)
+                for (size_t i=Ni; i>0u; --i, X+=(int)(Li-Lk)-ss, xcnt+=(int)(Li-Lk))
                 {
                     //Negative samps
                     if (pad_mode==0)        //zero pad
@@ -104,7 +104,7 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
                     }
 
                     //Nonnegative samps
-                    for (int k=(int)Lk+ss; k>0; --k, ++X, ++K)
+                    for (int k=(int)Lk+ss; k>0; --k, ++X, ++K, ++xcnt)
                     {
                         sm += *X * *K;
                     }
@@ -113,6 +113,7 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
             }
             ss += str; ++l;
             K -= Nk; B -= No; Y -= No*Lo-1u;
+            ycnt -= (int)(No*Lo-1u);
         }
         es = ss + (int)Lk - 1;
 
@@ -120,17 +121,18 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
         while (es<(int)Li && l<Lo)
         {
             //Loop over output chans
-            for (size_t o=No; o>0u; --o, ++B, X-=Ni*Li, Y+=Lo)
+            for (size_t o=No; o>0u; --o, ++B, X-=Ni*Li, Y+=Lo, xcnt-=(int)(Ni*Li), ycnt+=(int)Lo)
             {
                 sm = *B;
-                for (size_t i=Ni; i>0u; --i, X+=Li-Lk)
+                for (size_t i=Ni; i>0u; --i, X+=Li-Lk, xcnt+=(int)(Li-Lk))
                 {
-                    for (size_t k=Lk; k>0u; --k, ++X, ++K) { sm += *X * *K; }
+                    for (size_t k=Lk; k>0u; --k, ++X, ++K, ++xcnt) { sm += *X * *K; }
                 }
                 *Y = sm;
             }
             es += str; ++l;
             X += str; K -= Nk; B -= No; Y -= No*Lo-1u;
+            xcnt += (int)str; ycnt -= (int)(No*Lo-1u);
         }
         ss = es - (int)Lk + 1;
 
@@ -138,7 +140,7 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
         while (l<Lo)
         {
             //Loop over output chans
-            for (size_t o=No; o>0u; --o, ++B, X-=Ni*Li, Y+=Lo)
+            for (size_t o=No; o>0u; --o, ++B, X-=Ni*Li, Y+=Lo, ycnt+=(int)Lo)
             {
                 sm = *B;
                 for (size_t i=Ni; i>0u; --i, X+=Li-Lk)
@@ -178,8 +180,13 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
             }
             ss += str; es += str; ++l;
             X += str; K -= Nk; B -= No; Y -= No*Lo-1u; 
+            xcnt += (int)str; ycnt -= (int)(No*Lo-1u);
         }
-        X += (int)(Ni*Li) - ss; Y += (No-1u)*Lo;
+        fprintf(stderr,"xcnt=%d, ycnt=%d, Ni*Li=%lu, No*Lo=%lu\n",xcnt,ycnt,Ni*Li,No*Lo);
+        //X -= ss;
+        X += (int)(Ni*Li) - ss; xcnt += (int)(Ni*Li) - ss;
+        Y += (No-1u)*Lo; ycnt += (int)((No-1u)*Lo);
+        fprintf(stderr,"xcnt=%d, ycnt=%d, Ni*Li=%lu, No*Lo=%lu\n",xcnt,ycnt,Ni*Li,No*Lo);
     }
 
     // //Loop over output chans
