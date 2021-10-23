@@ -3,7 +3,6 @@
 //@license BSD 3-clause
 
 
-#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -23,7 +22,6 @@
 int main(int argc, char *argv[])
 {
     using namespace std;
-    timespec tic, toc;
 
 
     //Declarations
@@ -85,7 +83,7 @@ int main(int argc, char *argv[])
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,K,B)");
-    struct arg_int  *a_str = arg_intn("s","step","<uint>",0,1,"step size in samps [default=1]");
+    struct arg_int  *a_str = arg_intn("s","stride","<uint>",0,1,"stride in samps [default=1]");
     struct arg_int  *a_pad = arg_intn("p","padding","<int>",0,1,"padding [default=0]");
     struct arg_str   *a_pm = arg_strn("m","pad_mode","<str>",0,1,"padding mode [default='zeros']");
     struct arg_lit   *a_cm = arg_litn("c","ceil_mode",0,1,"include to use ceil_mode [default=false]");
@@ -214,12 +212,11 @@ int main(int argc, char *argv[])
 
 
     //Process
-    clock_gettime(CLOCK_REALTIME,&tic);
     if (i1.T==1u)
     {
         float *X1, *X2, *X3, *Y;
         try { X1 = new float[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { X2 = new float[i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
         try { X3 = new float[i3.N()]; }
@@ -227,7 +224,7 @@ int main(int argc, char *argv[])
         try { Y = new float[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
@@ -245,7 +242,7 @@ int main(int argc, char *argv[])
     {
         double *X1, *X2, *X3, *Y;
         try { X1 = new double[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { X2 = new double[i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
         try { X3 = new double[i3.N()]; }
@@ -253,7 +250,7 @@ int main(int argc, char *argv[])
         try { Y = new double[o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
@@ -271,7 +268,7 @@ int main(int argc, char *argv[])
     {
         float *X1, *X2, *X3, *Y;
         try { X1 = new float[2u*i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { X2 = new float[2u*i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
         try { X3 = new float[2u*i3.N()]; }
@@ -279,7 +276,7 @@ int main(int argc, char *argv[])
         try { Y = new float[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
@@ -297,7 +294,7 @@ int main(int argc, char *argv[])
     {
         double *X1, *X2, *X3, *Y;
         try { X1 = new double[2u*i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
         try { X2 = new double[2u*i2.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
         try { X3 = new double[2u*i3.N()]; }
@@ -305,7 +302,7 @@ int main(int argc, char *argv[])
         try { Y = new double[2u*o1.N()]; }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X1),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
         try { ifs2.read(reinterpret_cast<char*>(X2),i2.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(X3),i3.nbytes()); }
@@ -323,9 +320,12 @@ int main(int argc, char *argv[])
     {
         cerr << progstr+": " << __LINE__ << errstr << "data type not supported" << endl; return 1;
     }
-    clock_gettime(CLOCK_REALTIME,&toc);
-    cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
+    //Close fstreams
+    ifs1.close(); ifs2.close();
+ ifs3.close();
+
+    ofs1.close();
 
     //Exit
     return ret;

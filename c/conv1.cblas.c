@@ -71,7 +71,7 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
     int ss=-pad, es=ss+(int)Lk-1;       //current start-samp, end-samp
     int t = 0, prev_t = 0;              //non-negative samps during extrapolation (padding)
 
-    //struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+    struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
 
     //K before or overlapping first samp of X
     while (ss<0 && w<Lo)
@@ -210,8 +210,8 @@ int conv1_cblas_s (float *Y, const float *X, const float *K, const float *B, con
         ss+=str; es+=str; ++w;
     }
 
-    //clock_gettime(CLOCK_REALTIME,&toc);
-    //fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
+    clock_gettime(CLOCK_REALTIME,&toc);
+    fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
 
     return 0;
 }

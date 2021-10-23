@@ -11,7 +11,7 @@ string descr;
 descr += "Activation function.\n";
 descr += "Gets exponential linear unit (ELU) [Clevert et al. 2015] of each element of X.\n";
 descr += "For each element: y = alpha*(exp(x)-1),  if x<0.\n";
-descr += "                  y = x,                 if x>=0.\n";
+descr += "                  y = x,                 otherwise.\n";
 descr += "\n";
 descr += "For alpha=0, this is the usual ReLU.\n";
 descr += "\n";

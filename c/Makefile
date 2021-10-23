@@ -53,11 +53,13 @@ bilinear.cblas: bilinear.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Conv: convolution
 #conv1d and conv1d.cblas have dilation; conv1 and conv1.cblas do not.
-Conv: conv1 conv1.cblas conv1d conv1d.cblas
+#The .torch versions use PyTorch shape conventions for inputs/outputs.
+Conv: conv1 conv1.cblas conv1d conv1d.cblas conv1.torch
 conv1: conv1.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv1.cblas: conv1.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv1d: conv1d.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 conv1d.cblas: conv1d.cblas.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
+conv1.torch: conv1.torch.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 #Pool: pooling
 #maxpool1d and avgpool1d have dilation; maxpool1 and avgpool1 do not.

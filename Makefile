@@ -69,8 +69,9 @@ bilinear.cblas: srci/bilinear.cblas.cpp c/bilinear.cblas.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CCC) -c src/$@.cpp -oobj/$@.o $(CCFLAGS); $(CCC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 #Conv: convolution
-#conv1 and conv1.cblas do not have dilation; conv1d and conv1d.cblas do.
-Conv: conv1 conv1.cblas conv1d conv1d.cblas
+#conv1d and conv1d.cblas have dilation; conv1 and conv1.cblas do not.
+#The .torch versions use PyTorch conventions for shapes of inputs/outputs.
+Conv: conv1 conv1.cblas conv1d conv1d.cblas conv1.torch
 conv1: srci/conv1.cpp c/conv1.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 conv1.cblas: srci/conv1.cblas.cpp c/conv1.cblas.c
@@ -79,6 +80,8 @@ conv1d: srci/conv1d.cpp c/conv1d.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 conv1d.cblas: srci/conv1d.cblas.cpp c/conv1d.cblas.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CCC) -c src/$@.cpp -oobj/$@.o $(CCFLAGS); $(CCC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
+conv1.torch: srci/conv1.torch.cpp c/conv1.torch.c
+	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2 -lopenblas -lm
 
 #Pool: pooling
 #maxpool1 and avgpool1 do not have dilation; maxpool1d and avgpool1d do.
@@ -152,11 +155,11 @@ lstm_peephole4: srci/lstm_peephole4.cpp c/lstm_peephole4.c
 
 
 #OUT: output side of neurons (~axon hillock and axon)
-OUT: Static_Act Other_Act #CN_Neurons DEQ_Neurons
+OUT: Elementwise_Act Other_Act #CN_Neurons DEQ_Neurons
 
 #Output Activation functions
 #These are all element-wise static nonlinearities, so apply without modification to single neurons or to layers of neurons.
-Static_Act: step smoothstep logistic sigmoid logsigmoid hardsigmoid hardshrink softshrink tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu rrelu elu celu selu softclip softplus softsign plu silu swish hardswish mish sin threshold
+Elementwise_Act: step smoothstep logistic sigmoid logsigmoid hardsigmoid hardshrink softshrink tanh tanhshrink hardtanh atan asinh gudermann sqnl isru isrlu erf gelu gelu_new relu relu6 prelu rrelu elu celu selu softclip softplus softsign plu silu swish hardswish mish sin threshold
 step: srci/step.cpp c/step.c
 	$(ss) -vd srci/$@.cpp > src/$@.cpp; $(CC) -c src/$@.cpp -oobj/$@.o $(CFLAGS); $(CC) obj/$@.o -obin/$@ -largtable2
 signum: srci/signum.cpp c/signum.c

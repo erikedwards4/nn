@@ -259,6 +259,10 @@ int main(int argc, char *argv[])
     clock_gettime(CLOCK_REALTIME,&toc);
     cerr << "elapsed time = " << double(toc.tv_sec-tic.tv_sec)*1e3 + double(toc.tv_nsec-tic.tv_nsec)/1e6 << " ms" << endl;
     
+    //Close fstreams
+    ifs1.close(); ifs2.close();
+
+    ofs1.close();
 
     //Exit
     return ret;

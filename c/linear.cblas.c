@@ -39,7 +39,7 @@ int linear_cblas_s (float *Y, const float *X, const float *W, const size_t Ni, c
 {
     for (size_t l=L; l>0u; --l, X+=Ni, Y+=No)
     {
-        cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)No,(int)Ni,1.0f,W,(int)Ni,X,1,1.0f,Y,1);
+        cblas_sgemv(CblasRowMajor,CblasNoTrans,(int)No,(int)Ni,1.0f,W,(int)Ni,X,1,0.0f,Y,1);
     }
 
     return 0;
@@ -50,7 +50,7 @@ int linear_cblas_d (double *Y, const double *X, const double *W, const size_t Ni
 {
     for (size_t l=L; l>0u; --l, X+=Ni, Y+=No)
     {
-        cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)No,(int)Ni,1.0,W,(int)Ni,X,1,1.0,Y,1);
+        cblas_dgemv(CblasRowMajor,CblasNoTrans,(int)No,(int)Ni,1.0,W,(int)Ni,X,1,0.0,Y,1);
     }
 
     return 0;
@@ -59,11 +59,11 @@ int linear_cblas_d (double *Y, const double *X, const double *W, const size_t Ni
 
 int linear_cblas_c (float *Y, const float *X, const float *W, const size_t Ni, const size_t No, const size_t L)
 {
-    const float o[2] = {1.0f,0.0f};
+    const float z[2] = {0.0f,0.0f}, o[2] = {1.0f,0.0f};
 
     for (size_t l=L; l>0u; --l, X+=2u*Ni, Y+=2u*No)
     {
-        cblas_cgemv(CblasRowMajor,CblasNoTrans,(int)No,(int)Ni,o,W,(int)Ni,X,1,o,Y,1);
+        cblas_cgemv(CblasRowMajor,CblasNoTrans,(int)No,(int)Ni,o,W,(int)Ni,X,1,z,Y,1);
     }
 
     return 0;
@@ -72,11 +72,11 @@ int linear_cblas_c (float *Y, const float *X, const float *W, const size_t Ni, c
 
 int linear_cblas_z (double *Y, const double *X, const double *W, const size_t Ni, const size_t No, const size_t L)
 {
-    const double o[2] = {1.0,0.0};
+    const double z[2] = {0.0,0.0}, o[2] = {1.0,0.0};
 
     for (size_t l=L; l>0u; --l, X+=2u*Ni, Y+=2u*No)
     {
-        cblas_zgemv(CblasRowMajor,CblasNoTrans,(int)No,(int)Ni,o,W,(int)Ni,X,1,o,Y,1);
+        cblas_zgemv(CblasRowMajor,CblasNoTrans,(int)No,(int)Ni,o,W,(int)Ni,X,1,z,Y,1);
     }
 
     return 0;

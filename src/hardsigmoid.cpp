@@ -40,11 +40,9 @@ int main(int argc, char *argv[])
     string descr;
     descr += "Activation function.\n";
     descr += "Gets the Hardsigmoid function of each element of X.\n";
-    descr += "For each element: y = 0,         if x<=-3.\n";
-    descr += "                  y = 1,         if x>=+3.\n";
+    descr += "For each element: y = 0,         if x < -3.\n";
+    descr += "                  y = 1,         if x > +3.\n";
     descr += "                  y = (x+3)/6,   otherwise.\n";
-    descr += "\n";
-    descr += "Use -b (--beta) to specify the beta parameter [default=1].\n";
     descr += "\n";
     descr += "Examples:\n";
     descr += "$ hardsigmoid X -o Y \n";
@@ -128,9 +126,9 @@ int main(int argc, char *argv[])
     {
         float *X;
         try { X = new float[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         if (codee::hardsigmoid_inplace_s(X,i1.N()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
@@ -144,9 +142,9 @@ int main(int argc, char *argv[])
     {
         double *X;
         try { X = new double[i1.N()]; }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file (X)" << endl; return 1; }
         try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
-        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file (X)" << endl; return 1; }
         if (codee::hardsigmoid_inplace_d(X,i1.N()))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)

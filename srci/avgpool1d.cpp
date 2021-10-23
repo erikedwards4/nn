@@ -52,7 +52,7 @@ descr += "$ cat X | avgpool1d -k12 -i2 -c -s5 -p10 -m'c' - > Y \n";
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input file (X)");
 struct arg_int   *a_lk = arg_intn("k","kernel_size","<uint>",0,1,"kernel length in samps [default=1]");
-struct arg_int  *a_str = arg_intn("s","step","<uint>",0,1,"step size in samps [default=1]");
+struct arg_int  *a_str = arg_intn("s","stride","<uint>",0,1,"stride in samps [default=1]");
 struct arg_int  *a_dil = arg_intn("i","dilation","<uint>",0,1,"dilation factor [default=1]");
 struct arg_int  *a_pad = arg_intn("p","padding","<int>",0,1,"padding [default=0]");
 struct arg_str   *a_pm = arg_strn("m","pad_mode","<str>",0,1,"padding mode [default='zeros']");
