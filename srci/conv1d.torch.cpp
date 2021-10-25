@@ -2,9 +2,9 @@
 #include "conv1d.torch.c"
 
 //Declarations
-const valarray<size_t> oktypes = {1u};
+const valarray<size_t> oktypes = {1u,2u};
 const size_t I = 3u, O = 1u;
-size_t Nb, Ni, No, Li, Lo, Lk, str, dil;
+size_t Nb, Ni, No, Ng, Li, Lo, Lk, str, dil;
 int pad, Ti, Tk, ceil_mode, pm;
 string pad_mode;
 
@@ -20,9 +20,10 @@ descr += "Ni is the number of input neurons (C_in).\n";
 descr += "Li is the input length (usually the number of time points).\n";
 descr += "\n";
 descr += "K is the tensor of convolving kernels.\n";
-descr += "K has size No x Ni x Lk,\n";
+descr += "K has size No x Ni/Ng x Lk,\n";
 descr += "where:\n";
 descr += "Lk is the kernel length (kernel_size, or time width).\n";
+descr += "Ng is the number of groups.\n";
 descr += "\n";
 descr += "B is the bias vector of length No,\n";
 descr += "where:\n";
@@ -48,13 +49,17 @@ descr += "Use -m (--pad_mode) to give the padding mode as [default='zeros']\n";
 descr += "The pad_mode can be 'zeros', 'reflect', 'repeat' or 'circular'.\n";
 descr += "The pad_mode can also be entered as 'z', 'ref', 'rep' or 'c'.\n";
 descr += "\n";
+descr += "Use -g (--groups) to enter the number of groups [default=1].\n";
+descr += "Both Ni and No must be divisible by num groups.\n";
+descr += "\n";
 descr += "Examples:\n";
 descr += "$ conv1d.torch X K B -o Y \n";
 descr += "$ conv1d.torch -s2 -i2 -p10 -m'reflect' X K B > Y \n";
-descr += "$ cat X | conv1d.torch -c -s5 -i3 -p10 -m'c' - K B > Y \n";
+descr += "$ cat X | conv1d.torch -g2 -s5 -i3 -p10 -m'c' - K B > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,K,B)");
+struct arg_int    *a_g = arg_intn("g","groups","<uint>",0,1,"num groups [default=1]");
 struct arg_int  *a_str = arg_intn("s","stride","<uint>",0,1,"stride in samps [default=1]");
 struct arg_int  *a_dil = arg_intn("i","dilation","<uint>",0,1,"dilation factor [default=1]");
 struct arg_int  *a_pad = arg_intn("p","padding","<int>",0,1,"padding [default=0]");
@@ -63,6 +68,11 @@ struct arg_lit   *a_cm = arg_litn("c","ceil_mode",0,1,"include to use ceil_mode 
 struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
 
 //Get options
+
+//Get groups
+if (a_g->count==0) { Ng = 1u; }
+else if (a_g->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "num groups must be positive" << endl; return 1; }
+else { Ng = size_t(a_g->ival[0]); }
 
 //Get stride
 if (a_str->count==0) { str = 1u; }
@@ -105,6 +115,8 @@ else { Nb = i1.R; Ni = i1.C; Li = i1.S; }
 No = i2.R; Lk = i2.S;
 Ti = (int)Li + 2*pad;
 Tk = (int)(dil*(Lk-1u)) + 1;
+if (Ni%Ng!=0u) { cerr << progstr+": " << __LINE__ << errstr << "Ni must be divisible by num groups" << endl; return 1; }
+if (No%Ng!=0u) { cerr << progstr+": " << __LINE__ << errstr << "No must be divisible by num groups" << endl; return 1; }
 if (i1.T!=i2.T || i1.T!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
 if (i1.iscolmajor() || i2.iscolmajor()) { cerr << progstr+": " << __LINE__ << errstr << "inputs 1 and 2 must have row-major layout" << endl; return 1; }
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
@@ -146,7 +158,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
     try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-    if (codee::conv1d_torch_s(Y,X,K,B,Ni,No,Nb,Li,Lk,pad,str,dil,ceil_mode,pm))
+    if (codee::conv1d_torch_s(Y,X,K,B,Ni,No,Nb,Ng,Li,Lk,pad,str,dil,ceil_mode,pm))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {

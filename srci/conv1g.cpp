@@ -1,41 +1,47 @@
 //Includes
-#include "conv1g.torch.c"
+#include "conv1g.c"
 
 //Declarations
 const valarray<size_t> oktypes = {1u,2u};
 const size_t I = 3u, O = 1u;
-size_t Ni, No, Nb, Ng, Li, Lo, Lk, str;
+size_t Nb, Ni, No, Ng, Li, Lo, Lk, str;
 int pad, Ti, ceil_mode, pm;
 string pad_mode;
 
 //Description
 string descr;
-descr += "1D convolution using PyTorch shape conventions.\n";
-descr += "All inputs/outputs are row-major.\n";
+descr += "1d convolution, same as conv1d, but no dilation.\n";
 descr += "\n";
-descr += "X has size Nb x Ni x Li,\n";
+descr += "This is an input (IN) component for a layer of neurons.\n";
+descr += "There are No (num output) neurons in the layer,\n";
+descr += "and the layer gets inputs from Ni (num input) neurons.\n";
+descr += "\n";
+descr += "X has size Ni x Li x Nb for col-major.\n";
+descr += "X has size Nb x Li x Ni for row-major.\n";
 descr += "where:\n";
-descr += "Nb is the batch size.\n";
-descr += "Ni is the number of input neurons (C_in).\n";
+descr += "Ni is the num input neurons (aka, C_in or in_channels).\n";
 descr += "Li is the input length (usually the number of time points).\n";
+descr += "Nb is the batch size (if 1, can use matrices, see below).\n";
 descr += "\n";
-descr += "K is the tensor of convolving kernels.\n";
-descr += "K has size No x Ni/Ng x Lk,\n";
+descr += "K is the convolving kernel (weights).\n";
+descr += "K has size Ni/Ng x Lk x No for col-major.\n";
+descr += "K has size No x Lk x Ni/Ng for row-major.\n";
 descr += "where:\n";
+descr += "No is the num output neurons (aka, C_out or out_channels).\n";
 descr += "Lk is the kernel length (kernel_size, or time width).\n";
 descr += "Ng is the number of groups.\n";
 descr += "\n";
-descr += "B is the bias vector of length No,\n";
-descr += "where:\n";
-descr += "No is the number of output neurons (C_out).\n";
+descr += "B is a vector of length No (each output neuron has a fixed bias).\n";
 descr += "\n";
-descr += "Y has size Nb x No x Lo,\n";
+descr += "Y has size No x Lo x Nb for col-major.\n";
+descr += "Y has size Nb x Lo x No for row-major.\n";
 descr += "where:\n";
-descr += "Lo =  ceil[1 + (Li + 2*pad - Lk)/stride], if ceil_mode=true.\n";
-descr += "Lo = floor[1 + (Li + 2*pad - Lk)/stride], if ceil_mode=false.\n";
+descr += "Lo =  ceil[1 + (Li + 2*pad - Lk)/stride], for ceil_mode true.\n";
+descr += "Lo = floor[1 + (Li + 2*pad - Lk)/stride], for ceil_mode false.\n";
 descr += "\n";
-descr += "If Nb==1, then X can be entered as a matrix with size Ni x Li,\n";
-descr += "and then Y will be a matrix with size No x Lo.\n";
+descr += "If Nb==1:\n";
+descr += "X is a matrix with size Ni x Li (col-major) or Li x Ni (row-major);\n";
+descr += "Y is a matrix with size No x Lo (col-major) or Lo x No (row-major).\n";
 descr += "\n";
 descr += "Include -c (--ceil_mode) to use ceil for Lo calculation [default=false].\n";
 descr += "\n";
@@ -47,13 +53,10 @@ descr += "Use -m (--pad_mode) to give the padding mode as [default='zeros']\n";
 descr += "The pad_mode can be 'zeros', 'reflect', 'repeat' or 'circular'.\n";
 descr += "The pad_mode can also be entered as 'z', 'ref', 'rep' or 'c'.\n";
 descr += "\n";
-descr += "Use -g (--groups) to enter the number of groups [default=1].\n";
-descr += "Both Ni and No must be divisible by num groups.\n";
-descr += "\n";
 descr += "Examples:\n";
-descr += "$ conv1g.torch X K B -o Y \n";
-descr += "$ conv1g.torch -g2 -s2 -p10 -m'reflect' X K B > Y \n";
-descr += "$ cat X | conv1g.torch -g3 -c -s5 -p10 -m'c' - K B > Y \n";
+descr += "$ conv1g X K B -o Y \n";
+descr += "$ conv1g -g2 -s2 -p10 -m'reflect' X K B > Y \n";
+descr += "$ cat X | conv1g -g3 -s5 -p10 -m'c' - K B > Y \n";
 
 //Argtable
 struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,K,B)");
@@ -102,14 +105,24 @@ else
 }
 
 //Checks
-if (i1.ismat()) { Nb = 1u; Ni = i1.R; Li = i1.C;}
-else { Nb = i1.R; Ni = i1.C; Li = i1.S; }
-No = i2.R; Lk = i2.S;
+if (i1.ismat())
+{
+    Ni = i1.iscolmajor() ? i1.R :i1.C;
+    Li = i1.iscolmajor() ? i1.C : i1.R;
+    Nb = 1u;
+}
+else
+{
+    Ni = i1.iscolmajor() ? i1.R : i1.S;
+    Li = i1.iscolmajor() ? i1.C : i1.C;
+    Nb = i1.iscolmajor() ? i1.S : i1.R;
+}
+No = i2.iscolmajor() ? i2.S : i2.R;
+Lk = i2.C;
 Ti = (int)Li + 2*pad;
 if (Ni%Ng!=0u) { cerr << progstr+": " << __LINE__ << errstr << "Ni must be divisible by num groups" << endl; return 1; }
 if (No%Ng!=0u) { cerr << progstr+": " << __LINE__ << errstr << "No must be divisible by num groups" << endl; return 1; }
 if (i1.T!=i2.T || i1.T!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
-if (i1.iscolmajor() || i2.iscolmajor()) { cerr << progstr+": " << __LINE__ << errstr << "inputs 1 and 2 must have row-major layout" << endl; return 1; }
 if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
 if (i2.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 2 (K) found to be empty" << endl; return 1; }
 if (i3.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 3 (B) found to be empty" << endl; return 1; }
@@ -125,9 +138,19 @@ if (Ti<(int)Lk) { cerr << progstr+": " << __LINE__ << errstr << "Li+2*pad must b
 //Set output header info
 Lo = 1u + size_t(Ti-(int)Lk)/str + size_t(ceil_mode && size_t(Ti-(int)Lk)%str);
 o1.F = i1.F; o1.T = i1.T;
-if (i1.ismat()) { o1.R = No; o1.C = Lo; o1.S = 1u; }
-else { o1.R = Nb; o1.C = No; o1.S = Lo; }
-o1.H = 1u;
+if (i1.ismat())
+{
+    o1.R = i1.iscolmajor() ? No : Lo;
+    o1.C = i1.iscolmajor() ? Lo : No;
+    o1.S = i1.S;
+}
+else
+{
+    o1.R = i1.iscolmajor() ? No : Nb;
+    o1.C = i1.iscolmajor() ? Lo : Lo;
+    o1.S = i1.iscolmajor() ? Nb : No;
+}
+o1.H = i1.H;
 
 //Other prep
 
@@ -149,7 +172,7 @@ if (i1.T==1u)
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
     try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-    if (codee::conv1g_torch_s(Y,X,K,B,Ni,No,Nb,Ng,Li,Lk,pad,str,ceil_mode,pm))
+    if (codee::conv1g_s(Y,X,K,B,Ni,No,Nb,Ng,Li,Lk,pad,str,ceil_mode,pm))
     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
     if (wo1)
     {
@@ -160,3 +183,29 @@ if (i1.T==1u)
 }
 
 //Finish
+// else if (i1.T==101u)
+// {
+//     float *X, *K, *B, *Y;
+//     try { X = new float[2u*i1.N()]; }
+//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+//     try { K = new float[2u*i2.N()]; }
+//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
+//     try { B = new float[2u*i3.N()]; }
+//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 3 (B)" << endl; return 1; }
+//     try { Y = new float[2u*o1.N()]; }
+//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+//     try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
+//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+//     try { ifs2.read(reinterpret_cast<char*>(K),i2.nbytes()); }
+//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
+//     try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
+//     catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
+//     if (codee::conv1g_c(Y,X,K,B,Ni,No,Nb,Ng,Li,Lk,pad,str,ceil_mode,pm))
+//     { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+//     if (wo1)
+//     {
+//         try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+//         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
+//     }
+//     delete[] X; delete[] K; delete[] B; delete[] Y;
+// }

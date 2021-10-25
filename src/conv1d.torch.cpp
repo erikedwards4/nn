@@ -29,12 +29,12 @@ int main(int argc, char *argv[])
     const string errstr = ": \033[1;31merror:\033[0m ";
     const string warstr = ": \033[1;35mwarning:\033[0m ";
     const string progstr(__FILE__,string(__FILE__).find_last_of("/")+1,strlen(__FILE__)-string(__FILE__).find_last_of("/")-5);
-    const valarray<size_t> oktypes = {1u};
+    const valarray<size_t> oktypes = {1u,2u};
     const size_t I = 3u, O = 1u;
     ifstream ifs1, ifs2, ifs3; ofstream ofs1;
     int8_t stdi1, stdi2, stdi3, stdo1, wo1;
     ioinfo i1, i2, i3, o1;
-    size_t Nb, Ni, No, Li, Lo, Lk, str, dil;
+    size_t Nb, Ni, No, Ng, Li, Lo, Lk, str, dil;
     int pad, Ti, Tk, ceil_mode, pm;
     string pad_mode;
 
@@ -51,9 +51,10 @@ int main(int argc, char *argv[])
     descr += "Li is the input length (usually the number of time points).\n";
     descr += "\n";
     descr += "K is the tensor of convolving kernels.\n";
-    descr += "K has size No x Ni x Lk,\n";
+    descr += "K has size No x Ni/Ng x Lk,\n";
     descr += "where:\n";
     descr += "Lk is the kernel length (kernel_size, or time width).\n";
+    descr += "Ng is the number of groups.\n";
     descr += "\n";
     descr += "B is the bias vector of length No,\n";
     descr += "where:\n";
@@ -79,15 +80,19 @@ int main(int argc, char *argv[])
     descr += "The pad_mode can be 'zeros', 'reflect', 'repeat' or 'circular'.\n";
     descr += "The pad_mode can also be entered as 'z', 'ref', 'rep' or 'c'.\n";
     descr += "\n";
+    descr += "Use -g (--groups) to enter the number of groups [default=1].\n";
+    descr += "Both Ni and No must be divisible by num groups.\n";
+    descr += "\n";
     descr += "Examples:\n";
     descr += "$ conv1d.torch X K B -o Y \n";
     descr += "$ conv1d.torch -s2 -i2 -p10 -m'reflect' X K B > Y \n";
-    descr += "$ cat X | conv1d.torch -c -s5 -i3 -p10 -m'c' - K B > Y \n";
+    descr += "$ cat X | conv1d.torch -g2 -s5 -i3 -p10 -m'c' - K B > Y \n";
 
 
     //Argtable
     int nerrs;
     struct arg_file  *a_fi = arg_filen(nullptr,nullptr,"<file>",I-1,I,"input files (X,K,B)");
+    struct arg_int    *a_g = arg_intn("g","groups","<uint>",0,1,"num groups [default=1]");
     struct arg_int  *a_str = arg_intn("s","stride","<uint>",0,1,"stride in samps [default=1]");
     struct arg_int  *a_dil = arg_intn("i","dilation","<uint>",0,1,"dilation factor [default=1]");
     struct arg_int  *a_pad = arg_intn("p","padding","<int>",0,1,"padding [default=0]");
@@ -96,7 +101,7 @@ int main(int argc, char *argv[])
     struct arg_file  *a_fo = arg_filen("o","ofile","<file>",0,O,"output file (Y)");
     struct arg_lit *a_help = arg_litn("h","help",0,1,"display this help and exit");
     struct arg_end  *a_end = arg_end(5);
-    void *argtable[] = {a_fi, a_str, a_dil, a_pad, a_pm, a_cm, a_fo, a_help, a_end};
+    void *argtable[] = {a_fi, a_g, a_str, a_dil, a_pad, a_pm, a_cm, a_fo, a_help, a_end};
     if (arg_nullcheck(argtable)!=0) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating argtable" << endl; return 1; }
     nerrs = arg_parse(argc, argv, argtable);
     if (a_help->count>0)
@@ -145,6 +150,11 @@ int main(int argc, char *argv[])
 
     //Get options
 
+    //Get groups
+    if (a_g->count==0) { Ng = 1u; }
+    else if (a_g->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "num groups must be positive" << endl; return 1; }
+    else { Ng = size_t(a_g->ival[0]); }
+
     //Get stride
     if (a_str->count==0) { str = 1u; }
     else if (a_str->ival[0]<1) { cerr << progstr+": " << __LINE__ << errstr << "stride must be positive" << endl; return 1; }
@@ -187,6 +197,8 @@ int main(int argc, char *argv[])
     No = i2.R; Lk = i2.S;
     Ti = (int)Li + 2*pad;
     Tk = (int)(dil*(Lk-1u)) + 1;
+    if (Ni%Ng!=0u) { cerr << progstr+": " << __LINE__ << errstr << "Ni must be divisible by num groups" << endl; return 1; }
+    if (No%Ng!=0u) { cerr << progstr+": " << __LINE__ << errstr << "No must be divisible by num groups" << endl; return 1; }
     if (i1.T!=i2.T || i1.T!=i3.T) { cerr << progstr+": " << __LINE__ << errstr << "inputs must have the same data type" << endl; return 1; }
     if (i1.iscolmajor() || i2.iscolmajor()) { cerr << progstr+": " << __LINE__ << errstr << "inputs 1 and 2 must have row-major layout" << endl; return 1; }
     if (i1.isempty()) { cerr << progstr+": " << __LINE__ << errstr << "input 1 (X) found to be empty" << endl; return 1; }
@@ -243,7 +255,33 @@ int main(int argc, char *argv[])
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
         try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
         catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
-        if (codee::conv1d_torch_s(Y,X,K,B,Ni,No,Nb,Li,Lk,pad,str,dil,ceil_mode,pm))
+        if (codee::conv1d_torch_s(Y,X,K,B,Ni,No,Nb,Ng,Li,Lk,pad,str,dil,ceil_mode,pm))
+        { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
+        if (wo1)
+        {
+            try { ofs1.write(reinterpret_cast<char*>(Y),o1.nbytes()); }
+            catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem writing output file (Y)" << endl; return 1; }
+        }
+        delete[] X; delete[] K; delete[] B; delete[] Y;
+    }
+    else if (i1.T==2u)
+    {
+        double *X, *K, *B, *Y;
+        try { X = new double[i1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 1 (X)" << endl; return 1; }
+        try { K = new double[i2.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 2 (K)" << endl; return 1; }
+        try { B = new double[i3.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for input file 3 (B)" << endl; return 1; }
+        try { Y = new double[o1.N()]; }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem allocating for output file (Y)" << endl; return 1; }
+        try { ifs1.read(reinterpret_cast<char*>(X),i1.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 1 (X)" << endl; return 1; }
+        try { ifs2.read(reinterpret_cast<char*>(K),i2.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 2 (K)" << endl; return 1; }
+        try { ifs3.read(reinterpret_cast<char*>(B),i3.nbytes()); }
+        catch (...) { cerr << progstr+": " << __LINE__ << errstr << "problem reading input file 3 (B)" << endl; return 1; }
+        if (codee::conv1d_torch_d(Y,X,K,B,Ni,No,Nb,Ng,Li,Lk,pad,str,dil,ceil_mode,pm))
         { cerr << progstr+": " << __LINE__ << errstr << "problem during function call" << endl; return 1; }
         if (wo1)
         {

@@ -85,17 +85,17 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
                     }
                     else if (pad_mode==1)   //repeat pad
                     {
-                        for (int k=-ss; k>0; --k, ++K) { sm += *X * *K; }
+                        for (int k=ss; k<0; ++k, ++K) { sm += *X * *K; }
                     }
                     else if (pad_mode==2)   //reflect pad
                     {
                         X += -ss;
-                        for (int k=-ss; k>0; --k, --X, ++K) { sm += *X * *K; }
+                        for (int k=ss; k<0; ++k, --X, ++K) { sm += *X * *K; }
                     }
                     else                    //circular pad
                     {
                         X += (int)Li + ss;
-                        for (int k=-ss; k>0; --k, ++X, ++K) { sm += *X * *K; }
+                        for (int k=ss; k<0; ++k, ++X, ++K) { sm += *X * *K; }
                         X -= Li;
                     }
 
@@ -249,17 +249,17 @@ int conv1_torch_d (double *Y, const double *X, const double *K, const double *B,
                     }
                     else if (pad_mode==1)   //repeat pad
                     {
-                        for (int k=-ss; k>0; --k, ++K) { sm += *X * *K; }
+                        for (int k=ss; k<0; ++k, ++K) { sm += *X * *K; }
                     }
                     else if (pad_mode==2)   //reflect pad
                     {
                         X += -ss;
-                        for (int k=-ss; k>0; --k, --X, ++K) { sm += *X * *K; }
+                        for (int k=ss; k<0; ++k, --X, ++K) { sm += *X * *K; }
                     }
                     else                    //circular pad
                     {
                         X += (int)Li + ss;
-                        for (int k=-ss; k>0; --k, ++X, ++K) { sm += *X * *K; }
+                        for (int k=ss; k<0; ++k, ++X, ++K) { sm += *X * *K; }
                         X -= Li;
                     }
 

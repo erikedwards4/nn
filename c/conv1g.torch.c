@@ -65,6 +65,8 @@ int conv1g_torch_s (float *Y, const float *X, const float *K, const float *B, co
     int ss, es;                         //current start-samp, end-samp
     size_t l;                           //current samp within Y in [0 Lo-1]
 
+    struct timespec tic, toc; clock_gettime(CLOCK_REALTIME,&tic);
+
     //Loop over batch members
     for (size_t b=Nb; b>0u; --b)
     {
@@ -90,17 +92,17 @@ int conv1g_torch_s (float *Y, const float *X, const float *K, const float *B, co
                         }
                         else if (pad_mode==1)   //repeat pad
                         {
-                            for (int k=-ss; k>0; --k, ++K) { sm += *X * *K; }
+                            for (int k=ss; k<0; ++k, ++K) { sm += *X * *K; }
                         }
                         else if (pad_mode==2)   //reflect pad
                         {
                             X += -ss;
-                            for (int k=-ss; k>0; --k, --X, ++K) { sm += *X * *K; }
+                            for (int k=ss; k<0; ++k, --X, ++K) { sm += *X * *K; }
                         }
                         else                    //circular pad
                         {
                             X += (int)Li + ss;
-                            for (int k=-ss; k>0; --k, ++X, ++K) { sm += *X * *K; }
+                            for (int k=ss; k<0; ++k, ++X, ++K) { sm += *X * *K; }
                             X -= Li;
                         }
 
@@ -193,9 +195,14 @@ int conv1g_torch_s (float *Y, const float *X, const float *K, const float *B, co
             X -= Ni*Li-str; Y -= No*Lo-1u;
             ss += str; es += str; ++l;
         }
+
+        //Go to start of next batch member
         X += (int)(Ni*Li) - ss;
         Y += (No-1u)*Lo;
     }
+
+    clock_gettime(CLOCK_REALTIME,&toc);
+    fprintf(stderr,"elapsed time = %.6f ms\n",(double)(toc.tv_sec-tic.tv_sec)*1e3+(double)(toc.tv_nsec-tic.tv_nsec)/1e6);
 
     return 0;
 }
@@ -252,17 +259,17 @@ int conv1g_torch_d (double *Y, const double *X, const double *K, const double *B
                         }
                         else if (pad_mode==1)   //repeat pad
                         {
-                            for (int k=-ss; k>0; --k, ++K) { sm += *X * *K; }
+                            for (int k=ss; k<0; ++k, ++K) { sm += *X * *K; }
                         }
                         else if (pad_mode==2)   //reflect pad
                         {
                             X += -ss;
-                            for (int k=-ss; k>0; --k, --X, ++K) { sm += *X * *K; }
+                            for (int k=ss; k<0; ++k, --X, ++K) { sm += *X * *K; }
                         }
                         else                    //circular pad
                         {
                             X += (int)Li + ss;
-                            for (int k=-ss; k>0; --k, ++X, ++K) { sm += *X * *K; }
+                            for (int k=ss; k<0; ++k, ++X, ++K) { sm += *X * *K; }
                             X -= Li;
                         }
 
@@ -354,6 +361,8 @@ int conv1g_torch_d (double *Y, const double *X, const double *K, const double *B
             X -= Ni*Li-str; Y -= No*Lo-1u;
             ss += str; es += str; ++l;
         }
+
+        //Go to start of next batch member
         X += (int)(Ni*Li) - ss;
         Y += (No-1u)*Lo;
     }
