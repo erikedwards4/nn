@@ -1,13 +1,9 @@
 //1D convolution using PyTorch shape conventions for X, K, Y.
 //Shapes are described below for row-major case.
 
-//This is just like conv1d.torch, but doesn't allow dilation,
-//and doesn't allow non-zero padding greater than Li (signal length).
-//This allows shorter and more efficient code.
-
-//X is the input of size Ni x Li.
+//X is the input of size Nb x Ni x Li.
 //K is the tensor of convolving kernels with size No x Ni x Lk.
-//Y is the output of size No x Lo,
+//Y is the output of size Nb x No x Lo,
 //where Lo==L_out is set by:
 //Lo =  ceil[1 + (Li + 2*pad - Lk)/stride], if ceil_mode is true
 //Lo = floor[1 + (Li + 2*pad - Lk)/stride], if ceil_mode is false [default]
@@ -15,6 +11,7 @@
 //The following params/opts are included:
 //Ni:           size_t  num input channels (leading dim of X)
 //No:           size_t  num output channels (leading dim of Y)
+//Nb:           size_t  batch size (trailing dim of X and Y)
 //Li:           size_t  length of input time-series (other dim of X)
 //Lk:           size_t  length of kernel in time (num cols of K)
 //pad:          int     padding length in [1-Li Li] (pad>0 means add extra samps)
@@ -30,7 +27,6 @@
 //Probably because it is only over Lk, which is usually short.
 
 #include <stdio.h>
-#include <cblas.h>
 
 #ifdef __cplusplus
 namespace codee {
@@ -46,9 +42,9 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
     if (str<1u) { fprintf(stderr,"error in conv1_torch_s: str (stride) must be positive\n"); return 1; }
     if (Li<1u) { fprintf(stderr,"error in conv1_torch_s: Li (length of input vecs) must be positive\n"); return 1; }
     if (Lk<1u) { fprintf(stderr,"error in conv1_torch_s: Lk (kernel_size) must be positive\n"); return 1; }
-    if (Nb<1u) { fprintf(stderr,"error in conv1_torch_s: Nb (batch size) must be positive\n"); return 1; }
     if (Ni<1u) { fprintf(stderr,"error in conv1_torch_s: Ni (num input neurons) must be positive\n"); return 1; }
     if (No<1u) { fprintf(stderr,"error in conv1_torch_s: No (num output neurons) must be positive\n"); return 1; }
+    if (Nb<1u) { fprintf(stderr,"error in conv1_torch_s: Nb (batch size) must be positive\n"); return 1; }
     if (pad<=-(int)Li) { fprintf(stderr,"error in conv1_torch_s: pad length must be > -Li\n"); return 1; }
     if (pad_mode && pad>(int)Li) { fprintf(stderr,"error in conv1_torch_s: Li (length of input vecs) must be >= pad length\n"); return 1; }
     if (pad_mode<0 || pad_mode>3) { fprintf(stderr,"error in conv1_torch_s: pad_mode must be an int in {0,1,2,3}\n"); return 1; }
@@ -171,7 +167,7 @@ int conv1_torch_s (float *Y, const float *X, const float *K, const float *B, con
                     {
                         X -= Li;
                         for (size_t k=(size_t)es-Li+1u; k>0u; --k, ++X, ++K) { sm += *X * *K; }
-                        X += (int)Li - es - 1 + ss + (int)Lk;
+                        X += (int)(Li+Lk) + ss - es - 1;
                     }
                 }
                 *Y = sm;
@@ -335,7 +331,7 @@ int conv1_torch_d (double *Y, const double *X, const double *K, const double *B,
                     {
                         X -= Li;
                         for (size_t k=(size_t)es-Li+1u; k>0u; --k, ++X, ++K) { sm += *X * *K; }
-                        X += (int)Li - es - 1 + ss + (int)Lk;
+                        X += (int)(Li+Lk) + ss - es - 1;
                     }
                 }
                 *Y = sm;
