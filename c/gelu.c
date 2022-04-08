@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifndef M_SQRT1_2
     #define M_SQRT1_2 0.707106781186547524401
@@ -12,12 +13,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int gelu_s (float *Y, const float *X, const size_t N);
-int gelu_d (double *Y, const double *X, const size_t N);
-
-int gelu_inplace_s (float *X, const size_t N);
-int gelu_inplace_d (double *X, const size_t N);
 
 
 int gelu_s (float *Y, const float *X, const size_t N)

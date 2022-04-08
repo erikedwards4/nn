@@ -30,17 +30,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int gru3_s (float *Y, const float *X, const float *Xr, const float *Xz, const float *U, const float *Ur, const float *Uz, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int gru3_d (double *Y, const double *X, const double *Xr, const double *Xz, const double *U, const double *Ur, const double *Uz, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-
-int gru3_inplace_s (float *X, const float *Xr, const float *Xz, const float *U, const float *Ur, const float *Uz, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int gru3_inplace_d (double *X, const double *Xr, const double *Xz, const double *U, const double *Ur, const double *Uz, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
 int gru3_s (float *Y, const float *X, const float *Xr, const float *Xz, const float *U, const float *Ur, const float *Uz, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
@@ -334,7 +329,6 @@ int gru3_d (double *Y, const double *X, const double *Xr, const double *Xz, cons
 
     return 0;
 }
-
 
 
 int gru3_inplace_s (float *X, const float *Xr, const float *Xz, const float *U, const float *Ur, const float *Uz, const size_t N, const size_t T, const char iscolmajor, const size_t dim)

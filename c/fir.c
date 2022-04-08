@@ -7,16 +7,12 @@
 
 #include <stdio.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int fir_s (float *Y, const float *X, const float *B, const size_t N, const size_t T, const size_t L, const char iscolmajor, const size_t dim);
-int fir_d (double *Y, const double *X, const double *B, const size_t N, const size_t T, const size_t L, const char iscolmajor, const size_t dim);
-int fir_c (float *Y, const float *X, const float *B, const size_t N, const size_t T, const size_t L, const char iscolmajor, const size_t dim);
-int fir_z (double *Y, const double *X, const double *B, const size_t N, const size_t T, const size_t L, const char iscolmajor, const size_t dim);
 
 
 int fir_s (float *Y, const float *X, const float *B, const size_t N, const size_t T, const size_t L, const char iscolmajor, const size_t dim)

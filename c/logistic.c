@@ -2,17 +2,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int logistic_s (float *Y, const float *X, const size_t N, const float alpha);
-int logistic_d (double *Y, const double *X, const size_t N, const double alpha);
-
-int logistic_inplace_s (float *X, const size_t N, const float alpha);
-int logistic_inplace_d (double *X, const size_t N, const double alpha);
 
 
 int logistic_s (float *Y, const float *X, const size_t N, const float alpha)

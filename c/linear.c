@@ -26,11 +26,6 @@ namespace codee {
 extern "C" {
 #endif
 
-int linear_s (float *Y, const float *X, const float *W, const size_t Ni, const size_t No, const size_t L);
-int linear_d (double *Y, const double *X, const double *W, const size_t Ni, const size_t No, const size_t L);
-int linear_c (float *Y, const float *X, const float *W, const size_t Ni, const size_t No, const size_t L);
-int linear_z (double *Y, const double *X, const double *W, const size_t Ni, const size_t No, const size_t L);
-
 
 int linear_s (float *Y, const float *X, const float *W, const size_t Ni, const size_t No, const size_t L)
 {

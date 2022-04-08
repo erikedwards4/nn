@@ -24,16 +24,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int maxpool1_s (float *Y, const float *X, const size_t N, const size_t Li, const size_t Lk, const int pad, const size_t str, const int ceil_mode);
-int maxpool1_d (double *Y, const double *X, const size_t N, const size_t Li, const size_t Lk, const int pad, const size_t str, const int ceil_mode);
-int maxpool1_c (float *Y, const float *X, const size_t N, const size_t Li, const size_t Lk, const int pad, const size_t str, const int ceil_mode);
-int maxpool1_z (double *Y, const double *X, const size_t N, const size_t Li, const size_t Lk, const int pad, const size_t str, const int ceil_mode);
 
 
 int maxpool1_s (float *Y, const float *X, const size_t N, const size_t Li, const size_t Lk, const int pad, const size_t str, const int ceil_mode)

@@ -7,17 +7,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int mish_s (float *Y, const float *X, const size_t N);
-int mish_d (double *Y, const double *X, const size_t N);
-
-int mish_inplace_s (float *X, const size_t N);
-int mish_inplace_d (double *X, const size_t N);
 
 
 int mish_s (float *Y, const float *X, const size_t N)

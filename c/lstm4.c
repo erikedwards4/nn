@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef I
     #undef I
@@ -45,12 +46,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int lstm4_s (float *Y, const float *Xc, const float *Xi, const float *Xf, const float *Xo, const float *Uc, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int lstm4_d (double *Y, const double *Xc, const double *Xi, const double *Xf, const double *Xo, const double *Uc, const double *Ui, const double *Uf, const double *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-
-int lstm4_inplace_s (float *Xc, const float *Xi, const float *Xf, const float *Xo, const float *Uc, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int lstm4_inplace_d (double *Xc, const double *Xi, const double *Xf, const double *Xo, const double *Uc, const double *Ui, const double *Uf, const double *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
 int lstm4_s (float *Y, const float *Xc, const float *Xi, const float *Xf, const float *Xo, const float *Uc, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
@@ -345,7 +340,6 @@ int lstm4_d (double *Y, const double *Xc, const double *Xi, const double *Xf, co
 
     return 0;
 }
-
 
 
 int lstm4_inplace_s (float *Xc, const float *Xi, const float *Xf, const float *Xo, const float *Uc, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim)

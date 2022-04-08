@@ -3,17 +3,12 @@
 //For compatibility to PyTorch, this function is identical to leaky ReLU.
 
 #include <stdio.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int prelu_s (float *Y, const float *X, const size_t N, const float alpha);
-int prelu_d (double *Y, const double *X, const size_t N, const double alpha);
-
-int prelu_inplace_s (float *X, const size_t N, const float alpha);
-int prelu_inplace_d (double *X, const size_t N, const double alpha);
 
 
 int prelu_s (float *Y, const float *X, const size_t N, const float alpha)

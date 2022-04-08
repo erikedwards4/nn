@@ -1,18 +1,13 @@
 //This gets ReLU activation function for each element of X.
 
 #include <stdio.h>
+#include "codee_nn.h"
 //#include <time.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int relu_s (float *Y, const float *X, const size_t N);
-int relu_d (double *Y, const double *X, const size_t N);
-
-int relu_inplace_s (float *X, const size_t N);
-int relu_inplace_d (double *X, const size_t N);
 
 
 int relu_s (float *Y, const float *X, const size_t N)

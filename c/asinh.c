@@ -4,21 +4,12 @@
 #include <stdio.h>
 #include <math.h>
 #include <complex.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int asinh_s (float *Y, const float *X, const size_t N);
-int asinh_d (double *Y, const double *X, const size_t N);
-int asinh_c (float *Y, const float *X, const size_t N);
-int asinh_z (double *Y, const double *X, const size_t N);
-
-int asinh_inplace_s (float *X, const size_t N);
-int asinh_inplace_d (double *X, const size_t N);
-int asinh_inplace_c (float *X, const size_t N);
-int asinh_inplace_z (double *X, const size_t N);
 
 
 int asinh_s (float *Y, const float *X, const size_t N)

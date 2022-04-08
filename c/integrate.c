@@ -13,21 +13,13 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
 
-int integrate_s (float *Y, const float *X, const float *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int integrate_d (double *Y, const double *X, const double *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
-int integrate_c (float *Y, const float *X, const float *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int integrate_z (double *Y, const double *X, const double *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
-
-int integrate_inplace_s (float *X, const float *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int integrate_inplace_d (double *X, const double *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
-int integrate_inplace_c (float *X, const float *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int integrate_inplace_z (double *X, const double *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
 
 int integrate_s (float *Y, const float *X, const float *tau, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs)
 {

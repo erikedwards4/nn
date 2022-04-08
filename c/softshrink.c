@@ -2,17 +2,12 @@
 //This is similar to the dead-zone, but different outside of the dead-zone.
 
 #include <stdio.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int softshrink_s (float *Y, const float *X, const size_t N, const float lambda);
-int softshrink_d (double *Y, const double *X, const size_t N, const double lambda);
-
-int softshrink_inplace_s (float *X, const size_t N, const float lambda);
-int softshrink_inplace_d (double *X, const size_t N, const double lambda);
 
 
 int softshrink_s (float *Y, const float *X, const size_t N, const float lambda)

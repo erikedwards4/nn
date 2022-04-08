@@ -14,17 +14,12 @@
 //but actually a bit slower for dim==1u and row-major dim==0u and col-major.
 
 #include <stdio.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int fukushima_s (float *Y, const float *X, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int fukushima_d (double *Y, const double *X, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-
-int fukushima_inplace_s (float *X, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int fukushima_inplace_d (double *X, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
 int fukushima_s (float *Y, const float *X, const size_t N, const size_t T, const char iscolmajor, const size_t dim)

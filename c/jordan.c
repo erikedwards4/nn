@@ -5,14 +5,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int jordan_s (float *Y, const float *X, const float *U, float *Y1, const float *W, const float *B, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int jordan_d (double *Y, const double *X, const double *U, double *Y1, const double *W, const double *B, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
 int jordan_s (float *Y, const float *X, const float *U, float *Y1, const float *W, const float *B, const size_t N, const size_t T, const char iscolmajor, const size_t dim)

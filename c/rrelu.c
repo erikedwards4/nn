@@ -11,17 +11,12 @@
 #include <stdint.h>
 #include <math.h>
 #include <time.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int rrelu_s (float *Y, const float *X, const size_t N, const float lower, const float upper);
-int rrelu_d (double *Y, const double *X, const size_t N, const double lower, const double upper);
-
-int rrelu_inplace_s (float *X, const size_t N, const float lower, const float upper);
-int rrelu_inplace_d (double *X, const size_t N, const double lower, const double upper);
 
 
 int rrelu_s (float *Y, const float *X, const size_t N, const float lower, const float upper)

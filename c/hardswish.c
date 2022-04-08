@@ -5,17 +5,12 @@
 //For each element: y = x,         if x>=+3
 //                  y = x*(x+3)/6, otherwise
 #include <stdio.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int hardswish_s (float *Y, const float *X, const size_t N);
-int hardswish_d (double *Y, const double *X, const size_t N);
-
-int hardswish_inplace_s (float *X, const size_t N);
-int hardswish_inplace_d (double *X, const size_t N);
 
 
 int hardswish_s (float *Y, const float *X, const size_t N)

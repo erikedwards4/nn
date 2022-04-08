@@ -5,18 +5,13 @@
 //This is used in the Hopfield network, for example.
 
 #include <stdio.h>
+#include "codee_nn.h"
 //#include <time.h>
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int signum_s (float *Y, const float *X, const size_t N, const float thresh);
-int signum_d (double *Y, const double *X, const size_t N, const double thresh);
-
-int signum_inplace_s (float *X, const size_t N, const float thresh);
-int signum_inplace_d (double *X, const size_t N, const double thresh);
 
 
 int signum_s (float *Y, const float *X, const size_t N, const float thresh)

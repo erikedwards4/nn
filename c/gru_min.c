@@ -27,17 +27,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-
-int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int gru_min_inplace_d (double *X, const double *U, const double *Uf, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
 int gru_min_s (float *Y, const float *X, const float *U, const float *Uf, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
@@ -292,7 +287,6 @@ int gru_min_d (double *Y, const double *X, const double *U, const double *Uf, co
 
     return 0;
 }
-
 
 
 int gru_min_inplace_s (float *X, const float *U, const float *Uf, const size_t N, const size_t T, const char iscolmajor, const size_t dim)

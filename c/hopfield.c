@@ -17,21 +17,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int hopfield_s (float *Y, const float *X, const float *tau, const float *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int hopfield_d (double *Y, const double *X, const double *tau, const double *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
-int hopfield_c (float *Y, const float *X, const float *tau, const float *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int hopfield_z (double *Y, const double *X, const double *tau, const double *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
-
-int hopfield_inplace_s (float *X, const float *tau, const float *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int hopfield_inplace_d (double *X, const double *tau, const double *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
-int hopfield_inplace_c (float *X, const float *tau, const float *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int hopfield_inplace_z (double *X, const double *tau, const double *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
 
 
 int hopfield_s (float *Y, const float *X, const float *tau, const float *alpha, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs)

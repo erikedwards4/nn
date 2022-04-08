@@ -8,21 +8,12 @@
 
 #include <stdio.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace ov {
 extern "C" {
 #endif
-
-int iir_s (float *Y, const float *X, const float *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim);
-int iir_d (double *Y, const double *X, const double *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim);
-int iir_c (float *Y, const float *X, const float *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim);
-int iir_z (double *Y, const double *X, const double *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim);
-
-int iir_inplace_s (float *X, const float *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim);
-int iir_inplace_d (double *X, const double *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim);
-int iir_inplace_c (float *X, const float *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim);
-int iir_inplace_z (double *X, const double *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim);
 
 
 int iir_inplace_s (float *X, const float *A, const size_t N, const size_t T, const int Q, const char iscolmajor, const size_t dim)

@@ -33,7 +33,7 @@ CFLAGS=$(WFLAG) $(STD) -O3 -ffast-math -march=native -mfpmath=sse -fPIC
 
 
 All: all
-all: Dirs IN CELL OUT Clean
+all: Dirs IN CELL OUT Lib Clean
 
 Dirs:
 	mkdir -pm 777 obj
@@ -174,7 +174,10 @@ betamax: betamax.c; $(CC) -c $@.c -o obj/$@.o $(CFLAGS)
 
 
 #If want to make a library archive for C++ use, this works with clang++
-#ar crs ../lib/libnn.a obj/*.o
+Lib: lib
+lib:
+	ar crs ../lib/libnn.a obj/*.o
+	gcc -shared -o ../lib/libnn.so ../lib/libnn.a
 
 
 #make clean

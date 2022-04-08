@@ -19,17 +19,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int grossberg2_s (float *Y, const float *Xe, const float *Xi, const float *tau, const float *alpha, const float *betae, const float *betai, const float *gammae, const float *gammai, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int grossberg2_d (double *Y, const double *Xe, const double *Xi, const double *tau, const double *alpha, const double *betae, const double *betai, const double *gammae, const double *gammai, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
-
-int grossberg2_inplace_s (float *Xe, const float *Xi, const float *tau, const float *alpha, const float *betae, const float *betai, const float *gammae, const float *gammai, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs);
-int grossberg2_inplace_d (double *Xe, const double *Xi, const double *tau, const double *alpha, const double *betae, const double *betai, const double *gammae, const double *gammai, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const double fs);
 
 
 int grossberg2_s (float *Y, const float *Xe, const float *Xi, const float *tau, const float *alpha, const float *betae, const float *betai, const float *gammae, const float *gammai, const size_t N, const size_t T, const char iscolmajor, const size_t dim, const float fs)

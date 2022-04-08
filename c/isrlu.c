@@ -3,17 +3,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int isrlu_s (float *Y, const float *X, const size_t N, const float alpha);
-int isrlu_d (double *Y, const double *X, const size_t N, const double alpha);
-
-int isrlu_inplace_s (float *X, const size_t N, const float alpha);
-int isrlu_inplace_d (double *X, const size_t N, const double alpha);
 
 
 int isrlu_s (float *Y, const float *X, const size_t N, const float alpha)

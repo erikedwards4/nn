@@ -6,17 +6,12 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int celu_s (float *Y, const float *X, const size_t N, const float alpha);
-int celu_d (double *Y, const double *X, const size_t N, const double alpha);
-
-int celu_inplace_s (float *X, const size_t N, const float alpha);
-int celu_inplace_d (double *X, const size_t N, const double alpha);
 
 
 int celu_s (float *Y, const float *X, const size_t N, const float alpha)

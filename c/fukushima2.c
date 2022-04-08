@@ -5,17 +5,12 @@
 //Xe and Xi result from applying weights (linear0) We and Wi, respectively.
 
 #include <stdio.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int fukushima2_s (float *Y, const float *Xe, const float *Xi, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int fukushima2_d (double *Y, const double *Xe, const double *Xi, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-
-int fukushima2_inplace_s (float *Xe, const float *Xi, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int fukushima2_inplace_d (double *Xe, const double *Xi, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
 int fukushima2_s (float *Y, const float *Xe, const float *Xi, const size_t N, const size_t T, const char iscolmajor, const size_t dim)

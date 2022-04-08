@@ -13,14 +13,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int elman_s (float *Y, const float *X, const float *U, float *H, const float *W, const float *B, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int elman_d (double *Y, const double *X, const double *U, double *H, const double *W, const double *B, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
 int elman_s (float *Y, const float *X, const float *U, float *H, const float *W, const float *B, const size_t N, const size_t T, const char iscolmajor, const size_t dim)

@@ -5,17 +5,12 @@
 //For thresh=0.0 and val=0.0, this is the usual ReLU.
 
 #include <stdio.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int threshold_s (float *Y, const float *X, const size_t N, const float thresh, const float val);
-int threshold_d (double *Y, const double *X, const size_t N, const double thresh, const double val);
-
-int threshold_inplace_s (float *X, const size_t N, const float thresh, const float val);
-int threshold_inplace_d (double *X, const size_t N, const double thresh, const double val);
 
 
 int threshold_s (float *Y, const float *X, const size_t N, const float thresh, const float val)

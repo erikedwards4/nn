@@ -31,16 +31,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int bilinear_cblas_s (float *Y, const float *X1, const float *X2, const float *W, const float *B, const size_t Ni1, const size_t Ni2, const size_t No, const size_t L);
-int bilinear_cblas_d (double *Y, const double *X1, const double *X2, const double *W, const double *B, const size_t Ni1, const size_t Ni2, const size_t No, const size_t L);
-int bilinear_cblas_c (float *Y, const float *X1, const float *X2, const float *W, const float *B, const size_t Ni1, const size_t Ni2, const size_t No, const size_t L);
-int bilinear_cblas_z (double *Y, const double *X1, const double *X2, const double *W, const double *B, const size_t Ni1, const size_t Ni2, const size_t No, const size_t L);
 
 
 int bilinear_cblas_s (float *Y, const float *X1, const float *X2, const float *W, const float *B, const size_t Ni1, const size_t Ni2, const size_t No, const size_t L)

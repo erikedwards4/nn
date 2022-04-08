@@ -24,16 +24,12 @@
 //any orientation, use the affine function from math.
 
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int affine_cblas_s (float *Y, const float *X, const float *W, const float *B, const size_t Ni, const size_t No, const size_t L);
-int affine_cblas_d (double *Y, const double *X, const double *W, const double *B, const size_t Ni, const size_t No, const size_t L);
-int affine_cblas_c (float *Y, const float *X, const float *W, const float *B, const size_t Ni, const size_t No, const size_t L);
-int affine_cblas_z (double *Y, const double *X, const double *W, const double *B, const size_t Ni, const size_t No, const size_t L);
 
 
 int affine_cblas_s (float *Y, const float *X, const float *W, const float *B, const size_t Ni, const size_t No, const size_t L)

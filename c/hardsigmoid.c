@@ -5,17 +5,12 @@
 //                  y = (x+3)/6,   otherwise
 
 #include <stdio.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int hardsigmoid_s (float *Y, const float *X, const size_t N);
-int hardsigmoid_d (double *Y, const double *X, const size_t N);
-
-int hardsigmoid_inplace_s (float *X, const size_t N);
-int hardsigmoid_inplace_d (double *X, const size_t N);
 
 
 int hardsigmoid_s (float *Y, const float *X, const size_t N)

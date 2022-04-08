@@ -2,17 +2,12 @@
 //Only p=0 (clamp) and p=1 (Hermite interpolation of clamp) supported here.
 
 #include <stdio.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int smoothstep_s (float *Y, const float *X, const size_t N, const int p);
-int smoothstep_d (double *Y, const double *X, const size_t N, const int p);
-
-int smoothstep_inplace_s (float *X, const size_t N, const int p);
-int smoothstep_inplace_d (double *X, const size_t N, const int p);
 
 
 int smoothstep_s (float *Y, const float *X, const size_t N, const int p)

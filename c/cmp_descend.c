@@ -3,16 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int cmp_descend_s (const void *a, const void *b);
-int cmp_descend_d (const void *a, const void *b);
-int cmp_descend_c (const void *a, const void *b);
-int cmp_descend_z (const void *a, const void *b);
 
 
 int cmp_descend_s (const void *a, const void *b)

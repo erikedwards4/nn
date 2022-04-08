@@ -29,11 +29,6 @@ namespace codee {
 extern "C" {
 #endif
 
-int affine_s (float *Y, const float *X, const float *W, const float *B, const size_t Ni, const size_t No, const size_t L);
-int affine_d (double *Y, const double *X, const double *W, const double *B, const size_t Ni, const size_t No, const size_t L);
-int affine_c (float *Y, const float *X, const float *W, const float *B, const size_t Ni, const size_t No, const size_t L);
-int affine_z (double *Y, const double *X, const double *W, const double *B, const size_t Ni, const size_t No, const size_t L);
-
 
 int affine_s (float *Y, const float *X, const float *W, const float *B, const size_t Ni, const size_t No, const size_t L)
 {

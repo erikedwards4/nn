@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "codee_nn.h"
 
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -18,12 +19,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int gelu_new_s (float *Y, const float *X, const size_t N);
-int gelu_new_d (double *Y, const double *X, const size_t N);
-
-int gelu_new_inplace_s (float *X, const size_t N);
-int gelu_new_inplace_d (double *X, const size_t N);
 
 
 int gelu_new_s (float *Y, const float *X, const size_t N)

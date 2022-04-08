@@ -23,16 +23,12 @@
 //I retain the for loop through L for compatibility with real-time streaming.
 
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef __cplusplus
 namespace codee {
 extern "C" {
 #endif
-
-int linear_cblas_s (float *Y, const float *X, const float *W, const size_t Ni, const size_t No, const size_t L);
-int linear_cblas_d (double *Y, const double *X, const double *W, const size_t Ni, const size_t No, const size_t L);
-int linear_cblas_c (float *Y, const float *X, const float *W, const size_t Ni, const size_t No, const size_t L);
-int linear_cblas_z (double *Y, const double *X, const double *W, const size_t Ni, const size_t No, const size_t L);
 
 
 int linear_cblas_s (float *Y, const float *X, const float *W, const size_t Ni, const size_t No, const size_t L)

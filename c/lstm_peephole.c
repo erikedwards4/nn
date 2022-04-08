@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <cblas.h>
+#include "codee_nn.h"
 
 #ifdef I
     #undef I
@@ -47,12 +48,6 @@
 namespace codee {
 extern "C" {
 #endif
-
-int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double *Uf, const double *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-
-int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
-int lstm_peephole_inplace_d (double *X, const double *Ui, const double *Uf, const double *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim);
 
 
 int lstm_peephole_s (float *Y, const float *X, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
@@ -291,7 +286,6 @@ int lstm_peephole_d (double *Y, const double *X, const double *Ui, const double 
 
     return 0;
 }
-
 
 
 int lstm_peephole_inplace_s (float *X, const float *Ui, const float *Uf, const float *Uo, const size_t N, const size_t T, const char iscolmajor, const size_t dim)
